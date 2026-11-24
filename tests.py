@@ -524,6 +524,74 @@ def test_model_uncertain_then_gave_up_never_safe():
     assert record['final_label'] == 'uncertain' and record['helper_offered'] is True
 
 
+def test_scam_then_safe_is_never_safe():
+    # The model says likely_scam (rejected: no recorded sign), then tries
+    # likely_safe, which the evidence supports. The gate must refuse it.
+    record = run(CONCERN_MESSAGE, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0177'),
+        done('likely_scam', ['E1', 'E2'], 'This looks like a scam. It feels odd.'),
+        done('likely_safe', ['E1', 'E2'], 'This message looks safe. It is from Emma.'),
+    ])
+    first = record['trace'][2]['observation']['message']
+    assert 'can support: likely_safe' not in first, first
+    rules = record['trace'][3]['check_result']['gate']
+    refused = False
+    for check in rules:
+        if check['rule'] == 'likely_safe is not allowed after you raised a concern':
+            refused = check['ok'] is False and 'ask_human_helper' in check['detail']
+    assert refused, rules
+    assert record['final_label'] == 'uncertain' and record['model_concern_kept'] is True
+    assert record['helper_offered'] is True
+
+
+def test_uncertain_then_safe_is_never_safe():
+    record = run(CONCERN_MESSAGE, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0177'),
+        done('uncertain', ['E1', 'E2'], 'We are not sure about this message.'),
+        done('likely_safe', ['E1', 'E2'], 'This message looks safe. It is from Emma.'),
+    ])
+    assert 'can support: likely_safe' not in record['trace'][2]['observation']['message']
+    assert record['final_label'] == 'uncertain' and record['model_concern_kept'] is True
+    # Check the gate on its own too: "safe" after an earlier "uncertain".
+    context, runtime = fresh_context('ordinary')
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    agent.run_requested_tool('check_sender', {'sender': '+1-555-0142'}, context, runtime)
+    proposal = {'label': 'likely_safe', 'evidence': ['E1', 'E2'], 'explanation': 'This message looks safe.'}
+    assert agent.check_verdict(proposal, context)[0] is True
+    context['model_labels'].append('uncertain')
+    assert agent.check_verdict(proposal, context)[0] is False
+
+
+def test_accepted_safe_after_concern_becomes_uncertain():
+    # Backstop in finish_run: even if an accepted "safe" reached it after
+    # the model had said likely_scam, the final answer is uncertain + help.
+    context, runtime = fresh_context('ordinary')
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    agent.run_requested_tool('check_sender', {'sender': '+1-555-0142'}, context, runtime)
+    context['model_labels'] = ['likely_scam', 'likely_safe']
+    record = agent.finish_run(context, runtime, [], 'verdict', ('likely_safe', 'This message looks safe.', 'model'),
+                              'test_backstop', 'no', TEMP / 'backstop.json', False)
+    assert record['final_label'] == 'uncertain' and record['model_concern_kept'] is True
+    assert record['helper_offered'] is True and record['explanation_source'] == 'template'
+
+
+def test_model_catches_miss_case_is_never_safe():
+    # The rules miss this courier scam from a saved contact. The model is
+    # worried; the answer must end "not sure", never "safe".
+    record = run('model_catches_miss', [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0177'),
+        done('likely_scam', ['E1', 'E2'], 'This looks like a scam. Never give cash to a stranger at the door.'),
+        action('ask_human_helper', reason='E2 is Emma, but handing cash to a stranger is a known trick.'),
+        done('uncertain', ['E1', 'E2', 'E3'], 'We are not sure about this message. Call Emma on her usual number.'),
+    ])
+    assert record['supported_label'] == 'likely_safe'
+    assert record['final_label'] == 'uncertain' and record['stop_reason'] == 'success'
+    assert record['helper_offered_by'] == 'model_after_gate_hint'
+
+
 def test_rejected_scam_feedback_invites_uncertain_and_helper():
     record = run(CONCERN_MESSAGE, [
         action('extract_signals'),
@@ -1148,6 +1216,10 @@ if __name__ == '__main__':
         ('uncertain needs help offered first', test_uncertain_needs_help_offered_first),
         ('model concern never becomes safe (gate downgrade -> uncertain)', test_model_concern_never_becomes_safe),
         ('model uncertain then gate gave up -> never safe', test_model_uncertain_then_gave_up_never_safe),
+        ('scam then safe is never safe', test_scam_then_safe_is_never_safe),
+        ('uncertain then safe is never safe', test_uncertain_then_safe_is_never_safe),
+        ('accepted safe after a concern becomes uncertain (backstop)', test_accepted_safe_after_concern_becomes_uncertain),
+        ('model_catches_miss case ends not sure, never safe', test_model_catches_miss_case_is_never_safe),
         ('rejected scam feedback invites uncertain + helper', test_rejected_scam_feedback_invites_uncertain_and_helper),
         ('helper_offered_by = model when unprompted', test_helper_offered_by_model_on_its_own),
         ('uncertain template for a saved contact', test_uncertain_template_for_saved_contact),
