@@ -12,6 +12,10 @@ venv/
 # Run-time files (sample evidence we want to keep is committed with git add -f)
 evidence/*_checkpoint.json
 evidence/scratch/
+# Single runs from `scamshield_agent.py --case ...` (recreated on every run);
+# the committed evidence lives in evidence/eval/ and evidence/harness/
+evidence/*_trace.json
+evidence/family_alerts.log
 
 # Mac OS
 .DS_Store
