@@ -387,6 +387,8 @@ def find_organization(name, data):
 #                       (REQUEST_WORDS). This is how "I'll send you a gift
 #                       card for your birthday" stays harmless while
 #                       "can you send me a gift card" does not.
+#    requested_patterns = a match counts only when the text also has
+#                       request words ("I need you to wire 2000").
 # ------------------------------------------------------------------------
 
 # Any kind of store or gift card, including brand cards ("Apple cards",
@@ -394,6 +396,7 @@ def find_organization(name, data):
 CARD_WORDS = (r'(?:gift\s*-?\s*cards?|prepaid (?:visa |debit )?cards?'
               r'|(?:apple|steam|google play|itunes|target|walmart|amazon|ebay|visa|store|razer gold|sephora'
               r'|best buy|vanilla)\s+(?:gift\s+)?cards?)')
+BANK_CARD = r'\b(debit|credit|bank|visa|mastercard|atm|amex|discover) card\b'
 REQUEST_WORDS = [r'\bcan you\b', r'\bcould you\b', r'\bwould you\b', r'\bplease\b', r'\bi need\b',
                  r'\bneed you to\b', r'\bgo (buy|get)\b']
 
@@ -417,23 +420,32 @@ SIGNAL_RULES = [
      'keywords': ['gift card', 'prepaid card', 'store card', 'itunes', 'google play', 'apple card', 'steam',
                   'card number', 'claim number', 'gift']},
     {'name': 'crypto', 'strength': 'strong',
-     'patterns': [r'\bbitcoin\b', r'\bcrypto', r'\bwire transfer\b', r'\bwestern union\b'],
+     'patterns': [r'\bbitcoin\b', r'\bcrypto', r'\bwire transfer\b', r'\bwestern union\b',
+                  # a crypto wallet address, the USDT coin, or "wallet address"
+                  r'\b0x[0-9a-f]{40}\b', r'\busdt\b', r'\bwallet address\b'],
      'fact': 'asks for payment by cryptocurrency or wire transfer',
-     'keywords': ['bitcoin', 'crypto', 'wire']},
+     'keywords': ['bitcoin', 'crypto', 'wire', 'wallet', 'usdt', 'western union']},
     # Money apps and transfer services: money sent this way is very hard to
     # get back. Only a REQUEST to send or pay with one counts, so "I sent
     # you $20 on Venmo" and "I'll pay you back on Venmo" from family are
     # not warning signs.
     {'name': 'payment_app', 'strength': 'strong',
-     'patterns': [r'\b(zelle|venmo|cash ?app|paypal|moneygram)\s+me\b',
+     'patterns': [r'\b(zelle|venmo|cash ?app|paypal|moneygram|remitly)\s+me\b(?! back\b)',
                   r'\bpaypal\b.{0,30}\bfriends (and|&) family\b',
                   r'\bfriends (and|&) family\b.{0,30}\bpaypal\b',
                   r'\bwire (me |us )?(the )?(money|funds|payment|cash)\b'],
-     'guarded_patterns': [r'\b(send|pay|transfer|wire)\b.{0,60}\b(zelle|venmo|cash ?app|moneygram|paypal)\b'],
+     'guarded_patterns': [r'\b(send|pay|transfer|wire)\b.{0,60}\b(zelle|venmo|cash ?app|moneygram|paypal|remitly'
+                          r'|google pay|apple pay|western union)\b',
+                          r'\b(send|pay|transfer|wire)\b.{0,60}\b(via|through|on|with|by|using) wise\b'],
+     # A match here counts only when the text also has request words
+     # ("I need you to wire 2000"), so "thanks for the wire, he got 1200"
+     # from family is not a warning sign.
+     'requested_patterns': [r'\bwire\b.{0,20}\$?\d'],
      'unless': [r'\bpay (you|u) back\b', r"\b(i|we)('ll| will)? (pay|send) (it )?(to )?you\b",
-                r'\b(i|we) (just |already )?(sent|paid)\b'],
+                r'\b(i|we) (just |already )?(sent|paid)\b', r'\bvenmo (you |u )?back\b'],
      'fact': 'asks you to send money through a money app or transfer service, which is very hard to get back',
-     'keywords': ['zelle', 'venmo', 'cash app', 'moneygram', 'wire', 'money app', 'payment app', 'transfer']},
+     'keywords': ['zelle', 'venmo', 'cash app', 'moneygram', 'wire', 'money app', 'payment app', 'transfer',
+                  'remitly', 'wise', 'google pay', 'apple pay', 'western union', 'paypal']},
     {'name': 'code_request', 'strength': 'strong',
      'patterns': [r'\b(verification|security|one[- ]time|login) (pass)?code\b', r'\botp\b',
                   # Only a REQUEST for a password or PIN counts, not
@@ -445,13 +457,28 @@ SIGNAL_RULES = [
                   r'\bcodes? (that )?you (just )?(got|received)\b',
                   r'\bcodes? (that )?(we|i) (just )?(sent|texted)( to)?( you)?\b',
                   r'\b(\d|four|five|six|seven|eight)[- ]?(digit|number) (code|number|pin|text|message)\b',
-                  r'\bnumbers on (the back of )?your (\w+ ){0,2}card\b'],
+                  r'\bnumbers on (the back of )?your (\w+ ){0,2}card\b',
+                  # bank routing and account details, sign-in codes, online
+                  # banking logins and Medicare numbers (only when asked for)
+                  r'\brouting (and account )?(numbers?|details|info)\b',
+                  r'\b(send|tell|give|text|share|forward|confirm|verify|enter|read|reply with)\b.{0,40}'
+                  r'\b(account|bank|banking) (details|info|login|password|pin)\b',
+                  r'\b(send|tell|give|text|share|forward|confirm|verify|enter|read|reply with)\b.{0,40}'
+                  r'\b(log-?in|sign-?in) (numbers?|codes?|details|info)\b',
+                  r'\b(log-?in|sign-?in) (numbers?|codes?)\b.{0,60}\b(forward|send|text|tell|give|read)\b'
+                  r'.{0,10}\b(it|them)? ?(to |back to )?me\b',
+                  r"\bwhat('s| is) your (online )?banking (login|password|pin)\b",
+                  r"\b(send|tell|give|text|share|confirm|verify|read|what('s| is))\b.{0,30}"
+                  r'\bmedicare (card )?(numbers?|id)\b'],
      'fact': 'asks for a code, password or personal number',
-     'keywords': ['code', 'password', 'pin', 'social security number', 'account number', 'personal number']},
+     'keywords': ['code', 'password', 'pin', 'social security number', 'account number', 'personal number',
+                  'routing', 'bank details', 'account details', 'login', 'sign-in', 'medicare number']},
     {'name': 'card_details_request', 'strength': 'strong',
-     'patterns': [r'\b(photo|picture|pic|image|scan|copy)s? of (both )?(the )?(front|back)\b.{0,30}\bcard\b',
-                  r'\b(photo|picture|pic|image|scan|copy)s? of your (\w+ ){0,2}card\b',
-                  r'\bsend (me )?the (front|back) of your (\w+ ){0,2}card\b',
+     # Only a bank card counts, so "a photo of the front of the card I
+     # made for you" is not a warning sign.
+     'patterns': [r'\b(photo|picture|pic|image|scan|copy)s? of (both )?(the )?(front|back)\b.{0,30}' + BANK_CARD,
+                  r'\b(photo|picture|pic|image|scan|copy)s? of your (\w+ ){0,2}' + BANK_CARD,
+                  r'\bsend (me )?the (front|back) of your (\w+ ){0,2}' + BANK_CARD,
                   r'\b(card number|expiration date|expiry date).{0,40}\b(cvv|security code|3[- ]digit)\b'],
      'fact': 'asks for a photo or the numbers of your bank card',
      'keywords': ['card', 'photo', 'picture']},
@@ -580,10 +607,14 @@ def any_pattern(patterns, lower, undisguised):
 
 
 def rule_matches(rule, lower, undisguised):
-    """A rule matches when any of its patterns matches, or when a guarded
+    """A rule matches when any of its patterns matches, when a requested
+    pattern matches in a text with request words, or when a guarded
     pattern matches and it is not cancelled by an 'unless' pattern (an
     'unless' pattern only cancels when the text has no request words)."""
     if any_pattern(rule['patterns'], lower, undisguised):
+        return True
+    if (any_pattern(rule.get('requested_patterns', []), lower, undisguised)
+            and any_pattern(REQUEST_WORDS, lower, undisguised)):
         return True
     if not any_pattern(rule.get('guarded_patterns', []), lower, undisguised):
         return False

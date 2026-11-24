@@ -345,12 +345,58 @@ def test_false_safe_regressions():
         assert label == 'likely_scam', (text, label, names, links)
 
 
+# Review round 3: wordings the rules missed (new money apps, wire requests,
+# bank routing details, sign-in codes, banking logins, Medicare numbers,
+# crypto wallets). These are a regression list, not a held-out score.
+RULE_COVERAGE_SCAMS = [
+    (EMMA, 'Grandma can you send me $200 via Remitly?'),
+    (EMMA, 'please send it through Wise, I am stuck'),
+    (EMMA, 'Grandma send me 150 through Google Pay please'),
+    (EMMA, 'can you pay me with Apple Pay, I need 300'),
+    (STRANGER, 'Send the payment by Western Union to the agent today.'),
+    (EMMA, 'Grandma I need you to wire 2000 to my landlord, I will explain later.'),
+    (EMMA, 'can you wire $500 to this account'),
+    (MOM, 'please send me your routing number and account details'),
+    (MOM, 'text me your bank routing details'),
+    (MOM, 'forward me the sign-in code Amazon sends you'),
+    (EMMA, 'Amazon will text you a sign-in number in a minute, please forward it to me'),
+    (MOM, 'what is your online banking password'),
+    (MOM, 'send me your banking login so I can help'),
+    (STRANGER, 'Medicare: can you text me your medicare number to keep your plan'),
+    (EMMA, 'send the USDT to 0x52908400098527886E0F7030069857D2E4169EE7 please'),
+    (EMMA, 'send it to my wallet address please'),
+]
+
+# Harmless texts with the same words: they must stay likely_safe.
+RULE_COVERAGE_HARMLESS = [
+    (MOM, 'Venmo me back when you can, no rush.'),
+    (MOM, "I'll venmo you back tomorrow for the tickets."),
+    (EMMA, 'Grandma send me a photo of the front of the card I made for you!'),
+    (MOM, 'I wired the money to the landlord already.'),
+    (MOM, 'Thanks for the wire, the landlord got 1200.'),
+    (MOM, 'Your new debit card came to my house, I will bring it Sunday.'),
+]
+
+
+def test_rule_coverage_regressions():
+    for sender, text in RULE_COVERAGE_SCAMS:
+        label, names, links = rules_label(text, sender)
+        assert label == 'likely_scam', (text, label, names, links)
+    for sender, text in RULE_COVERAGE_HARMLESS:
+        label, names, links = rules_label(text, sender)
+        assert label == 'likely_safe', (text, label, names, links)
+
+
 def test_demo_cases_keep_their_labels():
     for name in CASES:
-        if name in ('empty', 'guide_missing'):
+        if name in ('empty', 'guide_missing', 'model_catches_miss'):
             continue
         label, names, links = rules_label(CASES[name]['text'], CASES[name]['sender'])
         assert label == CASES[name]['expected_label'], (name, label, names)
+    # model_catches_miss is a miss of the rules on purpose: the evidence
+    # alone supports "safe", but a careful reader would worry.
+    label, names, links = rules_label(CASES['model_catches_miss']['text'], CASES['model_catches_miss']['sender'])
+    assert label == 'likely_safe' and names == [], (label, names)
 
 
 def test_link_tricks_found():
@@ -1089,6 +1135,8 @@ if __name__ == '__main__':
         ('new code request wordings', test_new_code_request_wordings),
         ('false-alarm regressions stay safe (%d texts)' % len(FALSE_ALARM_REGRESSIONS), test_false_alarm_regressions),
         ('false-safe regressions are scams (%d texts)' % len(FALSE_SAFE_REGRESSIONS), test_false_safe_regressions),
+        ('rule coverage regressions (%d scams, %d harmless)' % (len(RULE_COVERAGE_SCAMS), len(RULE_COVERAGE_HARMLESS)),
+         test_rule_coverage_regressions),
         ('demo cases keep their labels (rules only)', test_demo_cases_keep_their_labels),
         ('link tricks: other alphabet, defanged, hidden @, sentence ends', test_link_tricks_found),
         ('gift card as a present is not a warning sign', test_gift_card_present_is_not_a_sign),
