@@ -22,35 +22,33 @@ TOOL RESULT E3 : +1-555-0177 is a saved contact: Emma (granddaughter).
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
-MODEL DECISION : search_scam_guide {"query": "lookalike website from family member"}
+MODEL DECISION : ask_human_helper {"reason": "E2 shows the link in the message is a lookalike of First City
+                 Bank, which is a strong warning sign."}
 VALIDATION     : ok
-TOOL RESULT E4 : Found 2 guide entries (rag): G03: Lookalike website addresses; G09: Hacked accounts of
-                 friends and family.
-NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
+TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
+                 message was sent.
+NEXT OPTIONS   : search_scam_guide, done
 
 === STEP 5 ===
-MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2", "E4"], "explanation": "This looks like a
-                 scam. The link looks like a real bank website but is not. Call Emma on her usual number to
-                 check if she sent this."}
+MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2"], "explanation": "This looks like a scam. The
+                 link in the message is a lookalike of First City Bank. Do not click on it."}
 GATE           : PASSED - evidence supports likely_scam
 
 ====================== SCAMSHIELD RESULT ======================
 VERDICT     : LIKELY SCAM
 STOP REASON : success   (steps: 5, rejected proposals: 0, gate rejections: 0)
-TOOLS USED  : extract_signals -> check_link -> check_sender -> search_scam_guide
+TOOLS USED  : extract_signals -> check_link -> check_sender -> ask_human_helper
 EVIDENCE    :
   E1 extract_signals: strong: none; weak: none; 1 link(s); claims to be: no known organization
   E2 check_link: firstcity-bank-login.co is a LOOKALIKE of the official First City Bank website (strong
       warning sign).
   E3 check_sender: +1-555-0177 is a saved contact: Emma (granddaughter).
-  E4 search_scam_guide: Found 2 guide entries (rag): G03: Lookalike website addresses; G09: Hacked accounts of
-      friends and family.
+  E4 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
+      real message was sent.
 EXPLANATION (model):
-  This looks like a scam. The link looks like a real bank website but is not. Call Emma on her usual number to
-  check if she sent this.
+  This looks like a scam. The link in the message is a lookalike of First City Bank. Do not click on it.
 WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. Call Emma (granddaughter) on
               the number you already have and ask if they really sent it.
-Tip from our guide (G03): Never type personal details into a link from a text. Type the official address
-  yourself or call.
+HUMAN HELP  : offered by model, consent = True (simulated)
 TRACE       : evidence/harness/rag/run_trusted_bad_link_3_trace.json
 ===============================================================

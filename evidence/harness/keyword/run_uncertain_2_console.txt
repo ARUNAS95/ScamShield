@@ -22,27 +22,28 @@ TOOL RESULT E3 : Found 2 guide entries (keyword): G15: Unknown callers asking yo
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
-MODEL DECISION : ask_human_helper {"reason": "E1 shows the message asks you to call back, which matches guide
-                 G15. E2 shows the number is not a saved contact. We recommend calling the office using a
-                 number you already have, such as from an appointment card, or asking a family member."}
+MODEL DECISION : ask_human_helper {"reason": "E1 shows the message asks you to call back, which is a red flag
+                 per guide G15."}
 VALIDATION     : ok
 TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
                  message was sent.
 NEXT OPTIONS   : search_scam_guide, done
 
 === STEP 5 ===
-MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message
-                 looks safe. It asks you to call back, but the number is not in your contacts. A trusted
-                 helper was told. Call the office using a number you already have."}
+MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "This
+                 message looks safe. The sender is not a saved contact, but a trusted helper was told. The
+                 message asks you to call back, which is a red flag, but the helper agreed it was safe."}
 GATE           : REJECTED - evidence supports likely_safe -> likely_safe needs a saved contact, no strong
-                 signs, at most 1 weak sign, all links official; actual: sender +1-555-0163 is not a saved
-                 contact
+                 signs, at most 1 weak sign, all links official, and the official number looked up when the
+                 message gives a phone number for an organization; actual: sender +1-555-0163 is not a saved
+                 contact | likely_safe is not allowed after you raised a concern -> you raised a concern
+                 earlier; answer uncertain and use ask_human_helper
 NEXT OPTIONS   : search_scam_guide, done
 
 === STEP 6 ===
-MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3"], "explanation": "We are not sure
-                 about this message. It asks you to call back, and the number is not in your contacts. A
-                 trusted helper was told, but we need more info to be certain."}
+MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not
+                 sure about this message. The sender is not a saved contact, and the message asks you to call
+                 back, which is a red flag. A trusted helper was told, but this alone does not make it safe."}
 GATE           : PASSED - evidence supports uncertain
 
 ====================== SCAMSHIELD RESULT ======================
@@ -57,8 +58,8 @@ EVIDENCE    :
   E4 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
       real message was sent.
 EXPLANATION (model):
-  We are not sure about this message. It asks you to call back, and the number is not in your contacts. A
-  trusted helper was told, but we need more info to be certain.
+  We are not sure about this message. The sender is not a saved contact, and the message asks you to call
+  back, which is a red flag. A trusted helper was told, but this alone does not make it safe.
 WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
               we have let Priya (daughter) know so they can help.
 Tip from our guide (G15): Call the office using a number you already have, such as from an appointment card,

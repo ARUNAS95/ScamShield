@@ -23,7 +23,7 @@ NEXT OPTIONS   : ask_human_helper, done
 
 === STEP 4 ===
 MODEL DECISION : ask_human_helper {"reason": "E1 and E2 show the message asks you to call back and comes from
-                 a number that is not in your contacts. We are not sure if this is safe or a scam."}
+                 a number that is not in your contacts. We are not sure if this is safe."}
 VALIDATION     : ok
 TOOL RESULT E3 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
                  message was sent.

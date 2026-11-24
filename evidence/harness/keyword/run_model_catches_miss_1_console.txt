@@ -15,14 +15,15 @@ TOOL RESULT E2 : +1-555-0177 is a saved contact: Emma (granddaughter).
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 3 ===
-MODEL DECISION : search_scam_guide {"query": "cash in envelope, someone coming to door"}
+MODEL DECISION : search_scam_guide {"query": "calls asking for cash"}
 VALIDATION     : ok
-TOOL RESULT E3 : Found 1 guide entries (keyword): G13: Shortened links hide where they go.
+TOOL RESULT E3 : Found 2 guide entries (keyword): G15: Unknown callers asking you to call back; G04: Package
+                 delivery fee texts.
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
 MODEL DECISION : done {"label": "likely_safe", "evidence": ["E2"], "explanation": "This message looks safe. It
-                 comes from your saved contact Emma (granddaughter). No strong warning signs were found."}
+                 comes from a saved contact named Emma (granddaughter). There are no strong warning signs."}
 GATE           : PASSED - evidence supports likely_safe
 
 ====================== SCAMSHIELD RESULT ======================
@@ -32,10 +33,11 @@ TOOLS USED  : extract_signals -> check_sender -> search_scam_guide
 EVIDENCE    :
   E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: no known organization
   E2 check_sender: +1-555-0177 is a saved contact: Emma (granddaughter).
-  E3 search_scam_guide: Found 1 guide entries (keyword): G13: Shortened links hide where they go.
+  E3 search_scam_guide: Found 2 guide entries (keyword): G15: Unknown callers asking you to call back; G04:
+      Package delivery fee texts.
 EXPLANATION (model):
-  This message looks safe. It comes from your saved contact Emma (granddaughter). No strong warning signs were
-  found.
+  This message looks safe. It comes from a saved contact named Emma (granddaughter). There are no strong
+  warning signs.
 WHAT TO DO  : You can reply as usual. If anything feels wrong, call Emma (granddaughter) on the number you
               saved.
 TRACE       : evidence/harness/keyword/run_model_catches_miss_1_trace.json
