@@ -2,38 +2,38 @@
   <title>ScamShield workflow: how one message is checked</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#37474F"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#137C3F"/>
     </marker>
     <marker id="arrowp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#5E35B1"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#146AEB"/>
     </marker>
     <style>
-      .model { fill: #EDE7F6; stroke: #5E35B1; stroke-width: 3; }
-      .py { fill: #E6F4EC; stroke: #2E7D5B; stroke-width: 2.5; }
-      .gate { fill: #E6F4EC; stroke: #1B5E3F; stroke-width: 4; }
-      .tool { fill: #FFF3E0; stroke: #D97706; stroke-width: 2.5; }
-      .stop { fill: #FDECEA; stroke: #C62828; stroke-width: 2.5; }
-      .final { fill: #1F3A5F; stroke: #1F3A5F; stroke-width: 2; }
-      .pill { fill: #FFFFFF; stroke: #5E35B1; stroke-width: 2; stroke-dasharray: 6 4; }
-      .menu { fill: #FAF8FF; stroke: #5E35B1; stroke-width: 2; }
-      .line { stroke: #37474F; stroke-width: 2.5; fill: none; }
-      .back { stroke: #5E35B1; stroke-width: 2.5; fill: none; }
-      .dash { stroke: #5E35B1; stroke-width: 2; fill: none; stroke-dasharray: 5 5; }
-      .h { font-size: 21px; font-weight: bold; fill: #1A1A1A; }
-      .t { font-size: 17px; fill: #263238; }
-      .s { font-size: 15px; fill: #37474F; }
-      .lab { font-size: 16px; font-weight: bold; fill: #37474F; }
-      .labp { font-size: 16px; font-weight: bold; fill: #5E35B1; }
-      .mono { font-family: Menlo, Consolas, monospace; font-size: 17px; font-weight: bold; fill: #4527A0; }
-      .cond { font-size: 14.5px; fill: #455A64; }
+      .model { fill: #E8F0FD; stroke: #146AEB; stroke-width: 3; }
+      .py { fill: #E7F2EA; stroke: #137C3F; stroke-width: 2.5; }
+      .gate { fill: #E7F2EA; stroke: #137C3F; stroke-width: 4.5; }
+      .tool { fill: #FEEDE5; stroke: #E0805F; stroke-width: 2.5; }
+      .stop { fill: #FBE3DA; stroke: #B23E17; stroke-width: 2.5; }
+      .final { fill: #146AEB; stroke: #146AEB; stroke-width: 2; }
+      .pill { fill: #FFFFFF; stroke: #146AEB; stroke-width: 2; stroke-dasharray: 6 4; }
+      .menu { fill: #FFFFFF; stroke: #146AEB; stroke-width: 2; }
+      .line { stroke: #137C3F; stroke-width: 2.5; fill: none; }
+      .back { stroke: #146AEB; stroke-width: 2.5; fill: none; }
+      .dash { stroke: #146AEB; stroke-width: 2; fill: none; stroke-dasharray: 5 5; }
+      .h { font-size: 21px; font-weight: bold; fill: #1E2A22; }
+      .t { font-size: 17px; fill: #1E2A22; }
+      .s { font-size: 15px; fill: #2F3F35; }
+      .lab { font-size: 16px; font-weight: bold; fill: #137C3F; }
+      .labp { font-size: 16px; font-weight: bold; fill: #146AEB; }
+      .mono { font-family: Menlo, Consolas, monospace; font-size: 17px; font-weight: bold; fill: #146AEB; }
+      .cond { font-size: 14.5px; fill: #2F3F35; }
       .w { fill: #FFFFFF; }
     </style>
   </defs>
 
-  <rect x="0" y="0" width="1420" height="900" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1420" height="900" fill="#FFFCF5"/>
 
   <!-- Row 1: message, input check, model, parser, validator -->
-  <rect class="py" x="30" y="60" width="160" height="100" rx="12" style="fill:#F5F7FA;stroke:#607D8B"/>
+  <rect class="py" x="30" y="60" width="160" height="100" rx="12" style="fill:#FFFFFF;stroke:#137C3F"/>
   <text class="h" x="110" y="102" text-anchor="middle">Text message</text>
   <text class="t" x="110" y="128" text-anchor="middle">+ sender</text>
 
@@ -54,8 +54,8 @@
   <text class="lab" x="444" y="100" text-anchor="middle">ok</text>
 
   <rect class="model" x="470" y="50" width="280" height="120" rx="14"/>
-  <text class="h" x="610" y="84" text-anchor="middle" style="fill:#311B92">Model chooses</text>
-  <text class="h" x="610" y="110" text-anchor="middle" style="fill:#311B92">ONE action</text>
+  <text class="h" x="610" y="84" text-anchor="middle" style="fill:#0B4FB8">Model chooses</text>
+  <text class="h" x="610" y="110" text-anchor="middle" style="fill:#0B4FB8">ONE action</text>
   <text class="mono" x="610" y="136" text-anchor="middle" style="font-size:15px">{"action", "argument"}</text>
   <text class="s" x="610" y="158" text-anchor="middle">qwen3:8b via Ollama, JSON</text>
 
@@ -79,8 +79,8 @@
   <path class="line" d="M1060,170 L1060,246 L982,246" marker-end="url(#arrow)"/>
   <text class="lab" x="1068" y="212">rejected</text>
   <rect class="pill" x="790" y="215" width="190" height="62" rx="31"/>
-  <text class="t" x="885" y="241" text-anchor="middle" style="fill:#4527A0">reason + allowed</text>
-  <text class="t" x="885" y="263" text-anchor="middle" style="fill:#4527A0">actions</text>
+  <text class="t" x="885" y="241" text-anchor="middle" style="fill:#146AEB">reason + allowed</text>
+  <text class="t" x="885" y="263" text-anchor="middle" style="fill:#146AEB">actions</text>
   <path class="back" d="M790,246 L700,246 L700,173" marker-end="url(#arrowp)"/>
   <text class="labp" x="745" y="236" text-anchor="middle">feedback</text>
 
@@ -99,7 +99,7 @@
   <text class="h" x="1165" y="450" text-anchor="middle">Post-action check</text>
   <text class="t" x="1165" y="474" text-anchor="middle">did the promised state</text>
   <text class="t" x="1165" y="496" text-anchor="middle">change really happen?</text>
-  <text class="s" x="1165" y="532" text-anchor="middle" style="fill:#C62828">fails: tool_failure, tool not offered again</text>
+  <text class="s" x="1165" y="532" text-anchor="middle" style="fill:#B23E17">fails: tool_failure, tool not offered again</text>
 
   <path class="line" d="M1030,465 L962,465" marker-end="url(#arrow)"/>
   <text class="lab" x="996" y="456" text-anchor="middle">ok</text>
@@ -116,7 +116,7 @@
   <!-- The model's menu -->
   <path class="dash" d="M500,170 L500,320 L422,320"/>
   <rect class="menu" x="30" y="300" width="390" height="410" rx="14"/>
-  <text class="h" x="50" y="332" style="fill:#311B92">The model's choices</text>
+  <text class="h" x="50" y="332" style="fill:#0B4FB8">The model's choices</text>
   <text class="cond" x="50" y="354">one per step; Python offers only the ones allowed now</text>
   <text class="mono" x="50" y="390">extract_signals</text>
   <text class="cond" x="50" y="410">always first, only once</text>
@@ -127,10 +127,10 @@
   <text class="mono" x="50" y="531">lookup_official_contact</text>
   <text class="cond" x="50" y="551">an organization the message claims to be</text>
   <text class="mono" x="50" y="578">search_scam_guide</text>
-  <text class="cond" x="50" y="598">metadata RAG over the guide, up to 3 times</text>
+  <text class="cond" x="50" y="598">metadata search over the guide, up to 3 times</text>
   <text class="mono" x="50" y="625">ask_human_helper</text>
   <text class="cond" x="50" y="645">after check_sender, once, only with consent</text>
-  <text class="mono" x="50" y="672" style="fill:#1B5E3F">done</text>
+  <text class="mono" x="50" y="672" style="fill:#137C3F">done</text>
   <text class="cond" x="50" y="692">label + evidence ids + explanation: verdict gate</text>
 
   <!-- Done path: the verdict gate -->
@@ -148,8 +148,8 @@
 
   <path class="line" d="M1105,670 L1105,703" marker-end="url(#arrow)"/>
   <rect class="pill" x="1030" y="705" width="160" height="62" rx="31"/>
-  <text class="t" x="1110" y="731" text-anchor="middle" style="fill:#4527A0">1st rejection:</text>
-  <text class="t" x="1110" y="753" text-anchor="middle" style="fill:#4527A0">&#8634; to the model</text>
+  <text class="t" x="1110" y="731" text-anchor="middle" style="fill:#146AEB">1st rejection:</text>
+  <text class="t" x="1110" y="753" text-anchor="middle" style="fill:#146AEB">&#8634; to the model</text>
 
   <path class="line" d="M1300,670 L1300,773" marker-end="url(#arrow)"/>
   <text class="lab" x="1308" y="716" style="font-size:15px">2nd</text>
@@ -169,8 +169,8 @@
 
   <path class="line" d="M650,615 L622,615" marker-end="url(#arrow)"/>
   <rect class="pill" x="440" y="584" width="180" height="62" rx="31"/>
-  <text class="t" x="530" y="610" text-anchor="middle" style="fill:#4527A0">too hard: rewrite</text>
-  <text class="t" x="530" y="632" text-anchor="middle" style="fill:#4527A0">once &#8634; to the model</text>
+  <text class="t" x="530" y="610" text-anchor="middle" style="fill:#146AEB">too hard: rewrite</text>
+  <text class="t" x="530" y="632" text-anchor="middle" style="fill:#146AEB">once &#8634; to the model</text>
 
   <path class="line" d="M805,670 L805,773" marker-end="url(#arrow)"/>
   <text class="lab" x="815" y="716">ok (or Python's template</text>
@@ -183,6 +183,11 @@
   <text class="t w" x="720" y="829" text-anchor="middle">likely scam / likely safe / not sure + plain explanation</text>
   <text class="t w" x="720" y="851" text-anchor="middle">+ "what to do" written by Python from trusted data</text>
   <text class="t w" x="720" y="873" text-anchor="middle">+ JSON trace of every step</text>
+
+  <path d="M930,772 L963,772 L963,805 Z" fill="#FFFCF5"/>
+  <path d="M932,775 L960,803 L932,803 Z" fill="#FBA084"/>
+  <path d="M388,297 L423,297 L423,332 Z" fill="#FFFCF5"/>
+  <path d="M390,300 L420,330 L390,330 Z" fill="#FBA084"/>
 
   <!-- Legend -->
   <rect class="model" x="40" y="736" width="26" height="20" rx="4"/>
