@@ -1,0 +1,10 @@
+{
+  "_note": "Fictional phone contacts saved by the older adult. Numbers use the 555-01xx fictional range.",
+  "contacts": {
+    "+1-555-0142": {"name": "Main Street Pharmacy", "type": "business"},
+    "+1-555-0177": {"name": "Emma (granddaughter)", "type": "family"},
+    "+1-555-0150": {"name": "Priya (daughter)", "type": "family"},
+    "+1-555-0131": {"name": "First City Bank alerts", "type": "business"}
+  },
+  "helper": {"name": "Priya (daughter)", "number": "+1-555-0150"}
+}
