@@ -37,6 +37,12 @@
       "expected_label": "likely_scam",
       "notes": "Saved family contact sends a bank lookalike link (possible hacked account)."
     },
+    "model_catches_miss": {
+      "sender": "+1-555-0177",
+      "text": "Grandma it's Emma. I'm in trouble and can't talk right now. A man named Mike will come to your door tonight to pick up the cash, please put it in an envelope. I'll explain later.",
+      "expected_label": "uncertain",
+      "notes": "Saved family contact asks for cash to be handed to a stranger (a courier scam). The rules find no warning sign, so the evidence alone would support likely_safe; a careful reader would worry. The model's concern must make it 'not sure', never 'safe'. rules_label is likely_safe on purpose."
+    },
     "guide_missing": {
       "sender": "+1-555-0163",
       "text": "Hi, this is Dr. Lee's office. Please call us back about your appointment.",
