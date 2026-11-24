@@ -40,6 +40,7 @@ Results are saved in evidence/eval/.
 
 import argparse
 import contextlib
+import hashlib
 import io
 import json
 import time
@@ -56,6 +57,18 @@ EVAL_FILES = {
     'holdout2': HERE / 'data' / 'eval_holdout2.json',
 }
 OUT_DIR = HERE / 'evidence' / 'eval'
+SOURCE_FILES = ['scamshield_agent.py', 'rag.py', 'eval.py', 'data/scam_guide.json', 'data/organizations.json',
+                'data/domains.json', 'data/trusted_contacts.json', 'data/eval_set.json',
+                'data/eval_holdout.json', 'data/eval_holdout2.json']
+
+
+def write_source_checksums():
+    """Record exactly which code and data produced the saved results."""
+    lines = []
+    for path in SOURCE_FILES:
+        lines.append(hashlib.sha256((HERE / path).read_bytes()).hexdigest() + '  ' + path)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    (OUT_DIR / 'source_checksums.txt').write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
 def load_eval_set(set_name='eval'):
@@ -327,6 +340,7 @@ def summarize_agent(rows, mode):
     guide_scored = 0
     guide_hits = 0
     model_correct = 0
+    helper_by = {}
     not_safe_total = 0
     safe_total = 0
     per_category = {}
@@ -363,6 +377,9 @@ def summarize_agent(rows, mode):
         sequence = ' > '.join(row['tools'])
         if sequence not in sequences:
             sequences.append(sequence)
+        # model / model_after_gate_hint / python / None (no help offered)
+        who = str(row['helper_offered_by'])
+        helper_by[who] = helper_by.get(who, 0) + 1
     return {
         'search_mode': mode, 'messages': count,
         'accuracy': round(correct / count, 3) if count else None, 'correct': correct,
@@ -374,6 +391,7 @@ def summarize_agent(rows, mode):
         'messages_where_guide_was_searched': searched,
         'guide_hit_when_searched': '%d/%d' % (guide_hits, guide_scored),
         'distinct_tool_sequences': len(sequences),
+        'helper_offered_by': helper_by,
         'per_category': per_category,
     }
 
@@ -388,6 +406,7 @@ def print_agent_summary(s):
     print('  average steps        : %s   distinct tool sequences: %d' % (s['average_steps'], s['distinct_tool_sequences']))
     print('  guide searched in %d messages; correct guide entry used: %s'
           % (s['messages_where_guide_was_searched'], s['guide_hit_when_searched']))
+    print('  human help offered by: ' + json.dumps(s['helper_offered_by']))
     for cat in s['per_category']:
         c = s['per_category'][cat]
         print('  %-13s %d/%d' % (cat, c['correct'], c['total']))
@@ -409,6 +428,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if not args.retrieval and not args.agent and not args.model_queries and not args.rules:
         parser.print_help()
+    else:
+        write_source_checksums()
     if args.rules:
         evaluate_rules(args.set)
     if args.retrieval:

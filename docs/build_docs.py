@@ -22,6 +22,7 @@ Outputs:
 import datetime
 import html
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -38,7 +39,26 @@ HARNESS_DIR = 'evidence/harness/'
 
 PDF_OUT = DOCS / 'ScamShield_Project_Document.pdf'
 PPTX_OUT = DOCS / 'ScamShield_Presentation.pptx'
-CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+MAC_CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+
+
+def find_chrome():
+    """Chrome prints the PDF. Look in this order: the CHROME_PATH environment
+    variable, the usual macOS place, then google-chrome / chromium on the
+    PATH (Linux). Returns None when none is found. Tested on macOS."""
+    from_env = os.environ.get('CHROME_PATH')
+    if from_env and Path(from_env).exists():
+        return from_env
+    if Path(MAC_CHROME).exists():
+        return MAC_CHROME
+    for name in ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser']:
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
+CHROME = find_chrome()
 
 STUDENT = 'Aruna Senthamaraikannan'
 COURSE = 'CSYE 7374 Agentic AI, mini-project (individual)'
@@ -643,6 +663,8 @@ LESSONS = {
 # ------------------------------------------------------------------------
 
 def render_diagram():
+    if CHROME is None:
+        return False
     page = SRC / 'workflow_page.html'
     target = DOCS / 'workflow.png'
     command = [CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=2',
@@ -652,6 +674,8 @@ def render_diagram():
 
 
 def print_pdf(html_path):
+    if CHROME is None:
+        return False
     command = [CHROME, '--headless=new', '--disable-gpu', '--no-pdf-header-footer', '--print-to-pdf=' + str(PDF_OUT),
                html_path.as_uri()]
     subprocess.run(command, capture_output=True, text=True, timeout=180)
@@ -847,7 +871,11 @@ def main():
     print('ScamShield documents')
     print('  tests          : ' + (('%d of %d passed' % (tests['passed'], tests['total'])) if tests else 'could not run'))
     print('  diagram        : ' + ('docs/workflow.png' if diagram_ok else 'NOT rendered'))
-    print('  PDF            : ' + ('docs/' + PDF_OUT.name if pdf_ok else 'NOT written (Chrome missing?)'))
+    if CHROME is None:
+        print('  PDF            : NOT written: Chrome was not found. Set CHROME_PATH to the Chrome or Chromium '
+              'program, or install google-chrome / chromium.')
+    else:
+        print('  PDF            : ' + ('docs/' + PDF_OUT.name if pdf_ok else 'NOT written (Chrome at ' + CHROME + ' failed)'))
     print('  PPTX           : ' + ('docs/' + PPTX_OUT.name if pptx_ok else 'NOT written: ' + pptx_note))
     print('  values filled  : %d (%s)' % (len(FILLED), ', '.join(FILLED)))
     if leftover:
