@@ -4,6 +4,12 @@
 //
 // Usage (build_docs.py runs this for you):
 //   node docs/build_pptx.js docs/build/deck_data.json docs/ScamShield_Presentation.pptx
+//
+// Design: the colors, font and shapes follow the student's slide template
+// (its theme "theme3": cream background, green and blue as main colors,
+// peach as the accent, Arial; a small breadcrumb line top left with the page
+// number top right; boxes with a folded peach corner; green arrows between
+// cards; full-color statement slides with a large corner triangle).
 
 const fs = require('fs');
 const path = require('path');
@@ -12,90 +18,141 @@ const pptxgen = require(path.join(__dirname, 'node_modules', 'pptxgenjs'));
 const dataPath = process.argv[2];
 const outPath = process.argv[3];
 const D = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+const PENDING = 'pending';
 
-// ---- Theme: change these few constants to restyle the whole deck ----
-const BG = 'FBF8F3';            // slide background, warm off-white
-const ORANGE = 'F6B26B';        // light orange: title bar, table headers, highlights
-const ORANGE_SOFT = 'FCE5CD';   // pale orange: card fills
-const ORANGE_LINE = 'E9A35A';   // card borders
-const ORANGE_DEEP = 'E07B24';   // deeper orange: arrows, number circles, "pending" marker
-const ORANGE_TEXT = 'A04E0C';   // deep orange for small accent text (readable on off-white)
-const INK = '2B2B2B';           // body text, dark charcoal
-const MUTED = '6A5D50';         // captions, warm grey
-const SAND = 'F1EBE2';          // neutral warm card (the Python side)
-const SAND_LINE = 'BFB2A3';
+// ---- Colors taken from the template theme (ppt/theme/theme3.xml) ----
+const GREEN = '137C3F';   // dk1: body text, breadcrumb, arrows
+const CREAM = 'FFFCF5';   // lt1: slide background
+const BLUE = '146AEB';    // dk2: titles, callout boxes
+const PEACH = 'FBA084';   // lt2: folded corners, triangles, accent
+const SAGE = 'B6D7A8';    // accent3 (template)
+const SKY = 'A4C2F4';     // accent4 (template)
+// ---- Derived from those (tints and dark shades for readable text) ----
+const INK = '1E2A22';         // near-black green for long text and tables
+const GREEN_TINT = 'E7F2EA';  // pale green card
+const BLUE_TINT = 'E8F0FD';   // pale blue card
+const PEACH_TINT = 'FEEDE5';  // pale peach card / table stripe
+const RUST = 'B23E17';        // deep peach: "likely scam" and warnings (5.6:1 on cream)
+const CODE_BG = '0E3B21';     // dark green code box
 const WHITE = 'FFFFFF';
-// Verdict colors, the same meaning on every slide (white text on each passes contrast)
-const SCAM = 'B83227';          // likely scam: brick red
-const SCAM_TINT = 'FADBD6';
-const SAFE = '2F7A4B';          // likely safe: green
-const SAFE_TINT = 'E2F0E6';
-const UNSURE = 'A86400';        // not sure: amber
-const UNSURE_TINT = 'FDECCF';
-const CODE_BG = '2B2B2B';
-const CODE_TEXT = 'FCE5CD';
-const BODY = 'Calibri';
+const FONT = 'Arial';
 const MONO = 'Courier New';
 
+// Verdict colors, the same meaning on every slide
+const V_SCAM = RUST;
+const V_SAFE = GREEN;
+const V_UNSURE = BLUE;
+
 const pres = new pptxgen();
-pres.layout = 'LAYOUT_WIDE';            // 13.33 x 7.5 inches
+pres.layout = 'LAYOUT_WIDE';            // 13.333 x 7.5 in (the template's 10 x 5.625 scaled by 4/3)
 pres.author = D.student;
 pres.title = 'ScamShield';
 pres.subject = 'CSYE 7374 Agentic AI mini-project';
-pres.theme = { headFontFace: BODY, bodyFontFace: BODY };
+pres.theme = { headFontFace: FONT, bodyFontFace: FONT };
 
-const TITLE_SIZE = 30;
+const W = 13.333;
+const LEFT = 0.6;
+const CONTENT_W = 12.13;
 
-// Title and closing slides: light orange background, charcoal text.
+// Content slides: cream, blue title, page number top right.
 pres.defineSlideMaster({
-  title: 'SCAMSHIELD_HERO',
-  background: { color: ORANGE },
+  title: 'SS_CONTENT',
+  background: { color: CREAM },
   objects: [
-    { placeholder: { options: { name: 'title', type: 'title', x: 0.7, y: 0.5, w: 11.9, h: 1.0, fontFace: BODY,
-      fontSize: 36, bold: true, color: INK, valign: 'middle' }, text: '' } },
+    { placeholder: { options: { name: 'title', type: 'title', x: LEFT, y: 0.78, w: CONTENT_W, h: 0.9, fontFace: FONT,
+      fontSize: 36, color: BLUE, align: 'left', valign: 'middle', margin: 0 }, text: '' } },
   ],
+  slideNumber: { x: 12.05, y: 0.27, w: 0.68, h: 0.36, fontFace: FONT, fontSize: 14, color: GREEN, align: 'right' },
+});
+// Full-bleed blue statement slide.
+pres.defineSlideMaster({
+  title: 'SS_BLUE',
+  background: { color: BLUE },
+  objects: [],
+  slideNumber: { x: 12.05, y: 0.27, w: 0.68, h: 0.36, fontFace: FONT, fontSize: 14, color: INK, align: 'right' },
+});
+// Full-bleed peach slide (title and closing slides).
+pres.defineSlideMaster({
+  title: 'SS_PEACH',
+  background: { color: PEACH },
+  objects: [],
 });
 
-// Content slides: off-white background under a light orange title bar.
-pres.defineSlideMaster({
-  title: 'SCAMSHIELD_CONTENT',
-  background: { color: BG },
-  objects: [
-    { rect: { x: 0, y: 0, w: 13.333, h: 1.1, fill: { color: ORANGE }, line: { color: ORANGE } } },
-    { placeholder: { options: { name: 'title', type: 'title', x: 0.6, y: 0.12, w: 12.1, h: 0.86, fontFace: BODY,
-      fontSize: TITLE_SIZE, bold: true, color: INK, valign: 'middle', margin: 0 }, text: '' } },
-    { text: { text: 'ScamShield  |  CSYE 7374 Agentic AI', options: { x: 0.6, y: 7.08, w: 6, h: 0.3, fontFace: BODY,
-      fontSize: 12, color: MUTED, margin: 0 } } },
-  ],
-  slideNumber: { x: 12.1, y: 7.05, w: 0.6, h: 0.3, fontFace: BODY, fontSize: 12, color: MUTED, align: 'right' },
-});
+// ---------------------------------------------------------------- helpers
 
-function text(slide, value, options) {
-  const merged = Object.assign({ isTextBox: true, fontFace: BODY, color: INK, margin: 0, valign: 'top' }, options);
-  slide.addText(value, merged);
+function T(slide, value, options) {
+  slide.addText(value, Object.assign({ isTextBox: true, fontFace: FONT, color: INK, margin: 0, valign: 'top' }, options));
 }
 
-function card(slide, x, y, w, h, fill, line, dash) {
-  const border = { color: line || fill, width: 1.25 };
-  if (dash) {
-    border.dashType = 'dash';
-    border.width = 2;
-  }
-  slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x, y: y, w: w, h: h, rectRadius: 0.12,
+function crumb(slide, section, title, color) {
+  T(slide, section, { x: LEFT, y: 0.27, w: 2.3, h: 0.36, fontSize: 14, color: color || GREEN, valign: 'middle' });
+  T(slide, title, { x: 3.05, y: 0.27, w: 7.5, h: 0.36, fontSize: 14, color: color || GREEN, valign: 'middle' });
+}
+
+// A free shape from a list of [x, y] points (inches on the slide).
+function poly(slide, points, color, name) {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  points.forEach(function (p) {
+    x0 = Math.min(x0, p[0]);
+    y0 = Math.min(y0, p[1]);
+    x1 = Math.max(x1, p[0]);
+    y1 = Math.max(y1, p[1]);
+  });
+  const pts = points.map(function (p) {
+    return { x: p[0] - x0, y: p[1] - y0 };
+  });
+  pts.push({ close: true });
+  slide.addShape(pres.shapes.CUSTOM_GEOMETRY, { x: x0, y: y0, w: x1 - x0, h: y1 - y0, points: pts,
+    fill: { color: color }, line: { color: color, width: 0 }, objectName: name || 'shape' });
+}
+
+// Template pixel coordinates (720 x 405 preview) to slide inches.
+const K = W / 720;
+function px(points) {
+  return points.map(function (p) {
+    return [p[0] * K, p[1] * K];
+  });
+}
+
+// The template's box with a folded peach corner (top right).
+function foldedBox(slide, x, y, w, h, fill, line, fold, name) {
+  const c = fold || 0.42;
+  const border = line ? { color: line, width: 1.5 } : { color: fill, width: 0 };
+  slide.addShape(pres.shapes.CUSTOM_GEOMETRY, { x: x, y: y, w: w, h: h, objectName: name || 'card',
+    points: [{ x: 0, y: 0 }, { x: w - c, y: 0 }, { x: w, y: c }, { x: w, y: h }, { x: 0, y: h }, { close: true }],
     fill: { color: fill }, line: border });
+  slide.addShape(pres.shapes.CUSTOM_GEOMETRY, { x: x + w - c, y: y, w: c, h: c, objectName: 'fold',
+    points: [{ x: 0, y: 0 }, { x: c, y: c }, { x: 0, y: c }, { close: true }],
+    fill: { color: PEACH }, line: { color: PEACH, width: 0 } });
 }
 
-function pill(slide, x, y, w, h, fill, label, size, labelColor) {
-  slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x, y: y, w: w, h: h, rectRadius: h / 2,
-    fill: { color: fill }, line: { color: fill } });
-  text(slide, label, { x: x, y: y, w: w, h: h, fontSize: size || 20, bold: true, color: labelColor || WHITE,
-    align: 'center', valign: 'middle' });
+function arrowRight(slide, x, y, w, h) {
+  slide.addShape(pres.shapes.RIGHT_ARROW, { x: x, y: y, w: w, h: h, fill: { color: GREEN }, line: { color: GREEN, width: 0 },
+    objectName: 'arrow' });
 }
 
-function numberCircle(slide, x, y, n) {
-  slide.addShape(pres.shapes.OVAL, { x: x, y: y, w: 0.6, h: 0.6, fill: { color: ORANGE }, line: { color: ORANGE_DEEP, width: 1.5 } });
-  text(slide, String(n), { x: x, y: y, w: 0.6, h: 0.6, fontSize: 22, bold: true, color: INK,
-    align: 'center', valign: 'middle' });
+function arrowDown(slide, x, y, w, h) {
+  slide.addShape(pres.shapes.DOWN_ARROW, { x: x, y: y, w: w, h: h, fill: { color: GREEN }, line: { color: GREEN, width: 0 },
+    objectName: 'arrow' });
+}
+
+function chip(slide, x, y, w, h, fill, label, size, color) {
+  slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x, y: y, w: w, h: h, rectRadius: h / 2, fill: { color: fill },
+    line: { color: fill, width: 0 }, objectName: 'chip' });
+  T(slide, label, { x: x, y: y, w: w, h: h, fontSize: size || 18, bold: true, color: color || WHITE, align: 'center',
+    valign: 'middle' });
+}
+
+function line(slide, x1, y1, x2, y2, color, arrowEnd) {
+  const options = { color: color || GREEN, width: 3 };
+  if (arrowEnd) {
+    options.endArrowType = 'triangle';
+  }
+  slide.addShape(pres.shapes.LINE, { x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1),
+    h: Math.abs(y2 - y1), flipH: x2 < x1, flipV: y2 < y1, line: options });
 }
 
 function short(value, limit) {
@@ -106,592 +163,441 @@ function short(value, limit) {
   return value.slice(0, limit - 3).trim() + '...';
 }
 
-function content(section, title) {
-  const slide = pres.addSlide({ masterName: 'SCAMSHIELD_CONTENT', sectionTitle: section });
+function isPending(value) {
+  return value === undefined || value === null || value === PENDING;
+}
+
+function content(section, crumbTitle, title) {
+  const slide = pres.addSlide({ masterName: 'SS_CONTENT', sectionTitle: section });
+  crumb(slide, section, crumbTitle);
   slide.addText(title, { placeholder: 'title' });
   return slide;
 }
 
-const SAFE_RULE = 'saved contact, no strong signs, at most 1 weak sign, every link checked and official, the official ' +
-  'number looked up whenever the message gives a phone number for an organization it claims, no tool failure';
+const WORDS = { likely_scam: 'likely scam', likely_safe: 'likely safe', uncertain: 'not sure' };
+const SAFE_RULE = 'a saved contact, no strong signs, at most 1 weak sign, every link checked and official, the ' +
+  'official number looked up whenever the message gives a phone number for an organization it claims, and no tool failure';
 
-// ---------------------------------------------------------------- 1. Title
+// ================================================================ 1. Title
 pres.addSection({ title: 'Introduction' });
-let s = pres.addSlide({ masterName: 'SCAMSHIELD_HERO', sectionTitle: 'Introduction' });
-text(s, 'ScamShield', { x: 0.7, y: 1.4, w: 7.5, h: 1.2, fontSize: 60, bold: true, color: INK });
-text(s, 'A plain-language scam warning agent for older adults', { x: 0.7, y: 2.7, w: 7.2, h: 1.1,
-  fontSize: 26, color: INK });
-text(s, [
+let s = pres.addSlide({ masterName: 'SS_PEACH', sectionTitle: 'Introduction' });
+poly(s, px([[20, 70], [195, 0], [712, 30], [697, 335], [522, 405], [20, 372]]), CREAM, 'cream sheet');
+poly(s, px([[20, 70], [195, 0], [158, 115]]), GREEN, 'corner triangle');
+poly(s, px([[697, 335], [522, 405], [565, 287]]), GREEN, 'corner triangle');
+T(s, 'ScamShield', { x: 2.85, y: 1.95, w: 8.6, h: 1.25, fontSize: 64, color: BLUE, valign: 'middle' });
+T(s, 'Plain-language scam warnings for older adults', { x: 2.85, y: 3.2, w: 8.6, h: 0.65, fontSize: 28,
+  color: GREEN, valign: 'middle' });
+T(s, [
   { text: D.student, options: { bold: true, breakLine: true } },
-  { text: D.course, options: { breakLine: true } },
-  { text: D.date, options: { breakLine: true } },
-  { text: D.repo },
-], { x: 0.7, y: 4.3, w: 7.4, h: 1.9, fontSize: 18, color: INK, paraSpaceAfter: 4 });
-card(s, 8.6, 1.3, 4.1, 5.0, BG, ORANGE_DEEP);
-pill(s, 8.8, 1.6, 3.7, 0.8, SCAM, 'Likely scam', 22);
-pill(s, 8.8, 2.7, 3.7, 0.8, SAFE, 'Likely safe', 22);
-pill(s, 8.8, 3.8, 3.7, 1.1, UNSURE, 'Not sure: ask someone you trust', 20);
-text(s, 'Fictional messages only. Never opens links.', { x: 8.8, y: 5.2, w: 3.7, h: 0.8, fontSize: 16,
-  color: MUTED, align: 'center', valign: 'middle' });
-s.addNotes('ScamShield checks one text message and answers in plain words: likely scam, likely safe, or not sure. ' +
-  'It runs a local language model, qwen3:8b with Ollama, as an agent that chooses tools step by step, and Python checks ' +
-  'every step. Everything is fictional and nothing is ever opened or sent.');
+  { text: D.course },
+], { x: 2.85, y: 4.25, w: 6.6, h: 1.0, fontSize: 20, color: GREEN, paraSpaceAfter: 4 });
+s.addNotes('Hello, I am ' + D.student + '. My project is ScamShield. It checks one text message and tells an older ' +
+  'adult, in plain words, whether it is likely a scam, likely safe, or not sure. A small local language model, ' +
+  'qwen3:8b running in Ollama, acts as an agent that chooses its checks step by step, and Python checks every step. ' +
+  'All messages are fictional, and it never opens links or contacts anyone.');
 
-// ---------------------------------------------------------------- 2. Problem
-pres.addSection({ title: 'Problem' });
-s = content('Problem', 'Scam texts are built to rush older adults');
-const exampleText = D.example ? D.example.message.text : 'Example message pending';
-card(s, 0.6, 1.45, 5.6, 3.75, WHITE, SAND_LINE);
-text(s, 'A text from an unknown number:', { x: 0.85, y: 1.65, w: 5.1, h: 0.4, fontSize: 18, color: MUTED });
-text(s, exampleText, { x: 0.85, y: 2.1, w: 5.1, h: 2.95, fontSize: 20, color: INK });
-const problems = [
-  ['They copy real organizations', 'Medicare, the post office, a bank, a grandchild'],
-  ['They rush and threaten', '"Your benefits will be suspended today"'],
-  ['They ask for gift cards or codes', 'payment apps, or a tap on a look-alike link'],
-];
-for (let i = 0; i < problems.length; i++) {
-  const y = 1.5 + i * 1.25;
-  numberCircle(s, 6.8, y + 0.05, i + 1);
-  text(s, problems[i][0], { x: 7.6, y: y, w: 5.1, h: 0.45, fontSize: 21, bold: true });
-  text(s, problems[i][1], { x: 7.6, y: y + 0.48, w: 5.1, h: 0.5, fontSize: 18, color: MUTED });
+// ================================================================ 2. Problem (blue statement)
+pres.addSection({ title: 'The problem' });
+s = pres.addSlide({ masterName: 'SS_BLUE', sectionTitle: 'The problem' });
+poly(s, px([[555, 0], [720, 0], [720, 95]]), CREAM, 'corner');
+poly(s, px([[555, 0], [718, 95], [590, 130]]), PEACH, 'corner triangle');
+crumb(s, 'The problem', 'Why ScamShield', WHITE);
+T(s, 'Scam texts are built to rush older adults', { x: LEFT, y: 1.75, w: 9.6, h: 1.1, fontSize: 38, color: WHITE,
+  valign: 'middle' });
+function whiteList(slide, heading, items, x) {
+  T(slide, heading, { x: x, y: 3.35, w: 5.7, h: 0.5, fontSize: 26, bold: true, color: CREAM });
+  const runs = items.map(function (item, i) {
+    return { text: item, options: { bullet: { indent: 22 }, breakLine: i < items.length - 1 } };
+  });
+  T(slide, runs, { x: x, y: 4.05, w: 5.9, h: 3.0, fontSize: 24, color: WHITE, paraSpaceAfter: 14 });
 }
-card(s, 0.6, 5.5, 12.1, 1.3, ORANGE_SOFT, ORANGE_LINE);
-text(s, 'People are told "don\'t click links", but rarely why this message is suspicious. ScamShield explains the ' +
-  'evidence and says "not sure" instead of guessing.', { x: 0.9, y: 5.6, w: 11.5, h: 1.1, fontSize: 20,
-  color: INK, valign: 'middle' });
-s.addNotes('Scam texts copy real organizations, rush people and ask for gift cards, codes or payments. Older adults are ' +
-  'targeted often. The usual advice is "don\'t click", but it does not teach why a message is suspicious. ' +
-  'ScamShield explains the evidence in everyday words and, when it cannot tell, recommends asking a trusted person.');
+whiteList(s, 'What scam texts do', ['Pretend to be Medicare, the post office or a bank',
+  'Rush you: "suspended today"', 'Ask for gift cards, codes or a tap on a fake link'], LEFT);
+whiteList(s, 'What is missing', ['People hear "don\'t click", but not why',
+  'A wrong "safe" is the most harmful mistake', 'An honest "not sure, ask someone" is better than a guess'], 6.95);
+s.addNotes('The problem. Scam texts copy real organizations, rush people with threats, and ask for gift cards, ' +
+  'codes or a click on a look-alike link. Older adults are targeted often. They are told "don\'t click links" but ' +
+  'rarely why this particular message is suspicious. For them the worst mistake is a wrong "safe". So ScamShield ' +
+  'explains the evidence in everyday words, and when it cannot tell, it says "not sure" and offers to alert a ' +
+  'trusted family member.');
 
-// ---------------------------------------------------------------- 3. What it does
-s = content('Problem', 'One message in, a plain answer out');
-const verdicts = [
-  [SCAM, 'Likely scam', 'a strong warning sign, or two weak ones', 1.45, 0.45],
-  [SAFE, 'Likely safe', SAFE_RULE, 2.7, 1.6],
-  [UNSURE, 'Not sure', 'evidence cannot settle it: ask someone you trust', 4.75, 0.75],
-];
-for (let i = 0; i < verdicts.length; i++) {
-  const y = verdicts[i][3];
-  pill(s, 0.6, y, 2.6, 0.6, verdicts[i][0], verdicts[i][1], 20);
-  text(s, verdicts[i][2], { x: 0.6, y: y + 0.7, w: 4.9, h: verdicts[i][4], fontSize: verdicts[i][2].length > 100 ? 16 : 18,
-    color: INK });
-}
-card(s, 5.9, 1.45, 6.8, 5.35, WHITE, ORANGE_LINE);
-if (D.example) {
-  pill(s, 6.2, 1.7, 2.6, 0.6, SCAM, D.example.final_label.toUpperCase(), 18);
-  text(s, short(D.example.explanation, 330), { x: 6.2, y: 2.5, w: 6.2, h: 2.4, fontSize: 18 });
-  text(s, [
-    { text: 'What to do: ', options: { bold: true, color: ORANGE_TEXT } },
-    { text: short(D.example.what_to_do, 210) },
-  ], { x: 6.2, y: 4.9, w: 6.2, h: 1.35, fontSize: 18 });
-  text(s, 'Real output from a saved live run. The "what to do" line is written by Python.', { x: 6.2, y: 6.3,
-    w: 6.2, h: 0.4, fontSize: 14, color: MUTED, italic: true });
+// ================================================================ 3. What it does
+pres.addSection({ title: 'ScamShield' });
+s = content('ScamShield', 'What it does', 'One message in, a plain answer out');
+const ex = D.example;
+foldedBox(s, LEFT, 1.95, 5.2, 3.45, WHITE, SAGE, 0.42, 'message card');
+if (ex) {
+  T(s, 'Text from ' + ex.message.sender + ' (not a saved contact)', { x: LEFT + 0.25, y: 2.15, w: 4.4, h: 0.6,
+    fontSize: 16, bold: true, color: GREEN });
+  T(s, '"' + ex.message.text + '"', { x: LEFT + 0.25, y: 2.8, w: 4.7, h: 2.45, fontSize: 20, color: INK });
 } else {
-  text(s, 'Example output pending', { x: 6.2, y: 2.0, w: 6.2, h: 1, fontSize: 20, color: ORANGE_TEXT });
+  T(s, 'Example message pending', { x: LEFT + 0.25, y: 2.2, w: 4.7, h: 1, fontSize: 20, color: RUST });
 }
-s.addNotes('Three possible answers. The example on the right is the real output for the Medicare gift-card text: the ' +
-  'model wrote the explanation, Python checked it, and Python added the what-to-do line with the real Medicare number ' +
-  'from a trusted list, so the model can never invent a phone number.');
-
-// ---------------------------------------------------------------- 4. How it works (two slides)
-// The full diagram (docs/workflow.png) is in the PDF. On slides it is split
-// into two native diagrams so the smallest text is 14 pt when projected.
-// Colors: orange boxes = the model decides; sand boxes = Python checks;
-// red = a stop, amber = a retry.
-const ARROW = '5A4E44';
-const MODEL_BOX = [ORANGE, ORANGE_DEEP, INK];
-const PY_BOX = [SAND, SAND_LINE, INK];
-const IN_BOX = [WHITE, SAND_LINE, INK];
-const STOP_BOX = [SCAM_TINT, SCAM, SCAM];
-const RETRY_BOX = [UNSURE_TINT, UNSURE, UNSURE];
-
-function flowBox(slide, x, y, w, h, style, title, body) {
-  card(slide, x, y, w, h, style[0], style[1]);
-  text(slide, title, { x: x + 0.12, y: y + 0.1, w: w - 0.24, h: 0.42, fontSize: 18, bold: true,
-    color: style[2], align: 'center' });
-  if (body) {
-    text(slide, body, { x: x + 0.12, y: y + 0.52, w: w - 0.24, h: h - 0.6, fontSize: 15, color: INK,
-      align: 'center' });
-  }
+arrowRight(s, 5.95, 3.35, 0.8, 0.6);
+foldedBox(s, 6.9, 1.95, 5.83, 4.35, BLUE, null, 0.5, 'answer callout');
+if (ex) {
+  chip(s, 7.2, 2.2, 2.7, 0.58, CREAM, ex.final_label.toUpperCase(), 20, V_SCAM);
+  T(s, short(ex.explanation, 300), { x: 7.2, y: 3.0, w: 5.25, h: 1.75, fontSize: 18, color: WHITE });
+  T(s, [
+    { text: 'What to do: ', options: { bold: true } },
+    { text: short(ex.what_to_do, 200) },
+  ], { x: 7.2, y: 4.6, w: 5.25, h: 1.5, fontSize: 18, color: WHITE });
+} else {
+  T(s, 'Example output pending', { x: 7.2, y: 2.4, w: 5.2, h: 1, fontSize: 20, color: WHITE });
 }
+T(s, 'Three possible answers', { x: LEFT, y: 5.6, w: 5.2, h: 0.4, fontSize: 16, bold: true, color: GREEN });
+chip(s, LEFT, 6.05, 1.6, 0.5, V_SCAM, 'Likely scam', 16);
+chip(s, LEFT + 1.75, 6.05, 1.6, 0.5, V_SAFE, 'Likely safe', 16);
+chip(s, LEFT + 3.5, 6.05, 1.7, 0.5, V_UNSURE, 'Not sure', 16);
+T(s, 'Real output from a saved live run. Python writes the "what to do" line and every phone number.',
+  { x: LEFT, y: 6.85, w: CONTENT_W, h: 0.35, fontSize: 14, italic: true, color: GREEN });
+s.addNotes('Input: one text message and the sender\'s number. Output: a verdict, a short explanation and a concrete ' +
+  '"what to do" line. This is the real output for the Medicare gift-card text from a saved live run. The model wrote ' +
+  'the explanation and Python checked it. The what-to-do line, with the real Medicare number from a trusted list, ' +
+  'is always written by Python, so the model can never invent a phone number. The three possible answers are ' +
+  'likely scam, likely safe, and not sure, which always comes with an offer of human help.');
 
-function arrow(slide, x1, y1, x2, y2, color) {
-  slide.addShape(pres.shapes.LINE, { x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1),
-    h: Math.abs(y2 - y1), flipH: x2 < x1, flipV: y2 < y1,
-    line: { color: color || ARROW, width: 2, endArrowType: 'triangle' } });
-}
-
-function plainLine(slide, x1, y1, x2, y2, color) {
-  slide.addShape(pres.shapes.LINE, { x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1),
-    h: Math.abs(y2 - y1), line: { color: color || ARROW, width: 2 } });
-}
-
-function arrowLabel(slide, x, y, w, value, color) {
-  text(slide, value, { x: x, y: y, w: w, h: 0.4, fontSize: 14, italic: true, color: color || MUTED,
-    align: 'center' });
-}
-
-function legend(slide, y) {
-  const items = [[MODEL_BOX, 'the model decides'], [PY_BOX, 'Python checks'], [STOP_BOX, 'stop'], [RETRY_BOX, 'retry']];
-  let x = 0.6;
-  for (let i = 0; i < items.length; i++) {
-    card(slide, x, y + 0.06, 0.32, 0.26, items[i][0][0], items[i][0][1]);
-    text(slide, items[i][1], { x: x + 0.42, y: y, w: 2.2, h: 0.38, fontSize: 14, color: MUTED, valign: 'middle' });
-    x += 0.42 + (items[i][1].length * 0.085) + 0.45;
-  }
-}
-
+// ================================================================ 4. How it works
 pres.addSection({ title: 'How it works' });
-s = content('How it works', 'How it works (1/2): the model chooses, Python checks');
-const COLS = [0.6, 3.8, 7.0, 10.2];
-const BW = 2.5;
-const TOP = 2.05;
-const BOT = 4.4;
-const BH = 1.55;
-legend(s, 1.25);
-flowBox(s, COLS[0], TOP, BW, BH, IN_BOX, 'Text message', '+ sender number (fictional)');
-flowBox(s, COLS[1], TOP, BW, BH, PY_BOX, 'Input check', 'Python: empty or too long?');
-flowBox(s, COLS[2], TOP, BW, BH, MODEL_BOX, 'Model chooses', 'ONE action as JSON: action + argument');
-flowBox(s, COLS[3], TOP, BW, BH, PY_BOX, 'Parser + validator', 'allowed now? argument from the message? not a repeat?');
-flowBox(s, COLS[1], BOT, BW, BH, STOP_BOX, 'Stop: invalid_input', 'answer: not sure (no model call)');
-flowBox(s, COLS[2], BOT, BW, BH, PY_BOX, 'Evidence E1, E2 ...', '+ evidence ledger + NEXT OPTIONS back to the model');
-flowBox(s, COLS[3], BOT, BW, BH, PY_BOX, 'Tool runs (Python)', 'never opens links; post-check: did the state really change?');
-arrow(s, COLS[0] + BW, TOP + BH / 2, COLS[1], TOP + BH / 2);
-arrow(s, COLS[1] + BW, TOP + BH / 2, COLS[2], TOP + BH / 2);
-arrow(s, COLS[2] + BW, TOP + BH / 2, COLS[3], TOP + BH / 2);
-// Rejected proposals loop back over the top: validator -> model.
-plainLine(s, COLS[3] + BW / 2, TOP, COLS[3] + BW / 2, TOP - 0.2, SCAM);
-plainLine(s, COLS[2] + BW / 2, TOP - 0.2, COLS[3] + BW / 2, TOP - 0.2, SCAM);
-arrow(s, COLS[2] + BW / 2, TOP - 0.2, COLS[2] + BW / 2, TOP, SCAM);
-arrowLabel(s, COLS[2] + BW / 2 - 0.6, TOP - 0.58, COLS[3] - COLS[2] + 1.2, 'rejected: reason + allowed actions go back', SCAM);
-arrow(s, COLS[1] + BW / 2, TOP + BH, COLS[1] + BW / 2, BOT, SCAM);
-arrowLabel(s, COLS[1] + BW / 2 + 0.05, TOP + BH + 0.2, 1.3, 'fails', SCAM);
-arrow(s, COLS[3] + BW / 2, TOP + BH, COLS[3] + BW / 2, BOT);
-arrowLabel(s, COLS[3] + BW / 2 + 0.05, TOP + BH + 0.2, 1.2, 'tool');
-arrow(s, COLS[3], BOT + BH / 2, COLS[2] + BW, BOT + BH / 2);
-arrow(s, COLS[2] + BW / 2, BOT, COLS[2] + BW / 2, TOP + BH);
-arrowLabel(s, COLS[2] + BW / 2 - 1.35, TOP + BH + 0.2, 1.3, 'next step');
-card(s, 0.6, 6.15, 12.1, 0.75, ORANGE_SOFT, ORANGE_LINE);
-text(s, 'When the model chooses done, the validator sends it to the verdict gate (next slide). A tool failure is ' +
-  'recorded and that tool is not offered again.', { x: 0.8, y: 6.2, w: 11.7, h: 0.65, fontSize: 16, valign: 'middle' });
-s.addNotes('Walk through the loop: Python checks the input, then the model chooses ONE action as JSON. Python parses ' +
-  'and validates it: is this action allowed now, does the argument come from the message. A rejection goes back to ' +
-  'the model with the reason and the allowed actions. The tool runs locally and never opens links; a post-check ' +
-  'verifies the state change. The result becomes evidence E1, E2 with a ledger and the NEXT OPTIONS list, and the ' +
-  'model chooses again. The full diagram is in the project document.');
+s = content('How it works', 'The loop', 'How it works');
+// legend in the title row
+s.addShape(pres.shapes.RECTANGLE, { x: 8.15, y: 1.03, w: 0.36, h: 0.36, fill: { color: BLUE }, line: { color: BLUE, width: 0 } });
+T(s, 'the model decides', { x: 8.65, y: 1.0, w: 2.0, h: 0.42, fontSize: 15, color: INK, valign: 'middle' });
+s.addShape(pres.shapes.RECTANGLE, { x: 10.75, y: 1.03, w: 0.36, h: 0.36, fill: { color: GREEN }, line: { color: GREEN, width: 0 } });
+T(s, 'Python checks', { x: 11.25, y: 1.0, w: 1.5, h: 0.42, fontSize: 15, color: INK, valign: 'middle' });
 
-s = content('How it works', 'How it works (2/2): the verdict gate and the answer');
-const GX = [0.6, 3.8, 7.0, 10.2];
-const GY = 1.85;
-const GBOT = 4.15;
-legend(s, 1.25);
-flowBox(s, GX[0], GY, BW, BH, MODEL_BOX, 'Model: done', 'label + evidence ids + explanation');
-flowBox(s, GX[1], GY, BW, BH, PY_BOX, 'Verdict gate', 'does the recorded evidence support this label?');
-flowBox(s, GX[2], GY, BW, BH, PY_BOX, 'Readability', 'verdict first, at most 6 short sentences, no jargon or links');
-flowBox(s, GX[3], GY, BW, BH, IN_BOX, 'Final answer', 'verdict + explanation + "what to do" by Python + trace');
-arrow(s, GX[0] + BW, GY + BH / 2, GX[1], GY + BH / 2);
-arrow(s, GX[1] + BW, GY + BH / 2, GX[2], GY + BH / 2);
-arrowLabel(s, GX[1] + BW - 0.1, GY + BH / 2 - 0.45, 0.9, 'passes', SAFE);
-arrow(s, GX[2] + BW, GY + BH / 2, GX[3], GY + BH / 2);
-arrowLabel(s, GX[2] + BW - 0.1, GY + BH / 2 - 0.45, 0.9, 'ok', SAFE);
-flowBox(s, GX[0], GBOT, BW + 0.7, BH, RETRY_BOX, '1st rejection', 'feedback shows expected vs. actual; the model tries again');
-flowBox(s, GX[1] + 0.9, GBOT, BW + 1.6, BH, STOP_BOX, '2nd rejection: Python decides',
-  'uses the label the evidence supports (gate_downgrade), but never "safe" if the model was worried');
-flowBox(s, GX[3] - 0.3, GBOT, BW + 0.3, BH, RETRY_BOX, 'Too hard to read', 'one rewrite, then Python\'s template');
-arrow(s, GX[1] + 0.6, GY + BH, GX[0] + 1.6, GBOT, UNSURE);
-arrow(s, GX[1] + 1.9, GY + BH, GX[1] + 2.4, GBOT, SCAM);
-arrow(s, GX[2] + 1.9, GY + BH, GX[3] + 0.6, GBOT, UNSURE);
-card(s, 0.6, 5.95, 12.1, 0.95, SAFE_TINT, SAFE);
-text(s, [
-  { text: 'Safe needs: ', options: { bold: true, color: SAFE } },
-  { text: SAFE_RULE + '.' },
-], { x: 0.8, y: 6.0, w: 11.7, h: 0.85, fontSize: 16, valign: 'middle' });
-s.addNotes('When the model says done, the verdict gate checks the label against the recorded evidence, like ' +
-  'check_goal in the Airways agent. A first rejection goes back to the model with expected versus actual. After a ' +
-  'second rejection Python uses the label the evidence supports, but the model\'s concern can only make the answer ' +
-  'more careful: if the model said scam or not sure, or asked for human help itself, the answer is never safe. Then the readability check, one ' +
-  'rewrite, and the final answer with Python\'s what-to-do line.');
-
-// ---------------------------------------------------------------- 5. Model vs Python
-s = content('How it works', 'The model decides; Python checks every decision');
-card(s, 0.6, 1.45, 5.9, 5.35, ORANGE_SOFT, ORANGE_DEEP);
-card(s, 6.8, 1.45, 5.9, 5.35, SAND, SAND_LINE);
-text(s, 'The model decides', { x: 0.9, y: 1.65, w: 5.3, h: 0.5, fontSize: 24, bold: true, color: ORANGE_TEXT });
-text(s, 'Python checks', { x: 7.1, y: 1.65, w: 5.3, h: 0.5, fontSize: 24, bold: true, color: INK });
-const modelSide = ['Which tool to use next, and with which argument', 'What to search for in the scam guide',
-  'When it has enough evidence', 'Which label to propose, which evidence to cite', 'How to word the explanation'];
-const pythonSide = ['Is this action allowed now? Is the argument from the message?', 'Was the result recorded? Alert read back from the log',
-  'Does the recorded evidence support the label? (gate)', 'Is the answer easy to read?', 'Writes "what to do" and every phone number'];
-const modelRuns = [];
-const pythonRuns = [];
-for (let i = 0; i < modelSide.length; i++) {
-  modelRuns.push({ text: modelSide[i], options: { bullet: true, breakLine: i < modelSide.length - 1 } });
-  pythonRuns.push({ text: pythonSide[i], options: { bullet: true, breakLine: i < pythonSide.length - 1 } });
+const CX = [0.65, 3.8, 6.95, 10.1];
+const CW = 2.55;
+const TOP_Y = 2.6;
+const BOX_H = 1.45;
+const BOT_Y = 4.85;
+function flowCard(slide, x, y, w, kind, title, body) {
+  const fill = kind === 'model' ? BLUE : kind === 'python' ? GREEN : WHITE;
+  const textColor = kind === 'plain' ? INK : WHITE;
+  if (kind === 'plain') {
+    foldedBox(slide, x, y, w, BOX_H, WHITE, GREEN, 0.36, title);
+  } else {
+    slide.addShape(pres.shapes.RECTANGLE, { x: x, y: y, w: w, h: BOX_H, fill: { color: fill },
+      line: { color: fill, width: 0 }, objectName: title });
+  }
+  T(slide, title, { x: x + 0.15, y: y + 0.15, w: w - 0.45, h: 0.45, fontSize: 19, bold: true, color: textColor });
+  T(slide, body, { x: x + 0.15, y: y + 0.62, w: w - 0.3, h: BOX_H - 0.7, fontSize: 16, color: textColor });
 }
-text(s, modelRuns, { x: 0.9, y: 2.35, w: 5.3, h: 4.25, fontSize: 20, paraSpaceAfter: 10 });
-text(s, pythonRuns, { x: 7.1, y: 2.35, w: 5.3, h: 4.25, fontSize: 20, paraSpaceAfter: 10 });
-s.addNotes('The split of responsibility. The model makes the investigative decisions: which tool, which argument, ' +
-  'when to stop, which label. Python never trusts those decisions: it checks preconditions and argument grounding ' +
-  'before a tool runs, verifies the state change after, and accepts a verdict only if the recorded evidence supports it.');
+flowCard(s, CX[0], TOP_Y, CW, 'model', 'Model chooses', 'ONE action as JSON: action + argument');
+flowCard(s, CX[1], TOP_Y, CW, 'python', 'Python validates', 'allowed now? argument taken from the message?');
+flowCard(s, CX[2], TOP_Y, CW, 'python', 'Tool runs', 'a local lookup; never opens a link');
+flowCard(s, CX[3], TOP_Y, CW, 'plain', 'Evidence', 'E1, E2 ... recorded, plus the new list of allowed actions');
+for (let i = 0; i < 3; i++) {
+  arrowRight(s, CX[i] + CW + 0.08, TOP_Y + BOX_H / 2 - 0.2, 0.44, 0.4);
+}
+// evidence goes back to the model: a loop over the top
+line(s, CX[3] + CW / 2, TOP_Y, CX[3] + CW / 2, 2.2);
+line(s, CX[0] + CW / 2, 2.2, CX[3] + CW / 2, 2.2);
+line(s, CX[0] + CW / 2, 2.2, CX[0] + CW / 2, TOP_Y, GREEN, true);
+T(s, 'next decision: the model reads the evidence and chooses again', { x: 3.45, y: 2.0, w: 6.4, h: 0.4,
+  fontSize: 15, bold: true, color: GREEN, align: 'center', valign: 'middle', fill: { color: CREAM } });
+T(s, 'not allowed? the reason goes back to the model', { x: CX[1], y: TOP_Y + BOX_H + 0.08, w: 3.0, h: 0.6,
+  fontSize: 14, italic: true, color: RUST });
+// done path
+arrowDown(s, CX[0] + CW / 2 - 0.2, TOP_Y + BOX_H + 0.08, 0.4, BOT_Y - TOP_Y - BOX_H - 0.16);
+T(s, 'enough evidence', { x: CX[0] + CW / 2 + 0.3, y: TOP_Y + BOX_H + 0.25, w: 1.6, h: 0.4, fontSize: 14,
+  italic: true, color: GREEN });
+flowCard(s, CX[0], BOT_Y, CW, 'model', 'Model: done', 'label + evidence ids + explanation');
+flowCard(s, CX[1], BOT_Y, CW, 'python', 'Verdict gate', 'does the recorded evidence support it?');
+flowCard(s, CX[2], BOT_Y, CX[3] + CW - CX[2], 'plain', 'Answer',
+  'verdict + plain explanation + "what to do" (written by Python) + a saved trace of every step');
+arrowRight(s, CX[0] + CW + 0.08, BOT_Y + BOX_H / 2 - 0.2, 0.44, 0.4);
+arrowRight(s, CX[1] + CW + 0.08, BOT_Y + BOX_H / 2 - 0.2, 0.44, 0.4);
+T(s, 'Gate says no? The reason goes back. After 2 rejections, Python uses the supported label.',
+  { x: LEFT, y: 6.5, w: CONTENT_W, h: 0.6, fontSize: 18, color: INK, valign: 'middle' });
+s.addNotes('This is the whole loop. The model chooses ONE action at a time as JSON. Python validates it: is this ' +
+  'action allowed right now, and does the argument come from the message? If not, the reason goes back to the ' +
+  'model. The tool runs locally and never opens a link. The result is recorded as evidence with an id, and the ' +
+  'model gets the evidence and the new list of allowed actions, so the next decision depends on what was found. ' +
+  'When the model has enough evidence it says done with a label, evidence ids and an explanation. The verdict gate ' +
+  'checks that label against the recorded evidence. After two rejections Python uses the label the evidence supports. ' +
+  'The answer gets a what-to-do line written by Python, and every step is saved in a trace.');
 
-// ---------------------------------------------------------------- 6. Tools
-s = content('How it works', 'Six tools the model can choose from');
+// ================================================================ 5. Tools
+s = content('How it works', 'The tools', 'Six tools the model can choose from');
 const tools = [
-  ['extract_signals', 'Warning signs, links, claimed organization', 'always first, once'],
-  ['check_link', 'Official, look-alike or scam? Never opened', 'a link from the message is unchecked'],
-  ['check_sender', 'Is the sender a saved contact?', 'the real sender, once'],
-  ['lookup_official_contact', 'Real phone number from a trusted list', 'an organization the message claims'],
-  ['search_scam_guide', 'Metadata RAG over the scam guide', 'up to 3 times'],
-  ['ask_human_helper', 'Simulated alert to family, with consent', 'after check_sender, once'],
+  ['extract_signals', 'Finds warning signs, links, phone numbers and the claimed organization', 'first, only once'],
+  ['check_link', 'Looks the link up in a list of official and scam websites. Never opens it', 'a link in the message is unchecked'],
+  ['check_sender', 'Is the sender a saved contact?', 'the real sender, only once'],
+  ['lookup_official_contact', 'The real phone number from a trusted list', 'the message claims an organization'],
+  ['search_scam_guide', 'Metadata search over the scam guide: keyword scoring plus metadata rules', 'up to 3 times'],
+  ['ask_human_helper', 'Simulated alert to a family member, only with consent', 'after check_sender, once'],
 ];
 for (let i = 0; i < tools.length; i++) {
-  const col = i % 3;
-  const row = Math.floor(i / 3);
-  const x = 0.6 + col * 4.1;
-  const y = 1.45 + row * 2.4;
-  card(s, x, y, 3.85, 2.2, ORANGE_SOFT, ORANGE_LINE);
-  text(s, tools[i][0], { x: x + 0.2, y: y + 0.18, w: 3.5, h: 0.45, fontSize: 18, bold: true, fontFace: MONO,
-    color: ORANGE_TEXT });
-  text(s, tools[i][1], { x: x + 0.2, y: y + 0.7, w: 3.5, h: 0.75, fontSize: 18 });
-  text(s, 'When: ' + tools[i][2], { x: x + 0.2, y: y + 1.45, w: 3.5, h: 0.65, fontSize: 16, color: MUTED,
-    italic: true });
+  const x = LEFT + (i % 3) * 4.14;
+  const y = 1.95 + Math.floor(i / 3) * 2.35;
+  foldedBox(s, x, y, 3.85, 2.15, WHITE, SAGE, 0.38, tools[i][0]);
+  T(s, tools[i][0], { x: x + 0.2, y: y + 0.2, w: 3.3, h: 0.4, fontSize: 16, bold: true, fontFace: MONO, color: BLUE });
+  T(s, tools[i][1], { x: x + 0.2, y: y + 0.65, w: 3.5, h: 0.9, fontSize: 17, color: INK });
+  T(s, 'Offered: ' + tools[i][2], { x: x + 0.2, y: y + 1.58, w: 3.5, h: 0.45, fontSize: 15, italic: true, color: GREEN,
+    valign: 'bottom' });
 }
-text(s, [
-  { text: 'done', options: { bold: true, fontFace: MONO, color: ORANGE_TEXT } },
-  { text: ' (label + evidence ids + explanation) is not a tool: it goes to the verdict gate.' },
-], { x: 0.6, y: 6.35, w: 12.1, h: 0.5, fontSize: 18 });
-s.addNotes('Each tool is a local Python function. Python only offers the tools whose precondition holds right now: ' +
-  'no links means no check_link; ask_human_helper only after the sender was checked. There is no fixed order beyond ' +
-  'extract_signals first, so the model picks different tools for different messages.');
+T(s, [
+  { text: 'done', options: { bold: true, fontFace: MONO, color: BLUE } },
+  { text: ' (label + evidence ids + explanation) is not a tool: the verdict gate checks it.' },
+], { x: LEFT, y: 6.65, w: CONTENT_W, h: 0.45, fontSize: 18, valign: 'middle' });
+s.addNotes('Each tool is a small local Python function. Python offers a tool only when it makes sense right now: no ' +
+  'link means no check_link, the official-number lookup only appears when the message claims an organization, and ' +
+  'ask_human_helper only after the sender was checked. Apart from extract_signals going first there is no fixed ' +
+  'order, so the model picks different tools for different messages. The guide search is a metadata search over a ' +
+  'small scam-prevention guide: keyword scoring plus rules that use the warning signs already found.');
 
-// ---------------------------------------------------------------- 7. Verdict gate
-s = content('How it works', 'The verdict gate accepts only what the evidence supports');
-const rules = [
-  ['Likely scam', 'at least 1 strong or 2 weak warning signs', SCAM, 1.45, 0.45],
-  ['Likely safe', SAFE_RULE, SAFE, 2.55, 1.6],
-  ['Not sure', 'otherwise; never with a strong sign; help must be offered first', UNSURE, 4.5, 0.75],
+// ================================================================ 6. Verdict gate
+s = content('How it works', 'The verdict gate', 'The verdict gate: only what the evidence supports');
+const gateRules = [
+  ['Likely scam', V_SCAM, 'at least 1 strong warning sign, or at least 2 weak ones', 1.95, 0.65],
+  ['Likely safe', V_SAFE, SAFE_RULE, 3.25, 1.75],
+  ['Not sure', V_UNSURE, 'anything else; never when a strong sign was found; human help offered first', 5.5, 0.9],
 ];
-for (let i = 0; i < rules.length; i++) {
-  const y = rules[i][3];
-  pill(s, 0.6, y, 2.4, 0.5, rules[i][2], rules[i][0], 18);
-  text(s, rules[i][1], { x: 0.6, y: y + 0.6, w: 5.0, h: rules[i][4], fontSize: rules[i][1].length > 100 ? 16 : 18 });
+for (let i = 0; i < gateRules.length; i++) {
+  const r = gateRules[i];
+  chip(s, LEFT, r[3], 2.0, 0.48, r[1], r[0], 17);
+  T(s, r[2], { x: LEFT, y: r[3] + 0.56, w: 6.25, h: r[4], fontSize: 18, color: INK });
 }
-card(s, 0.6, 5.9, 5.0, 0.9, SAND, SAND_LINE);
-text(s, 'A rejection shows expected vs. actual. After 2 rejections Python uses the supported label.',
-  { x: 0.8, y: 5.92, w: 4.6, h: 0.86, fontSize: 18, valign: 'middle' });
-card(s, 5.9, 1.45, 6.8, 5.35, WHITE, ORANGE_LINE);
 const g = D.gate_example;
+foldedBox(s, 7.2, 1.95, 5.53, 3.3, WHITE, SAGE, 0.42, 'rejection example');
 if (g) {
-  text(s, 'Real rejection (' + g.case + ' case, run ' + g.run + ', ' + g.mode + ')', { x: 6.15, y: 1.6, w: 6.3,
-    h: 0.45, fontSize: 18, bold: true, color: ORANGE_TEXT });
-  text(s, [
-    { text: 'Model: ', options: { bold: true, color: ORANGE_TEXT } },
-    { text: g.label + ', "' + short(g.explanation, 120) + '"' },
-  ], { x: 6.15, y: 2.15, w: 6.3, h: 1.45, fontSize: 18 });
-  let failed = g.failed.length ? g.failed[0] : '';
-  text(s, [
-    { text: 'Python: rejected. ', options: { bold: true, color: INK } },
-    { text: short(failed, 190) },
-  ], { x: 6.15, y: 3.65, w: 6.3, h: 1.45, fontSize: 18 });
-  let after = g.next_action ? g.next_action : 'nothing';
+  T(s, 'A real rejection (' + g.case + ' case, run ' + g.run + ')', { x: 7.45, y: 2.12, w: 4.6, h: 0.4,
+    fontSize: 16, bold: true, color: GREEN });
+  const asked = g.helper_offered_by === 'model' ? 'The model asked for human help, then said: ' : 'The model said: ';
+  T(s, [
+    { text: asked },
+    { text: String(g.label), options: { bold: true, fontFace: MONO } },
+  ], { x: 7.45, y: 2.6, w: 5.05, h: 0.65, fontSize: 18, color: INK });
+  const reason = String(g.key_failure || '').split(': ').slice(1).join(': ') || g.key_failure;
+  T(s, [
+    { text: 'Python: rejected. ', options: { bold: true, color: RUST } },
+    { text: '"' + short(reason, 120) + '"' },
+  ], { x: 7.45, y: 3.3, w: 5.05, h: 1.15, fontSize: 18, color: INK });
+  let after = 'the model chose ' + (g.next_action || 'nothing');
   if (g.next_action === 'done' && g.next_argument) {
-    after = 'done again: "' + short(g.next_argument.explanation, 95) + '"';
+    after = 'the model answered ' + (WORDS[g.next_argument.label] || g.next_argument.label);
   }
-  text(s, [
-    { text: 'Next: ', options: { bold: true, color: ORANGE_TEXT } },
-    { text: after },
-  ], { x: 6.15, y: 5.15, w: 6.3, h: 1.0, fontSize: 18 });
-  text(s, 'Ended: ' + g.final_label + ' (' + g.stop_reason + ')', { x: 6.15, y: 6.25, w: 6.3, h: 0.4,
-    fontSize: 16, color: MUTED, italic: true });
+  T(s, [
+    { text: 'Next: ', options: { bold: true, color: GREEN } },
+    { text: after + '; the run ended ' + (WORDS[g.final_label] || g.final_label) + '.' },
+  ], { x: 7.45, y: 4.5, w: 5.05, h: 0.6, fontSize: 18, color: INK });
 } else {
-  text(s, 'Gate rejection example pending', { x: 6.15, y: 2.0, w: 6.3, h: 0.8, fontSize: 20, color: ORANGE_TEXT });
+  T(s, 'Gate rejection example pending', { x: 7.45, y: 2.3, w: 5, h: 0.8, fontSize: 20, color: RUST });
 }
-s.addNotes('Python works out the label the recorded evidence supports, like check_goal in the Airways agent. The ' +
-  'model\'s label must match, cited evidence ids must exist, and the explanation must mention every strong warning ' +
-  'sign. The example on the right is a real rejection from a saved trace: the feedback says exactly what is missing, ' +
-  'and the model fixes it on the next step.');
+foldedBox(s, 7.2, 5.45, 5.53, 1.6, BLUE, null, 0.42, 'key rule callout');
+T(s, 'A worried model can only make the answer more careful, never "safe".', { x: 7.45, y: 5.6, w: 4.75, h: 1.3,
+  fontSize: 20, bold: true, color: WHITE, valign: 'middle' });
+s.addNotes('When the model says done, Python works out which label the recorded evidence supports, like check_goal ' +
+  'in the Airways class agent. Scam needs at least one strong or two weak warning signs. Safe needs everything on ' +
+  'this list. Anything else is not sure, which needs an offer of human help first. Cited evidence ids must exist and ' +
+  'the explanation must mention every strong sign. On the right is a real rejection from a saved run: the model had ' +
+  'asked for human help and then said safe; the gate rejected it with the reason, and the model answered not sure. ' +
+  'That is the key rule: once the model is worried, Python never turns that into safe.');
 
-// ---------------------------------------------------------------- 8. Demo plan
-pres.addSection({ title: 'Demonstration' });
-s = content('Demonstration', 'Live demo: safe, scam, not sure, two problem cases');
+// ================================================================ 7. Demo plan
+pres.addSection({ title: 'Demo' });
+s = content('Demo', 'Live demo plan', 'Live demo: four runs');
 const demo = [
-  ['Ordinary', 'Saved pharmacy reminder', 'Point at: no warning signs, saved contact, LIKELY SAFE'],
-  ['Scam', 'Medicare gift-card text', 'Point at: tools chosen, look-alike link, gate PASSED, what-to-do line'],
-  ['Not sure', 'Unknown doctor\'s office', 'Point at: NEXT OPTIONS adds ask_human_helper after check_sender'],
-  ['Guide missing', 'Tool failure (problem case)', 'Point at: TOOL FAILURE, stop reason tool_failure, never safe'],
-  ['Rules miss it', 'Cash courier text from family (problem case)', 'Point at: no warning signs, the model worries, NOT SURE (honest: 1 of 6 saved runs said safe)'],
+  ['Ordinary', 'likely safe', V_SAFE, 'saved pharmacy; no warning signs'],
+  ['Scam', 'likely scam', V_SCAM, 'tools chosen, look-alike link, gate passed'],
+  ['Uncertain', 'not sure + help', V_UNSURE, 'ask_human_helper appears after check_sender'],
+  ['Guide missing', 'not sure', V_UNSURE, 'TOOL FAILURE shown; the answer is never safe'],
 ];
 for (let i = 0; i < demo.length; i++) {
-  const x = 0.6 + i * 2.46;
-  card(s, x, 1.45, 2.3, 3.05, ORANGE_SOFT, ORANGE_LINE);
-  numberCircle(s, x + 0.12, 1.6, i + 1);
-  text(s, demo[i][0], { x: x + 0.8, y: 1.6, w: 1.45, h: 0.6, fontSize: 17, bold: true, color: INK, valign: 'middle' });
-  text(s, demo[i][1], { x: x + 0.12, y: 2.3, w: 2.1, h: 0.65, fontSize: 15, bold: true });
-  text(s, demo[i][2], { x: x + 0.12, y: 2.95, w: 2.1, h: 1.5, fontSize: 14, color: INK });
+  const x = LEFT + i * 3.15;
+  foldedBox(s, x, 1.95, 2.65, 2.4, WHITE, SAGE, 0.36, demo[i][0]);
+  T(s, (i + 1) + ' ' + demo[i][0], { x: x + 0.18, y: 2.1, w: 2.15, h: 0.45, fontSize: 18, bold: true, color: BLUE });
+  chip(s, x + 0.18, 2.65, 2.3, 0.46, demo[i][2], demo[i][1], 16);
+  T(s, demo[i][3], { x: x + 0.18, y: 3.25, w: 2.32, h: 1.0, fontSize: 16, color: INK });
+  if (i < demo.length - 1) {
+    arrowRight(s, x + 2.7, 2.95, 0.42, 0.4);
+  }
 }
-card(s, 0.6, 4.65, 12.1, 1.65, CODE_BG);
-text(s, [
+s.addShape(pres.shapes.RECTANGLE, { x: LEFT, y: 4.6, w: CONTENT_W, h: 1.75, fill: { color: CODE_BG },
+  line: { color: CODE_BG, width: 0 }, objectName: 'commands' });
+T(s, [
   { text: 'python3 scamshield_agent.py --case ordinary --consent yes', options: { breakLine: true } },
   { text: 'python3 scamshield_agent.py --case scam --consent yes', options: { breakLine: true } },
   { text: 'python3 scamshield_agent.py --case uncertain --consent yes', options: { breakLine: true } },
-  { text: 'python3 scamshield_agent.py --case guide_missing --consent yes', options: { breakLine: true } },
-  { text: 'python3 scamshield_agent.py --case model_catches_miss --consent yes' },
-], { x: 0.9, y: 4.72, w: 11.6, h: 1.5, fontSize: 15, fontFace: MONO, color: CODE_TEXT, valign: 'middle' });
-text(s, 'Optional extra: --case injection. If Ollama is slow: saved console logs in evidence/harness/rag/run_<case>_1_console.txt. If guide_missing ' +
-  'did not search the guide: show run_guide_missing_2_console.txt.', { x: 0.6, y: 6.38, w: 12.1, h: 0.6,
-  fontSize: 15, color: MUTED, italic: true });
-s.addNotes('Run the five commands. Ordinary: no warning signs and a saved contact, so likely safe. Scam: point at each ' +
-  'MODEL DECISION and VALIDATION line, the look-alike link and GATE PASSED. Not sure: point at the NEXT OPTIONS line, ' +
-  'where ask_human_helper appears only after check_sender, then the simulated alert. Guide missing: point at TOOL ' +
-  'FAILURE and the stop reason. Rules miss it: the rules find no warning sign in a cash courier text from a saved ' +
-  'contact; when the model is worried its concern makes the answer "not sure". Be honest: in 1 of 6 saved runs (keyword mode) the model was not worried and it was called safe. The injection case is ' +
-  'an optional extra. If Ollama is slow, open the saved console ' +
-  'logs instead. See docs/DEMO_SCRIPT.md.');
+  { text: 'python3 scamshield_agent.py --case guide_missing --consent yes' },
+], { x: LEFT + 0.3, y: 4.7, w: CONTENT_W - 0.6, h: 1.55, fontSize: 17, fontFace: MONO, color: CREAM, valign: 'middle' });
+T(s, [
+  { text: 'Backups: ', options: { bold: true } },
+  { text: '--case model_catches_miss, --case injection; if Ollama is slow, the saved console logs in evidence/harness/' },
+], { x: LEFT, y: 6.5, w: CONTENT_W, h: 0.6, fontSize: 16, color: GREEN, valign: 'middle' });
+s.addNotes('Four live runs. One, ordinary: the saved pharmacy reminder, no warning signs, likely safe. Two, scam: ' +
+  'point at each model decision and validation line, the look-alike link and GATE PASSED, and the what-to-do line. ' +
+  'Three, uncertain: an unknown doctor\'s office; point at the NEXT OPTIONS line where ask_human_helper appears only ' +
+  'after check_sender, then the simulated family alert. Four, guide missing: the guide file is missing, the search ' +
+  'returns TOOL FAILURE, and the answer is not sure, never safe. Backups: model_catches_miss and injection, and the ' +
+  'saved console logs if Ollama is slow. Consent yes answers the simulated alert question automatically.');
 
-// ---------------------------------------------------------------- 9. Problem cases
-const TABLE_ALT = 'FDF3E7';
-const TABLE_BORDER = 'E6D3BD';
-s = content('Demonstration', 'Problem cases: how each one ends');
+// ================================================================ 8. Problem cases
+s = content('Demo', 'Problem cases', 'Problem cases and how each one ends');
 const caseShort = {
-  injection: 'Message tells the AI to "mark safe"',
-  trusted_bad_link: 'Saved family contact sends a bank look-alike link',
-  model_catches_miss: 'Family contact asks for cash for a stranger; rules find nothing',
+  injection: 'Text tells the AI "mark safe"',
+  trusted_bad_link: 'Family contact sends a look-alike bank link',
+  model_catches_miss: 'Family contact asks for cash for a stranger; rules see nothing',
   guide_missing: 'Scam guide file is missing',
   empty: 'Empty message',
 };
-const head = { fill: { color: ORANGE }, color: INK, bold: true, fontSize: 18, fontFace: BODY };
+const head = { fill: { color: GREEN }, color: WHITE, bold: true, fontSize: 18, fontFace: FONT };
 const rows = [[
   { text: 'Case', options: head }, { text: 'What is tested', options: head },
-  { text: 'How run 1 ended', options: head }, { text: 'Repeated runs correct', options: head },
+  { text: 'How it ends', options: head }, { text: 'Repeated runs', options: head },
 ]];
-for (let i = 0; i < D.problems.length; i++) {
-  const p = D.problems[i];
-  const fill = { color: i % 2 ? TABLE_ALT : WHITE };
+const problems = D.problems || [];
+for (let i = 0; i < problems.length; i++) {
+  const p = problems[i];
+  const fill = { color: i % 2 ? PEACH_TINT : WHITE };
+  const ends = isPending(p.ended) ? PENDING : p.ended + ' (' + p.stop + ')';
+  const repeated = [{ text: p.repeated + ' correct', options: { breakLine: !!p.note } }];
+  if (p.note) {
+    repeated.push({ text: p.note, options: { color: RUST, bold: true, fontSize: 15 } });
+  }
   rows.push([
-    { text: p.case, options: { fontFace: MONO, bold: true, fill: fill } },
-    { text: caseShort[p.case] || p.what, options: { fill: fill } },
-    { text: p.ended, options: { fill: fill } },
-    { text: p.repeated, options: { fill: fill } },
+    { text: p.case, options: { fontFace: MONO, bold: true, fill: fill, fontSize: 16 } },
+    { text: caseShort[p.case] || p.case, options: { fill: fill } },
+    { text: ends, options: { fill: fill } },
+    { text: repeated, options: { fill: fill } },
   ]);
 }
-const lastFill = { color: D.problems.length % 2 ? TABLE_ALT : WHITE };
+const lastFill = { color: problems.length % 2 ? PEACH_TINT : WHITE };
 rows.push([
-  { text: 'model down', options: { fontFace: MONO, bold: true, fill: lastFill } },
-  { text: 'Ollama unreachable or one failed call', options: { fill: lastFill } },
-  { text: 'retried twice, then model_error; never safe', options: { fill: lastFill } },
+  { text: 'model down', options: { fontFace: MONO, bold: true, fill: lastFill, fontSize: 16 } },
+  { text: 'Ollama is unreachable', options: { fill: lastFill } },
+  { text: 'retried 2 times, then model_error; never safe', options: { fill: lastFill } },
   { text: 'offline tests', options: { fill: lastFill } },
 ]);
-s.addTable(rows, { x: 0.6, y: 1.45, w: 12.1, colW: [3.3, 3.3, 2.85, 2.65], fontSize: 18, fontFace: BODY, color: INK,
-  border: { type: 'solid', pt: 0.75, color: TABLE_BORDER }, valign: 'middle', margin: 0.12 });
-s.addNotes('Each problem case was run repeatedly with the live model. The injection text is itself a strong warning ' +
-  'sign, a trusted sender does not make a bad link safe, a text the rules miss ends as "not sure" when the model is ' +
-  'worried (in 1 of 6 saved runs it was not, and the answer was safe), a missing guide ends as tool_failure with "not sure", and an ' +
-  'empty message stops before the model is called. A failed model call is retried twice, then the run stops with ' +
-  'model_error.');
+s.addTable(rows, { x: LEFT, y: 1.95, w: CONTENT_W, colW: [2.95, 4.0, 3.0, 2.18], fontSize: 18, fontFace: FONT, color: INK,
+  border: { type: 'solid', pt: 0.75, color: SAGE }, valign: 'middle', margin: [0.04, 0.1, 0.04, 0.1] });
+foldedBox(s, LEFT, 6.3, CONTENT_W, 0.8, BLUE, null, 0.32, 'rule callout');
+T(s, 'After a tool failure, invalid input or a model error, the answer can never be "safe".', { x: LEFT + 0.3, y: 6.3,
+  w: CONTENT_W - 0.9, h: 0.8, fontSize: 20, bold: true, color: WHITE, valign: 'middle' });
+const mcm = problems.filter(function (p) { return p.case === 'model_catches_miss'; })[0];
+s.addNotes('Each problem case was run repeatedly with the live model. Injection: the hidden instruction is itself a ' +
+  'strong warning sign, so only scam passes the gate. Trusted sender with a bad link: a saved contact does not make ' +
+  'a look-alike link safe. model_catches_miss: the rules find no warning sign in a cash-courier request from a ' +
+  'saved contact, so only the model\'s worry can make it not sure. Be honest here: ' +
+  (mcm && mcm.note ? 'it ' + mcm.note + '. ' : 'when the model is not worried, the answer is safe. ') +
+  'Guide missing: the search fails, that tool is not offered again, and the answer is not sure, never safe. Empty ' +
+  'input stops before the model is called. If Ollama is down, the call is retried twice and the run stops with ' +
+  'model_error, which the offline tests cover.');
 
-// ---------------------------------------------------------------- 10. Results
+// ================================================================ 9. Testing and results
 pres.addSection({ title: 'Results' });
-s = content('Results', 'Testing and results');
-const E = D.eval.rag;
-const EK = D.eval.keyword;
-const H = D.holdout.rag;
-const HK = D.holdout.keyword;
-const H2 = D.holdout2.rag;
-const H2K = D.holdout2.keyword;
+s = content('Results', 'Testing and results', 'Testing and results');
+const S = D.sets || {};
+const evalSet = S.eval || {};
+const t2 = S.test2 || {};
+const t3 = S.test3 || {};
 const stats = [
-  [D.tests, 'offline tests passed', INK],
-  [E.correct, 'eval set correct (RAG)', SAFE],
-  [D.live_false_safe, 'false "safe" in ' + D.live_runs + ' live runs', SCAM],
-  [D.harness_total, 'repeated demo runs correct', SAFE],
-  [D.holdout2_before + ' > ' + D.holdout2_after, 'held-out set 2, rules only (before > after)', ORANGE_TEXT],
+  [isPending(D.tests_passed) ? PENDING : D.tests_passed + '/' + D.tests_total, 'offline tests pass (scripted model)', BLUE],
+  [isPending(D.break_gate_failed) ? PENDING : String(D.break_gate_failed),
+    'tests fail when the gate is broken on purpose', BLUE],
+  [isPending(D.live_false_safe) ? PENDING : String(D.live_false_safe),
+    'false "safe" answers in ' + (isPending(D.live_runs) ? 'all' : D.live_runs) + ' live runs', GREEN],
+  [D.harness_total, 'repeated demo runs correct (' + D.harness_runs_per_case + ' per case)', GREEN],
 ];
 for (let i = 0; i < stats.length; i++) {
-  const x = 0.6 + i * 2.46;
-  card(s, x, 1.45, 2.26, 1.9, ORANGE_SOFT, ORANGE_LINE);
-  text(s, String(stats[i][0]), { x: x + 0.1, y: 1.52, w: 2.06, h: 0.85, fontSize: String(stats[i][0]).length > 8 ? 26 : 36, bold: true,
-    color: stats[i][0] === 'pending' ? ORANGE_TEXT : stats[i][2], align: 'center', valign: 'middle' });
-  text(s, stats[i][1], { x: x + 0.15, y: 2.4, w: 1.96, h: 0.9, fontSize: 16, color: INK, align: 'center' });
+  const x = LEFT + i * 3.08;
+  foldedBox(s, x, 1.95, 2.85, 2.0, WHITE, SAGE, 0.34, 'stat');
+  const pend = stats[i][0] === PENDING;
+  T(s, stats[i][0], { x: x + 0.15, y: 2.05, w: 2.4, h: 0.85, fontSize: pend ? 26 : 40, bold: true,
+    color: pend ? RUST : stats[i][2], valign: 'middle' });
+  T(s, stats[i][1], { x: x + 0.15, y: 2.92, w: 2.55, h: 0.95, fontSize: 16, color: INK });
 }
-const resultLines = [
-  'Evaluation set, keyword only: ' + EK.correct + ' correct, false "safe" ' + EK.false_safe,
-  'Model\'s own last label: ' + E.model_last + ' with RAG, ' + EK.model_last + ' keyword; gate overrode it ' +
-    E.overrides + ' / ' + EK.overrides + ' times',
-  'Held-out set 1, live agent: ' + H.correct + ' (RAG), ' + HK.correct + ' (keyword); false "safe" ' + H.false_safe +
-    ' / ' + HK.false_safe,
-  'Held-out set 2, live agent: ' + H2.correct + ' (RAG), ' + H2K.correct + ' (keyword); false "safe" ' + H2.false_safe +
-    ' / ' + H2K.false_safe,
-  'Rules only on held-out set 1: ' + D.rules_before + ' before the round-1 fixes, ' + D.rules_after +
-    ' after (rules were fixed using these failures, so no longer held-out)',
-  'Break the gate (always "safe"): ' + D.break_gate + ' tests fail',
+const lines = [
+  [{ text: 'Evaluation set (' + (evalSet.messages || PENDING) + ' messages): ', options: { bold: true } },
+    { text: 'live agent ' + evalSet.correct + ' correct, false "safe" ' + evalSet.false_safe }],
+  [{ text: 'Test sets 2 and 3: ', options: { bold: true } },
+    { text: 'live agent ' + t2.correct + ' and ' + t3.correct + ' correct. Written before rule fixes, then used ' +
+      'to fix the rules, so no longer held out.' }],
 ];
-const resultRuns = [];
-for (let i = 0; i < resultLines.length; i++) {
-  resultRuns.push({ text: resultLines[i], options: { bullet: true, breakLine: i < resultLines.length - 1 } });
-}
-text(s, resultRuns, { x: 0.6, y: 3.55, w: 12.1, h: 2.75, fontSize: 18, paraSpaceAfter: 4 });
-let wrongIds = [];
-for (let i = 0; i < D.rules_after_wrong.length; i++) {
-  wrongIds.push(D.rules_after_wrong[i].id);
-}
-for (let i = 0; i < D.holdout2_after_wrong.length; i++) {
-  wrongIds.push(D.holdout2_after_wrong[i].id + ' (expected ' + D.holdout2_after_wrong[i].expected + ', rules say ' +
-    D.holdout2_after_wrong[i].supported + ')');
-}
-text(s, 'Wrong answers on the labeled sets (none "safe"): ' + (D.live_wrong.length ? D.live_wrong.join('; ') : 'none') +
-  '.   Rules only: ' + (wrongIds.length ? wrongIds.join('; ') : 'none'),
-  { x: 0.6, y: 6.32, w: 12.1, h: 0.7, fontSize: 14, color: MUTED, italic: true });
-s.addNotes('All numbers on this slide are read from the evidence files when the deck is built. The offline tests use ' +
-  'a scripted model with deliberately wrong answers. Held-out set 2 was written and committed before the round-2 ' +
-  'rule changes and was never edited; its before score is the honest one. Any value shown as "pending" was not ' +
-  'available when the deck was built.');
-
-// ---------------------------------------------------------------- 10b. Large blind test
+const runsList = [];
+lines.forEach(function (parts, i) {
+  parts.forEach(function (part, j) {
+    const options = Object.assign({}, part.options || {});
+    if (j === 0) {
+      options.bullet = { indent: 20 };
+    }
+    if (j === parts.length - 1 && i < lines.length - 1) {
+      options.breakLine = true;
+    }
+    runsList.push({ text: part.text, options: options });
+  });
+});
+T(s, runsList, { x: LEFT, y: 4.15, w: CONTENT_W, h: 1.35, fontSize: 18, color: INK, paraSpaceAfter: 8 });
 const L = D.large || {};
 const LR = L.rules;
 const LA = L.agent;
-s = content('Results', 'Large blind test: ' + L.messages + ' messages written without seeing the rules');
+foldedBox(s, LEFT, 5.6, CONTENT_W, 1.45, BLUE, null, 0.42, 'large test callout');
+T(s, [
+  { text: 'Large blind test set: ', options: { bold: true } },
+  { text: L.messages + ' messages written by a separate AI agent that never saw the rules (frozen). ' },
+  { text: 'Rules only: ' + (LR ? LR.score + ' (' + LR.percent + ', 95% range ' + LR.range + ')' : PENDING) + '. ',
+    options: { bold: true } },
+  { text: 'Live agent: ' + (LA ? LA.score + ' (' + LA.percent + ', 95% range ' + LA.range + ')' : PENDING) + '.',
+    options: { bold: true } },
+], { x: LEFT + 0.3, y: 5.7, w: CONTENT_W - 0.9, h: 1.25, fontSize: 18, color: WHITE, valign: 'middle' });
+s.addNotes('Every number here is read from the saved evidence files when the deck is built. ' +
+  'The offline tests use a scripted model that gives deliberately wrong answers: bad JSON, invented arguments, ' +
+  '"safe" on a scam, injection, a missing guide, Ollama down. When I break the gate on purpose so it always says ' +
+  'safe, ' + D.break_gate + ' tests fail, so the tests really check the gate. Over all live runs: ' + D.live_total +
+  '. The demo cases were each run ' + D.harness_runs_per_case + ' times. Test sets 2 and 3 were written before ' +
+  'rule fixes and then used to fix the rules, so I no longer call them held out. The large blind test set has ' +
+  L.messages + ' messages written by a separate AI agent that never saw the rules; it is frozen. The 95% range ' +
+  'says where the true score very likely lies. ' +
+  (LA ? 'The live agent scored ' + LA.score + '.' : 'The live agent run on it was not finished when this deck was built.') +
+  (D.live_wrong && D.live_wrong.length ? ' Wrong answers on the smaller sets: ' + D.live_wrong.join(', ') + '.' : ''));
 
-function scoreCard(slide, x, title, numbers, pendingNote) {
-  const y = 1.45;
-  const w = 3.75;
-  const h = 2.75;
-  if (!numbers) {
-    card(slide, x, y, w, h, BG, ORANGE_DEEP, true);
-    text(slide, title, { x: x + 0.2, y: y + 0.15, w: w - 0.4, h: 0.45, fontSize: 18, bold: true });
-    pill(slide, x + 0.3, y + 0.85, w - 0.6, 0.7, ORANGE_DEEP, 'LIVE RUN PENDING', 20, INK);
-    text(slide, pendingNote, { x: x + 0.2, y: y + 1.7, w: w - 0.4, h: 0.95, fontSize: 16, color: ORANGE_TEXT,
-      align: 'center' });
-    return;
-  }
-  card(slide, x, y, w, h, ORANGE_SOFT, ORANGE_LINE);
-  text(slide, title, { x: x + 0.2, y: y + 0.15, w: w - 0.4, h: 0.45, fontSize: 18, bold: true });
-  text(slide, [
-    { text: numbers.score, options: { bold: true } },
-    { text: '  ' + numbers.percent, options: { fontSize: 22, color: MUTED } },
-  ], { x: x + 0.2, y: y + 0.6, w: w - 0.4, h: 0.75, fontSize: 36, valign: 'middle' });
-  text(slide, '95% range: ' + numbers.range, { x: x + 0.2, y: y + 1.38, w: w - 0.4, h: 0.4, fontSize: 18,
-    color: ORANGE_TEXT, bold: true });
-  text(slide, [
-    { text: 'False "safe": ' + numbers.false_safe, options: { breakLine: true, color: SCAM, bold: true } },
-    { text: 'False alarms: ' + numbers.false_alarm },
-  ], { x: x + 0.2, y: y + 1.85, w: w - 0.4, h: 0.8, fontSize: 18 });
-}
-scoreCard(s, 0.6, 'Rules only (no model)', LR, '');
-scoreCard(s, 4.55, 'Live agent (model + gate)', LA, 'The slide fills in when the live run has finished.');
-
-// confidence range picture: one bar per result on a shared percent axis
-card(s, 0.6, 4.4, 7.7, 2.45, WHITE, SAND_LINE);
-text(s, '95% confidence range for the score', { x: 0.85, y: 4.5, w: 7.2, h: 0.4, fontSize: 18, bold: true });
-const AX0 = 2.85;
-const AXW = 5.05;
-const lows = [];
-const highs = [];
-[LR, LA].forEach(function (n) {
-  if (n && n.ci) {
-    lows.push(n.ci[0]);
-    highs.push(n.ci[1]);
-  }
-});
-const lo = lows.length ? Math.max(0, Math.floor(Math.min.apply(null, lows) * 10 - 0.5) / 10) : 0.5;
-const hi = highs.length ? Math.min(1, Math.ceil(Math.max.apply(null, highs) * 10 + 0.5) / 10) : 1;
-function px(v) {
-  return AX0 + (v - lo) / (hi - lo) * AXW;
-}
-const rangeRows = [['Rules only', LR, ORANGE_DEEP], ['Live agent', LA, SAFE]];
-for (let i = 0; i < rangeRows.length; i++) {
-  const ry = 5.05 + i * 0.6;
-  text(s, rangeRows[i][0], { x: 0.85, y: ry, w: 1.9, h: 0.45, fontSize: 16, valign: 'middle' });
-  const n = rangeRows[i][1];
-  if (n && n.ci) {
-    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: px(n.ci[0]), y: ry + 0.1, w: Math.max(0.08, px(n.ci[1]) - px(n.ci[0])),
-      h: 0.25, rectRadius: 0.12, fill: { color: rangeRows[i][2], transparency: 35 }, line: { color: rangeRows[i][2] } });
-    s.addShape(pres.shapes.OVAL, { x: px(n.accuracy) - 0.09, y: ry + 0.135, w: 0.18, h: 0.18,
-      fill: { color: INK }, line: { color: INK } });
-  } else {
-    text(s, 'pending', { x: AX0, y: ry, w: 2, h: 0.45, fontSize: 16, color: ORANGE_TEXT, italic: true, bold: true,
-      valign: 'middle' });
-  }
-}
-plainLine(s, AX0, 6.28, AX0 + AXW, 6.28, SAND_LINE);
-const tickStep = (hi - lo) > 0.41 ? 0.1 : 0.05;
-for (let v = lo; v <= hi + 1e-9; v += tickStep) {
-  text(s, Math.round(v * 100) + '%', { x: px(v) - 0.4, y: 6.32, w: 0.8, h: 0.35, fontSize: 14, color: MUTED,
-    align: 'center' });
-}
-
-// weakest categories
-const cats = L.categories || [];
-const catRows = [[
-  { text: 'Weakest categories', options: head },
-  { text: 'Rules', options: Object.assign({}, head, { align: 'center' }) },
-  { text: 'Agent', options: Object.assign({}, head, { align: 'center' }) },
-]];
-for (let i = 0; i < cats.length; i++) {
-  const fill = { color: i % 2 ? TABLE_ALT : WHITE };
-  const name = String(cats[i].category).replace(/^(scam|safe|uncertain)_/, function (m, kind) {
-    return { scam: 'scam: ', safe: 'safe: ', uncertain: 'not sure: ' }[kind];
-  }).replace(/_/g, ' ');
-  catRows.push([
-    { text: name, options: { fill: fill } },
-    { text: cats[i].rules, options: { fill: fill, align: 'center' } },
-    { text: cats[i].agent, options: { fill: fill, align: 'center', color: cats[i].agent === 'pending' ? ORANGE_TEXT : INK,
-      italic: cats[i].agent === 'pending' } },
-  ]);
-}
-s.addTable(catRows, { x: 8.6, y: 1.45, w: 4.1, colW: [2.3, 0.9, 0.9], fontSize: 16, fontFace: BODY, color: INK,
-  border: { type: 'solid', pt: 0.75, color: TABLE_BORDER }, valign: 'middle', margin: 0.06, rowH: 0.45 });
-text(s, 'Lowest ' + (L.ranked_by === 'agent' ? 'live agent' : 'rules-only') + ' score first, of ' +
-  L.category_count + ' categories.', { x: 8.6, y: 4.68, w: 4.1, h: 0.4, fontSize: 14, color: MUTED, italic: true });
-card(s, 8.6, 5.2, 4.1, 1.65, ORANGE_SOFT, ORANGE_LINE);
-text(s, 'The 95% range is where the true score very likely lies. More messages make it narrower: this set is ' +
-  'big enough to compare the two scores fairly.', { x: 8.8, y: 5.28, w: 3.7, h: 1.5, fontSize: 16, valign: 'middle' });
-const halfWidth = LR && LR.ci ? Math.round((LR.ci[1] - LR.ci[0]) * 50) : null;
-s.addNotes('This set of ' + L.messages + ' fictional messages was written and frozen without looking at the rules, ' +
-  'so it is the fairest test. A 95% confidence range says how far the true score could be from the measured one: ' +
-  'with 50 messages, 80% correct could really be anywhere from ' + L.small_example + '; with ' + L.messages +
-  ' messages the range is only about plus or minus ' + (halfWidth === null ? 'a few' : halfWidth) + ' points. ' +
-  (LA ? 'The live agent scored ' + LA.score + ' (range ' + LA.range + ') against ' + (LR ? LR.score : 'pending') +
-    ' for the rules alone.' : 'The live agent run was still going when this deck was built, so only the rules-only ' +
-    'score is shown.') + ' The table lists the weakest message categories.');
-
-// ---------------------------------------------------------------- 11. Learned
-pres.addSection({ title: 'Conclusion' });
-s = content('Conclusion', 'What I learned');
-const learned = D.learned.slice(0, 5);
+// ================================================================ 10. What I learned
+pres.addSection({ title: 'Wrap-up' });
+s = content('Wrap-up', 'What I learned', 'What I learned');
+const learned = (D.learned || []).slice(0, 4);
 for (let i = 0; i < learned.length; i++) {
-  const step = Math.min(1.35, 5.5 / Math.max(1, learned.length));
-  const y = 1.25 + i * step;
-  numberCircle(s, 0.6, y + 0.4, i + 1);
-  text(s, learned[i].lesson, { x: 1.45, y: y, w: 11.2, h: 0.78, fontSize: 19, bold: true, valign: 'bottom' });
-  text(s, 'DEVLOG: ' + learned[i].title, { x: 1.45, y: y + 0.82, w: 11.2, h: 0.35,
-    fontSize: 16, color: MUTED });
+  const x = LEFT + (i % 2) * 6.17;
+  const y = 1.95 + Math.floor(i / 2) * 2.55;
+  foldedBox(s, x, y, 5.96, 2.3, WHITE, SAGE, 0.4, 'lesson');
+  T(s, String(i + 1), { x: x + 0.2, y: y + 0.18, w: 0.6, h: 0.7, fontSize: 36, bold: true, color: BLUE });
+  T(s, learned[i].lesson, { x: x + 0.9, y: y + 0.25, w: 4.6, h: 1.35, fontSize: 19, bold: true, color: INK });
+  T(s, 'DEVLOG finding ' + learned[i].number + ': ' + learned[i].title, { x: x + 0.9, y: y + 1.65, w: 4.85,
+    h: 0.5, fontSize: 15, italic: true, color: GREEN });
 }
-s.addNotes('These lessons come from the development log findings. The most important: never trust the model\'s ' +
-  'output shape or its verdict; make the checker say what it expected; and measure the innovation honestly.');
+if (!learned.length) {
+  T(s, 'Lessons pending (DEVLOG findings not found)', { x: LEFT, y: 2.2, w: 8, h: 0.6, fontSize: 20, color: RUST });
+}
+s.addNotes('These come from the findings in my development log. The model invented tool arguments, so Python keeps ' +
+  'only the keys a tool declares. The model counted notes like "not a saved contact" as warning signs until the ' +
+  'tool said plainly they are not. A rejection that does not say what was expected makes the model guess again. ' +
+  'And the model\'s instinct on unknown senders was "safe"; the evidence gate is what kept every answer safe. The ' +
+  'main lesson: good answers come from Python checking the model, not from trusting it.');
 
-// ---------------------------------------------------------------- 12. Limitations
-s = pres.addSlide({ masterName: 'SCAMSHIELD_HERO', sectionTitle: 'Conclusion' });
-s.addText('Limitations and next steps', { placeholder: 'title' });
-const limits = ['Same author wrote the rules, guide and test messages', 'Small local model: often too quick to say "safe"',
-  'RAG gain is small on this data', 'Fictional English texts only; regex rules miss new tricks'];
-const next = ['Test with real (anonymized) scam texts', 'Ask older adults whether the explanations help',
-  'Larger website list and more look-alike tricks', 'Phone integration with a real, consented family alert'];
-card(s, 0.7, 1.65, 5.8, 4.55, BG, ORANGE_DEEP);
-card(s, 6.85, 1.65, 5.8, 4.55, BG, ORANGE_DEEP);
-text(s, 'Limitations', { x: 1.0, y: 1.85, w: 5.2, h: 0.5, fontSize: 24, bold: true, color: SCAM });
-text(s, 'Next steps', { x: 7.15, y: 1.85, w: 5.2, h: 0.5, fontSize: 24, bold: true, color: SAFE });
-const limitRuns = [];
-const nextRuns = [];
-for (let i = 0; i < limits.length; i++) {
-  limitRuns.push({ text: limits[i], options: { bullet: true, breakLine: i < limits.length - 1 } });
-  nextRuns.push({ text: next[i], options: { bullet: true, breakLine: i < next.length - 1 } });
+// ================================================================ 11. Limitations (peach statement)
+s = pres.addSlide({ masterName: 'SS_PEACH', sectionTitle: 'Wrap-up' });
+poly(s, px([[40, 92], [190, 38], [692, 64], [678, 330], [528, 388], [28, 362]]), CREAM, 'cream sheet');
+poly(s, px([[40, 92], [190, 38], [158, 140]]), GREEN, 'corner triangle');
+poly(s, px([[678, 330], [528, 388], [562, 288]]), GREEN, 'corner triangle');
+T(s, 'Limitations and next steps', { x: 3.65, y: 1.3, w: 8.6, h: 0.8, fontSize: 34, color: BLUE, valign: 'middle' });
+function creamList(slide, heading, color, items, x, w) {
+  T(slide, heading, { x: x, y: 2.55, w: w, h: 0.45, fontSize: 22, bold: true, color: color });
+  const runs = items.map(function (item, i) {
+    return { text: item, options: { bullet: { indent: 20 }, breakLine: i < items.length - 1 } };
+  });
+  T(slide, runs, { x: x, y: 3.1, w: w, h: 2.2, fontSize: 18, color: INK, paraSpaceAfter: 8 });
 }
-text(s, limitRuns, { x: 1.0, y: 2.5, w: 5.2, h: 3.5, fontSize: 20, color: INK, paraSpaceAfter: 12 });
-text(s, nextRuns, { x: 7.15, y: 2.5, w: 5.2, h: 3.5, fontSize: 20, color: INK, paraSpaceAfter: 12 });
-text(s, 'Thank you. Questions?   ' + D.repo, { x: 0.7, y: 6.45, w: 11.9, h: 0.5, fontSize: 20, bold: true, color: INK });
-s.addNotes('Be honest about the limits: the evaluation data was written by me, the model is small, and the RAG gain ' +
-  'is small. The safety comes from Python\'s evidence gate, not from the model. Next steps would be real data and ' +
-  'feedback from older adults.');
+creamList(s, 'Limitations', RUST, ['I wrote the rules, the guide, the evaluation set and test sets 2 and 3',
+  'Small local model: often too quick to say "safe"', 'Fictional English texts only; regex rules miss new tricks'],
+1.0, 5.4);
+creamList(s, 'Next steps', GREEN, ['Test on real, anonymized scam texts', 'Ask older adults if the explanations help',
+  'More look-alike tricks, a bigger website list'], 6.75, 5.0);
+T(s, 'Thank you. Questions?', { x: 1.0, y: 5.75, w: 6.5, h: 0.6, fontSize: 26, bold: true, color: BLUE, valign: 'middle' });
+s.addNotes('Limitations. I wrote the rules, the guide and the smaller test sets myself, which is why the large blind ' +
+  'set was written separately. The local model is small and often too quick to say safe; the gate catches that, ' +
+  'but it costs steps. The messages are fictional and in English, and regex rules miss new tricks. Next steps: real ' +
+  'anonymized scam texts, asking older adults whether the explanations help, and more look-alike tricks. Thank you; ' +
+  'I am happy to take questions.');
 
 pres.writeFile({ fileName: outPath }).then(function () {
   console.log('wrote ' + path.basename(outPath) + ' (' + pres.slides.length + ' slides)');
