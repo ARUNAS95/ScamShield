@@ -1,8 +1,8 @@
 # ScamShield: 5-minute live demo script
 
 Five short live runs: an ordinary message (safe), a clear scam, an uncertain message (routing and
-human help), and two problem cases: a tool failure, and a scam the rules miss (the model's concern makes it
-"not sure", never "safe"). The prompt injection is an optional extra if time is left.
+human help), and two problem cases: a tool failure, and a scam the rules miss (when the model is worried
+the answer becomes "not sure"; if the model is not worried either, it can be called safe: 2 of 6 saved runs, both keyword mode). The prompt injection is an optional extra if time is left.
 Every command uses `--consent yes`, so the simulated family-alert question never waits for typing.
 
 ## Before class (5 minutes, not part of the talk)
@@ -137,8 +137,9 @@ Point at:
    feedback invites "uncertain" and `ask_human_helper`. If the model then tries `likely_safe`, the gate
    rejects that too: "you raised a concern earlier; answer uncertain and use ask_human_helper".
 4. Banner: **NOT SURE - ASK SOMEONE YOU TRUST**, human help offered. Say: "The rules missed it; the
-   model's concern made it 'not sure', never 'safe'. Python can block the model's label, but the model's
-   worry can only make the answer more careful."
+   model's concern made it 'not sure'. Python can block the model's label, but the model's worry can only
+   make the answer more careful. If the model is not worried either, nothing catches it: in 2 of our 6
+   saved runs (keyword mode) it was called safe. That is the main limit of this design."
 
 The model decides the tool order and whether it is worried. If it is not worried, the evidence alone
 would support "safe": that is the honest limit of the rules (see Known limitations in the README).

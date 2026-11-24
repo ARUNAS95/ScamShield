@@ -141,6 +141,8 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
     is also rejected by the gate itself, and `finish_run` repeats the rule as a backstop. Tests: "model
     concern never becomes safe", "scam then safe is never safe", "uncertain then safe is never safe".
     Live demo: `--case model_catches_miss` (a cash-courier text from a saved contact that the rules miss).
+    Honest limit: the rule only helps when the model is worried. In 2 of the 6 saved runs (keyword mode)
+    the model was not worried, the rules found nothing, and the answer was "safe".
 
 15. **What do the `helper_offered_by` values mean?**
     `model`: the model called `ask_human_helper` before any gate feedback told it to. `model_after_gate_hint`:

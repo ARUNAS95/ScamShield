@@ -371,7 +371,7 @@ const demo = [
   ['Scam', 'Medicare gift-card text', 'Point at: tools chosen, look-alike link, gate PASSED, what-to-do line'],
   ['Not sure', 'Unknown doctor\'s office', 'Point at: NEXT OPTIONS adds ask_human_helper after check_sender'],
   ['Guide missing', 'Tool failure (problem case)', 'Point at: TOOL FAILURE, stop reason tool_failure, never safe'],
-  ['Rules miss it', 'Cash courier text from family (problem case)', 'Point at: no warning signs, the model worries, NOT SURE, never safe'],
+  ['Rules miss it', 'Cash courier text from family (problem case)', 'Point at: no warning signs, the model worries, NOT SURE (honest: 2 of 6 saved runs said safe)'],
 ];
 for (let i = 0; i < demo.length; i++) {
   const x = 0.6 + i * 2.46;
@@ -396,7 +396,7 @@ s.addNotes('Run the five commands. Ordinary: no warning signs and a saved contac
   'MODEL DECISION and VALIDATION line, the look-alike link and GATE PASSED. Not sure: point at the NEXT OPTIONS line, ' +
   'where ask_human_helper appears only after check_sender, then the simulated alert. Guide missing: point at TOOL ' +
   'FAILURE and the stop reason. Rules miss it: the rules find no warning sign in a cash courier text from a saved ' +
-  'contact; the model is worried, and its concern makes the answer "not sure", never "safe". The injection case is ' +
+  'contact; when the model is worried its concern makes the answer "not sure". Be honest: in 2 of 6 saved runs (keyword mode) the model was not worried and it was called safe. The injection case is ' +
   'an optional extra. If Ollama is slow, open the saved console ' +
   'logs instead. See docs/DEMO_SCRIPT.md.');
 
@@ -434,7 +434,7 @@ s.addTable(rows, { x: 0.6, y: 1.45, w: 12.1, colW: [2.9, 3.7, 3.4, 2.1], fontSiz
   border: { type: 'solid', pt: 0.75, color: 'CFD8DC' }, valign: 'middle', margin: 0.08 });
 s.addNotes('Each problem case was run repeatedly with the live model. The injection text is itself a strong warning ' +
   'sign, a trusted sender does not make a bad link safe, a text the rules miss ends as "not sure" when the model is ' +
-  'worried (never "safe"), a missing guide ends as tool_failure with "not sure", and an ' +
+  'worried (in 2 of 6 saved runs it was not, and the answer was safe), a missing guide ends as tool_failure with "not sure", and an ' +
   'empty message stops before the model is called. A failed model call is retried twice, then the run stops with ' +
   'model_error.');
 
