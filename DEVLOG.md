@@ -263,8 +263,8 @@ The live evidence is regenerated after these changes.
 - `model_catches_miss`: a saved contact (Emma) asks for cash to be handed to a stranger at the door. No rule
   matches, so the evidence alone supports "safe". In one live check (`--case model_catches_miss`, RAG) the
   model searched the guide, proposed likely_scam twice and offered human help after the gate hint; the gate
-  rejected both scam answers and the run ended **not sure** (`gate_downgrade`), never "safe". The repeated
-  runs are in `evidence/harness/` after the evidence is regenerated.
+  rejected both scam answers and the run ended **not sure** (`gate_downgrade`). See "Live results after the
+  round-3 fixes" below for the repeated runs, where it was called "safe" twice.
 
 ### Rule coverage
 - New request wordings: Remitly, Wise, Google Pay, Apple Pay and Western Union; "I need you to wire 2000"
@@ -301,6 +301,31 @@ The live evidence is regenerated after these changes.
 
 ### Testing the tests again
 `python3 tests.py --break-gate`: **21 of 88 fail** with the broken gate (`evidence/eval/break_gate_tests.txt`).
+
+## Nov 24, 2026: Live results after the round-3 fixes
+
+- 156 live runs (eval, held-out sets 1 and 2, demo harness; both search modes). Labeled sets: eval 25/25,
+  held-out 1 11/12 (H03 "not sure"), held-out 2 13/14 (F11 false alarm) in both modes; demo harness 52/54.
+- **The first false "safe" answers:** in 2 of 3 keyword runs of `model_catches_miss`
+  (`evidence/harness/keyword/run_model_catches_miss_1_trace.json`, `_2_`) the rules found nothing, the
+  guide search returned an irrelevant entry (G13), and the model proposed "likely safe" with no earlier
+  concern, so the gate had nothing to block. The RAG runs ended "not sure" 3/3, but the model's judgment
+  also varied, so this does not prove RAG caused the difference. The case was **not tuned** afterwards.
+- Documents and slides that said this case is "never safe" were corrected.
+
+## Nov 24, 2026: Critic review round 4 (final review)
+
+- Course alignment graded Full; criteria estimated at 27/30, 19/20, 19/20, 13/15, 9/10 (branch), 2/5.
+- Two more safety gaps were found and are **documented, not fixed**, because fixing them changes the agent
+  code and every piece of live evidence would have to be regenerated:
+  1. A phone number in the message that differs from the claimed organization's official number is not
+     used as evidence. In a critic's live check a "your account is locked, call 1-800-555-0199" text from
+     the saved bank contact was called "safe", although `lookup_official_contact` had returned the real
+     number.
+  2. If the model offers human help and then proposes "safe", the gate accepts it: `model_was_concerned`
+     only looks at earlier scam/uncertain labels.
+- Docs-only fixes: slide 10 title, README tool-sequence count and limitation wording, test name for the
+  `model_catches_miss` case, EXPLAIN round count and a robust-note section table.
 
 ## What came from the course and what is new
 

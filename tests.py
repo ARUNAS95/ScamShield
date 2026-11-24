@@ -1284,7 +1284,7 @@ if __name__ == '__main__':
         ('scam then safe is never safe', test_scam_then_safe_is_never_safe),
         ('uncertain then safe is never safe', test_uncertain_then_safe_is_never_safe),
         ('accepted safe after a concern becomes uncertain (backstop)', test_accepted_safe_after_concern_becomes_uncertain),
-        ('model_catches_miss case ends not sure, never safe', test_model_catches_miss_case_is_never_safe),
+        ('model_catches_miss ends not sure when the model is worried', test_model_catches_miss_case_is_never_safe),
         ('rejected scam feedback invites uncertain + helper', test_rejected_scam_feedback_invites_uncertain_and_helper),
         ('helper_offered_by = model when unprompted', test_helper_offered_by_model_on_its_own),
         ('uncertain template for a saved contact', test_uncertain_template_for_saved_contact),
