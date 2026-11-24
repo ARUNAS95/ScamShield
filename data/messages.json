@@ -45,9 +45,9 @@
     },
     "guide_missing": {
       "sender": "+1-555-0163",
-      "text": "Hi, this is Dr. Lee's office. Please call us back about your appointment.",
+      "text": "USPS: we tried to deliver your package today but no one was home. Please reply with a good time to try again.",
       "expected_label": "uncertain",
-      "notes": "Same as uncertain, but the scam guide file is missing. Must not end in safe."
+      "notes": "A delivery text from an unknown number that names USPS (no link, no fee), while the scam guide file is missing, so checking the guide fails. Must end \"not sure\", never safe."
     },
     "empty": {
       "sender": "+1-555-0163",
