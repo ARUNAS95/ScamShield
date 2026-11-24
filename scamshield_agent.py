@@ -306,6 +306,16 @@ def normalize_phone(number):
     return re.sub(r'\D', '', str(number))
 
 
+def phone_key(number):
+    """The part of a phone number used to compare two numbers: digits only,
+    a leading country code 1 removed, then the last 10 digits.
+    '1-800-555-0199' -> '8005550199'; '1-555-0142' and '555-0142' -> '5550142'."""
+    digits = normalize_phone(number)
+    if len(digits) in (8, 11) and digits.startswith('1'):
+        digits = digits[1:]
+    return digits[-10:]
+
+
 def edit_distance(a, b):
     """How many single-letter changes turn a into b (Levenshtein distance)."""
     previous = list(range(len(b) + 1))
@@ -769,13 +779,54 @@ def validate_lookup_official_contact(argument, context, runtime):
     return True, ''
 
 
+UNOFFICIAL_NUMBER_KEYWORDS = ['number', 'official', 'call']
+
+
+def compare_message_numbers(org, context, runtime):
+    """Compare the phone numbers in the message with the official number of
+    the organization. Returns a list of facts and adds the strong sign
+    unofficial_number when no number in the message is official.
+    A number that is the official number of ANOTHER organization the
+    message names also counts as official ("Main Street Pharmacy: your
+    Medicare refill is ready, call 1-555-0142" is not flagged)."""
+    if not context['phones']:
+        return []
+    official_numbers = []
+    for name in context['claimed_orgs']:
+        claimed = find_organization(name, runtime['data'])
+        if claimed is not None:
+            official_numbers.append(phone_key(claimed['official_phone']))
+    this_number = phone_key(org['official_phone'])
+    matches_this = False
+    matches_any = False
+    for number in context['phones']:
+        key = phone_key(number)
+        if key == this_number:
+            matches_this = True
+        if key in official_numbers:
+            matches_any = True
+    if matches_this:
+        return ['the number in the message is the official ' + org['name'] + ' number']
+    if matches_any:
+        return []
+    fact = 'asks you to call a number that is not the official ' + org['name'] + ' number'
+    add_flag(context, 'unofficial_number', 'strong', fact, UNOFFICIAL_NUMBER_KEYWORDS, context['current_evidence_id'])
+    return [fact + ' (strong warning sign)']
+
+
 def run_lookup_official_contact(argument, context, runtime):
     org = find_organization(argument['org'], runtime['data'])
     context['official_contacts'][org['name']] = org['official_phone']
-    return result(True, 'Official contact for ' + org['name'] + ' (from our trusted list): ' + org['official_phone'],
+    facts = ['official ' + org['name'] + ' contact found in our trusted list']
+    for fact in compare_message_numbers(org, context, runtime):
+        facts.append(fact)
+    message = 'Official contact for ' + org['name'] + ' (from our trusted list): ' + org['official_phone']
+    if len(facts) > 1:
+        message += '. The message ' + facts[1].replace(' (strong warning sign)', '') + '.'
+    return result(True, message,
                   {'org': org['name'], 'official_phone': org['official_phone'],
                    'official_websites': org['official_domains'],
-                   'facts': ['official ' + org['name'] + ' contact found in our trusted list']})
+                   'facts': facts})
 
 
 # ---- 6.5 search_scam_guide (metadata RAG, see rag.py) --------------------
@@ -915,7 +966,7 @@ TOOL_GUIDE = {
     'extract_signals': '{} : read the message and list warning signs, links, phone numbers and the organization it claims to be. Must be first.',
     'check_link': '{"url":"example.com"} : check a link FROM THE MESSAGE against our list of official and scam websites. It never opens the link.',
     'check_sender': '{"sender":"+1-555-0100"} : check whether the sender is one of the saved contacts.',
-    'lookup_official_contact': '{"org":"Medicare"} : get the real phone number of an organization the message claims to be.',
+    'lookup_official_contact': '{"org":"Medicare"} : get the real phone number of an organization the message claims to be. Use it before "safe" when the message gives a phone number.',
     'search_scam_guide': '{"query":"words to search"} : search the scam-prevention guide. Optional: add "filters":{"org":"Medicare"} ONLY when extract_signals found that organization.',
     'ask_human_helper': '{"reason":"E1 shows ..."} : offer to alert a trusted family member (after check_sender). The reason must mention an evidence id like E1.',
 }
@@ -950,6 +1001,14 @@ def unlooked_orgs(context):
         if org not in context['official_contacts']:
             waiting.append(org)
     return waiting
+
+
+def orgs_needing_lookup(context):
+    """Organizations the message claims AND gives a phone number for, whose
+    official number was not looked up yet. "Safe" waits for these."""
+    if not context['phones']:
+        return []
+    return unlooked_orgs(context)
 
 
 def precondition_met(name, context):
@@ -1134,7 +1193,8 @@ def make_system_prompt():
     prompt += 'Labels:\n'
     prompt += '- likely_scam: at least one strong warning sign, or two or more weak ones.\n'
     prompt += '- likely_safe: only if check_sender shows a saved contact, there are no strong warning signs, '
-    prompt += 'at most one weak sign, and every link was checked and is official.\n'
+    prompt += 'at most one weak sign, every link was checked and is official, and any phone number given for '
+    prompt += 'an organization was checked with lookup_official_contact.\n'
     prompt += '- uncertain: when the evidence cannot settle it, for example an unknown sender with no warning signs. '
     prompt += 'Use check_sender and then ask_human_helper before choosing uncertain. '
     prompt += 'uncertain is not allowed when there is a strong warning sign.\n'
@@ -1218,7 +1278,7 @@ def supported_label(context):
         if context['link_results'].get(link) != 'official':
             all_links_official = False
     if (context['sender_trusted'] is True and len(weak) <= 1 and all_links_official
-            and not context['tool_failures']):
+            and not orgs_needing_lookup(context) and not context['tool_failures']):
         return 'likely_safe'
     return 'uncertain'
 
@@ -1250,10 +1310,26 @@ def why_label_needs(label, context):
             problems.append('link not checked yet (use check_link)')
         elif status != 'official':
             problems.append('a link is ' + status + ', not official')
+    for org in orgs_needing_lookup(context):
+        problems.append('the message gives a phone number for ' + org
+                        + '; check the official number first (use lookup_official_contact)')
     if context['tool_failures']:
         problems.append('a tool failed, so the check is incomplete')
-    return 'likely_safe needs a saved contact, no strong signs, at most 1 weak sign, all links official; actual: ' \
-        + '; '.join(problems)
+    return ('likely_safe needs a saved contact, no strong signs, at most 1 weak sign, all links official, '
+            'and the official number looked up when the message gives a phone number for an organization; actual: '
+            + '; '.join(problems))
+
+
+def unfinished_checks(context):
+    """Checks a trusted sender's message still needs before it can be safe."""
+    if context['sender_trusted'] is not True or context['tool_failures']:
+        return []
+    missing = []
+    if unchecked_links(context):
+        missing.append('check_link')
+    if orgs_needing_lookup(context):
+        missing.append('lookup_official_contact')
+    return missing
 
 
 CONCERN_FEEDBACK = 'you raised a concern earlier; answer uncertain and use ask_human_helper'
@@ -1298,7 +1374,8 @@ def check_verdict(argument, context):
         checks.append({'rule': 'evidence supports likely_safe', 'ok': ok,
                        'detail': 'ok' if ok else why_label_needs('likely_safe', context)})
         # The model's concern can only make the answer more careful: after
-        # it proposed likely_scam or uncertain, "safe" is never accepted.
+        # it proposed likely_scam or uncertain, or asked for human help
+        # itself, "safe" is never accepted.
         concerned = model_was_concerned(context)
         checks.append({'rule': 'likely_safe is not allowed after you raised a concern', 'ok': not concerned,
                        'detail': CONCERN_FEEDBACK if concerned else 'ok'})
@@ -1783,7 +1860,12 @@ def handle_done(argument, context, record, verbose):
             hint = 'You raised a concern, so likely_safe will not be accepted; answer uncertain'
         else:
             hint = 'With the evidence so far, Python can support: ' + supported
-            if supported == 'uncertain' and not context['helper_offered']:
+            if supported == 'uncertain' and unfinished_checks(context):
+                # A check is still missing (a link or an official number):
+                # point to it, not to human help, so a safe message can
+                # still be confirmed once the check is done.
+                hint += ' (finish the checks first: ' + ', '.join(unfinished_checks(context)) + ')'
+            elif supported == 'uncertain' and not context['helper_offered']:
                 hint += ' (' + help_first_note(context) + ')'
         if argument.get('label') == 'likely_scam' and supported != 'likely_scam':
             # The model sees danger that the rules did not record. Python
@@ -1821,10 +1903,15 @@ def handle_done(argument, context, record, verbose):
 
 
 def model_was_concerned(context):
-    """True when the model proposed likely_scam or uncertain at any point."""
+    """True when the model proposed likely_scam or uncertain at any point,
+    or when the MODEL itself asked for human help in this run (asking a
+    family member for help and then saying "safe" does not fit together).
+    Python's own help offer (helper_offered_by 'python') does not count."""
     for label in context['model_labels']:
         if label in ('likely_scam', 'uncertain'):
             return True
+    if context['helper_offered_by'] in ('model', 'model_after_gate_hint'):
+        return True
     return False
 
 
@@ -1862,7 +1949,8 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         label, explanation, source = accepted
         if label == 'likely_safe' and model_was_concerned(context):
             # Backstop for the gate rule above: an accepted "safe" after the
-            # model said likely_scam or uncertain becomes uncertain + help.
+            # model said likely_scam or uncertain, or asked for human help
+            # itself, becomes uncertain + help.
             label = 'uncertain'
             context['model_concern_kept'] = True
             explanation = template_explanation(label, context)
@@ -1875,8 +1963,9 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         if label == 'likely_safe' and model_was_concerned(context):
             # Python can block a label the evidence does not support, but the
             # model's concern can only make the answer MORE careful, never
-            # less: if the model ever said likely_scam or uncertain, the
-            # final answer is never "safe" (it becomes uncertain + human help).
+            # less: if the model ever said likely_scam or uncertain, or asked
+            # for human help itself, the final answer is never "safe" (it
+            # becomes uncertain + human help).
             label = 'uncertain'
             context['model_concern_kept'] = True
         explanation = template_explanation(label, context)

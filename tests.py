@@ -276,6 +276,8 @@ def rules_label(text, sender):
     for link in list(context['links']):
         agent.run_requested_tool('check_link', {'url': link}, context, runtime)
     agent.run_requested_tool('check_sender', {'sender': sender}, context, runtime)
+    for org in list(context['claimed_orgs']):
+        agent.run_requested_tool('lookup_official_contact', {'org': org}, context, runtime)
     names = []
     for flag in context['flags']:
         if flag['strength'] != 'info':
@@ -558,7 +560,8 @@ def test_uncertain_then_safe_is_never_safe():
     context, runtime = fresh_context('ordinary')
     agent.run_requested_tool('extract_signals', {}, context, runtime)
     agent.run_requested_tool('check_sender', {'sender': '+1-555-0142'}, context, runtime)
-    proposal = {'label': 'likely_safe', 'evidence': ['E1', 'E2'], 'explanation': 'This message looks safe.'}
+    agent.run_requested_tool('lookup_official_contact', {'org': 'Main Street Pharmacy'}, context, runtime)
+    proposal = {'label': 'likely_safe', 'evidence': ['E1', 'E2', 'E3'], 'explanation': 'This message looks safe.'}
     assert agent.check_verdict(proposal, context)[0] is True
     context['model_labels'].append('uncertain')
     assert agent.check_verdict(proposal, context)[0] is False
@@ -577,7 +580,7 @@ def test_accepted_safe_after_concern_becomes_uncertain():
     assert record['helper_offered'] is True and record['explanation_source'] == 'template'
 
 
-def test_model_catches_miss_case_is_never_safe():
+def test_model_catches_miss_scripted_concern_ends_uncertain():
     # The rules miss this courier scam from a saved contact. The model is
     # worried; the answer must end "not sure", never "safe".
     record = run('model_catches_miss', [
@@ -609,6 +612,113 @@ def test_rejected_scam_feedback_invites_uncertain_and_helper():
 def test_helper_offered_by_model_on_its_own():
     record, log = helper_run(agent.consent_no)
     assert record['helper_offered_by'] == 'model'
+
+
+def test_helper_then_safe_is_never_safe():
+    # Final review round 4: the model offered human help and then said
+    # "safe". Asking a family member for help means the model was worried,
+    # so the final answer must be "not sure", never "safe".
+    record = run(CONCERN_MESSAGE, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0177'),
+        action('ask_human_helper', reason='E2 is Emma, but I want a family member to look.'),
+        done('likely_safe', ['E1', 'E2', 'E3'], 'This message looks safe. It is from Emma.'),
+        done('likely_safe', ['E1', 'E2', 'E3'], 'This message looks safe. It is from Emma.'),
+    ])
+    assert record['supported_label'] == 'likely_safe'
+    assert record['helper_offered_by'] == 'model'
+    assert record['final_label'] == 'uncertain' and record['model_concern_kept'] is True
+    gate = record['trace'][3]['check_result']['gate']
+    failed = []
+    for check in gate:
+        if not check['ok']:
+            failed.append(check['rule'])
+    assert failed == ['likely_safe is not allowed after you raised a concern'], failed
+    # Python's own help offer does not count as the model's concern.
+    context, runtime = fresh_context('ordinary')
+    context['helper_offered_by'] = 'python'
+    assert agent.model_was_concerned(context) is False
+    context['helper_offered_by'] = 'model_after_gate_hint'
+    assert agent.model_was_concerned(context) is True
+
+
+BANK_LOCK_MESSAGE = {'sender': '+1-555-0131',
+                     'text': 'First City Bank: your account is locked. Call 1-800-555-0199 now.'}
+
+
+def evidence_context(message, lookup):
+    """Run extract_signals and check_sender (and lookup_official_contact for
+    every claimed organization when lookup is True) without a model."""
+    context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
+    runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    agent.run_requested_tool('check_sender', {'sender': message['sender']}, context, runtime)
+    if lookup:
+        for org in list(context['claimed_orgs']):
+            agent.run_requested_tool('lookup_official_contact', {'org': org}, context, runtime)
+    return context
+
+
+def test_phone_key():
+    assert agent.phone_key('1-800-555-0199') == '8005550199'
+    assert agent.phone_key('+1 (800) 555-0199') == '8005550199'
+    assert agent.phone_key('1-555-0142') == agent.phone_key('555-0142') == '5550142'
+    assert agent.phone_key('1-800-555-0199') != agent.phone_key('1-800-555-0106')
+
+
+def test_unofficial_number_is_strong_after_lookup():
+    # The live false "safe" from the final review: a saved bank contact
+    # asks you to call a number that is not the official bank number.
+    context = evidence_context(BANK_LOCK_MESSAGE, lookup=True)
+    strong = agent.flags_with_strength(context, 'strong')
+    assert len(strong) == 1 and strong[0]['name'] == 'unofficial_number'
+    assert strong[0]['fact'] == 'asks you to call a number that is not the official First City Bank number'
+    assert strong[0]['keywords'] == ['number', 'official', 'call']
+    assert agent.supported_label(context) == 'likely_scam'
+    assert 'not the official First City Bank number' in '; '.join(context['evidence'][-1]['facts'])
+
+
+def test_number_not_looked_up_is_not_safe():
+    # Without lookup_official_contact the evidence is incomplete: not safe.
+    context = evidence_context(BANK_LOCK_MESSAGE, lookup=False)
+    assert agent.supported_label(context) == 'uncertain'
+    needs = agent.why_label_needs('likely_safe', context)
+    assert ('the message gives a phone number for First City Bank; check the official number first '
+            '(use lookup_official_contact)') in needs
+    # A scripted model that skips the lookup and says "safe" is rejected,
+    # is pointed to the lookup, and after the lookup "safe" is still refused.
+    record = run(BANK_LOCK_MESSAGE, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0131'),
+        done('likely_safe', ['E1', 'E2'], 'This message looks safe. It is from your bank.'),
+        action('lookup_official_contact', org='First City Bank'),
+        done('likely_safe', ['E1', 'E2', 'E3'], 'This message looks safe. It is from your bank.'),
+    ])
+    assert 'lookup_official_contact' in record['trace'][2]['observation']['message']
+    assert record['final_label'] == 'likely_scam' and record['stop_reason'] == 'gate_downgrade'
+
+
+def test_official_number_in_message_stays_safe():
+    # The ordinary demo: the saved pharmacy gives its official number.
+    context = evidence_context(case_message('ordinary'), lookup=True)
+    assert agent.supported_label(context) == 'likely_safe'
+    assert 'unofficial_number' not in agent.flag_names(context)
+    assert ('the number in the message is the official Main Street Pharmacy number'
+            in context['evidence'][-1]['facts'])
+    # A number that belongs to another organization the message names is
+    # not called unofficial.
+    message = {'sender': '+1-555-0142',
+               'text': 'Main Street Pharmacy: your Medicare refill is ready. Call us at 1-555-0142.'}
+    context = evidence_context(message, lookup=True)
+    assert agent.supported_label(context) == 'likely_safe', agent.flag_names(context)
+
+
+def test_message_without_number_needs_no_lookup():
+    message = {'sender': '+1-555-0142', 'text': 'Main Street Pharmacy: your refill is ready for pickup.'}
+    context = evidence_context(message, lookup=False)
+    assert context['phones'] == [] and agent.supported_label(context) == 'likely_safe'
+    context = evidence_context(message, lookup=True)
+    assert agent.flag_names(context) == [] and agent.supported_label(context) == 'likely_safe'
 
 
 def test_uncertain_template_for_saved_contact():
@@ -695,7 +805,8 @@ def test_gate_accepts_ordinary_message():
     record = run('ordinary', [
         action('extract_signals'),
         action('check_sender', sender='+1-555-0142'),
-        done('likely_safe', ['E1', 'E2'], 'This message looks safe. It is from your saved pharmacy number.'),
+        action('lookup_official_contact', org='Main Street Pharmacy'),
+        done('likely_safe', ['E1', 'E2', 'E3'], 'This message looks safe. It is from your saved pharmacy number.'),
     ])
     assert record['final_label'] == 'likely_safe' and record['stop_reason'] == 'success'
     assert record['gate_rejections'] == 0
@@ -1284,9 +1395,15 @@ if __name__ == '__main__':
         ('scam then safe is never safe', test_scam_then_safe_is_never_safe),
         ('uncertain then safe is never safe', test_uncertain_then_safe_is_never_safe),
         ('accepted safe after a concern becomes uncertain (backstop)', test_accepted_safe_after_concern_becomes_uncertain),
-        ('model_catches_miss ends not sure when the model is worried', test_model_catches_miss_case_is_never_safe),
+        ('model_catches_miss ends not sure when the model is worried', test_model_catches_miss_scripted_concern_ends_uncertain),
         ('rejected scam feedback invites uncertain + helper', test_rejected_scam_feedback_invites_uncertain_and_helper),
         ('helper_offered_by = model when unprompted', test_helper_offered_by_model_on_its_own),
+        ('helper then safe is never safe', test_helper_then_safe_is_never_safe),
+        ('phone numbers compared by their last digits', test_phone_key),
+        ('unofficial number is a strong sign after lookup', test_unofficial_number_is_strong_after_lookup),
+        ('phone number not looked up -> not safe', test_number_not_looked_up_is_not_safe),
+        ('official number in the message stays safe', test_official_number_in_message_stays_safe),
+        ('message without a phone number needs no lookup', test_message_without_number_needs_no_lookup),
         ('uncertain template for a saved contact', test_uncertain_template_for_saved_contact),
         ('helper reason must cite evidence', test_helper_reason_must_cite_evidence),
         ('ask_human_helper only after check_sender', test_helper_only_after_check_sender),

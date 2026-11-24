@@ -85,7 +85,8 @@ def run_prefix(set_name):
 
 def deterministic_context(item, data):
     """Run the lookup tools directly (no model) to get the evidence a careful
-    agent would collect: warning signs, link results and the sender check."""
+    agent would collect: warning signs, link results, the sender check and
+    the official number of every organization the message claims."""
     message = {'sender': item['sender'], 'text': item['text']}
     context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
     runtime = {'data': data, 'consent_fn': agent.consent_no, 'alert_log': OUT_DIR / 'unused.log'}
@@ -93,6 +94,8 @@ def deterministic_context(item, data):
     for link in list(context['links']):
         agent.run_requested_tool('check_link', {'url': link}, context, runtime)
     agent.run_requested_tool('check_sender', {'sender': item['sender']}, context, runtime)
+    for org in list(context['claimed_orgs']):
+        agent.run_requested_tool('lookup_official_contact', {'org': org}, context, runtime)
     return context
 
 
