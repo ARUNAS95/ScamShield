@@ -66,8 +66,11 @@ Point at:
 1. `STEP 1`: no warning signs. `NEXT OPTIONS` has no `check_link` (there is no link) and no
    `ask_human_helper` yet (the sender has not been checked).
 2. `check_sender`: a saved contact (Main Street Pharmacy).
-3. Banner: **LIKELY SAFE**. Say: "Safe needs a saved contact, no strong signs, at most one weak sign,
-   every link checked and official, and no tool failure. Everything else is 'scam' or 'not sure'."
+3. `lookup_official_contact`: the number in the message is the official pharmacy number. If the model
+   says "safe" before this lookup, the gate rejects it and points to `lookup_official_contact`.
+4. Banner: **LIKELY SAFE**. Say: "Safe needs a saved contact, no strong signs, at most one weak sign,
+   every link checked and official, the official number looked up whenever the message gives a phone
+   number for an organization it claims, and no tool failure. Everything else is 'scam' or 'not sure'."
 
 ### 0:50 to 1:50: run 2, the Medicare gift-card scam
 

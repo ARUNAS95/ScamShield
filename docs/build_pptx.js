@@ -144,13 +144,14 @@ s.addNotes('Scam texts copy real organizations, rush people and ask for gift car
 s = content('Problem', 'One message in, a plain answer out');
 const verdicts = [
   [RED, 'Likely scam', 'a strong warning sign, or two weak ones'],
-  [GREEN, 'Likely safe', 'saved contact, no strong signs, at most 1 weak sign, every link checked and official, no tool failure'],
+  [GREEN, 'Likely safe', 'saved contact, no strong signs, at most 1 weak sign, every link checked and official, the official number looked up whenever the message gives a phone number for an organization it claims, no tool failure'],
   [AMBER, 'Not sure', 'evidence cannot settle it: ask someone you trust'],
 ];
 for (let i = 0; i < verdicts.length; i++) {
   const y = 1.55 + i * 1.6;
   pill(s, 0.6, y, 2.6, 0.7, verdicts[i][0], verdicts[i][1], 20);
-  text(s, verdicts[i][2], { x: 0.6, y: y + 0.76, w: 4.7, h: 0.8, fontSize: 16, color: INK });
+  text(s, verdicts[i][2], { x: 0.6, y: y + 0.76, w: 4.7, h: 0.84, fontSize: verdicts[i][2].length > 100 ? 12 : 16,
+    color: INK });
 }
 card(s, 5.6, 1.45, 7.1, 5.3, WHITE, NAVY);
 if (D.example) {
@@ -257,11 +258,12 @@ arrow(s, GX[1] + 1.9, GY + BH, GX[1] + 2.4, BOT, RED);
 arrow(s, GX[2] + 1.9, GY + BH, GX[3] + 0.6, BOT, AMBER);
 card(s, 0.6, 6.15, 12.1, 0.7, TINT);
 text(s, 'Safe needs: a saved contact, no strong signs, at most 1 weak sign, every link checked and official, ' +
-  'no tool failure.', { x: 0.8, y: 6.2, w: 11.7, h: 0.6, fontSize: 16, valign: 'middle' });
+  'the official number looked up whenever the message gives a phone number for an organization it claims, no tool failure.', { x: 0.8, y: 6.2, w: 11.7, h: 0.6, fontSize: 13,
+  valign: 'middle' });
 s.addNotes('When the model says done, the verdict gate checks the label against the recorded evidence, like ' +
   'check_goal in the Airways agent. A first rejection goes back to the model with expected versus actual. After a ' +
   'second rejection Python uses the label the evidence supports, but the model\'s concern can only make the answer ' +
-  'more careful: if the model said scam or not sure, the answer is never safe. Then the readability check, one ' +
+  'more careful: if the model said scam or not sure, or asked for human help itself, the answer is never safe. Then the readability check, one ' +
   'rewrite, and the final answer with Python\'s what-to-do line.');
 
 // ---------------------------------------------------------------- 5. Model vs Python
@@ -320,13 +322,13 @@ s.addNotes('Each tool is a local Python function. Python only offers the tools w
 s = content('How it works', 'The verdict gate accepts only what the evidence supports');
 const rules = [
   ['Likely scam', 'at least 1 strong or 2 weak warning signs', RED],
-  ['Likely safe', 'saved contact, no strong signs, at most 1 weak sign, every link checked and official, no tool failure', GREEN],
+  ['Likely safe', 'saved contact, no strong signs, at most 1 weak sign, every link checked and official, the official number looked up whenever the message gives a phone number for an organization it claims, no tool failure', GREEN],
   ['Not sure', 'otherwise; never with a strong sign; help must be offered first', AMBER],
 ];
 for (let i = 0; i < rules.length; i++) {
   const y = 1.5 + i * 1.2;
   text(s, rules[i][0], { x: 0.6, y: y, w: 4.9, h: 0.45, fontSize: 21, bold: true, color: rules[i][2] });
-  text(s, rules[i][1], { x: 0.6, y: y + 0.42, w: 4.9, h: 0.75, fontSize: 16 });
+  text(s, rules[i][1], { x: 0.6, y: y + 0.42, w: 4.9, h: 0.78, fontSize: rules[i][1].length > 100 ? 12 : 16 });
 }
 card(s, 0.6, 5.2, 4.9, 1.5, TINT);
 text(s, 'A rejection shows expected vs. actual. After 2 rejections Python uses the supported label.',
