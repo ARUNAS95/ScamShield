@@ -38,7 +38,6 @@ PASS: model concern never becomes safe (gate downgrade -> uncertain)
 PASS: model uncertain then gate gave up -> never safe
 PASS: scam then safe is never safe
 PASS: uncertain then safe is never safe
-PASS: accepted safe after a concern becomes uncertain (backstop)
 PASS: model_catches_miss ends not sure when the model is worried
 PASS: rejected scam feedback invites uncertain + helper
 PASS: helper_offered_by = model when unprompted
@@ -82,18 +81,15 @@ PASS: stop reason precedence
 PASS: readability rules
 FAIL: template explanation passes its own checks 
 FAIL: hard wording: one rewrite, then template 
-PASS: RAG: red-flag boost ranks right entry first
-PASS: RAG: other-organization entries ranked lower
-PASS: RAG: embedding down -> keyword fallback
-FAIL: RAG: legit pattern alone cannot make safe 
+PASS: guide search: red-flag boost ranks right entry first
+PASS: guide search: other-organization entries ranked lower
+PASS: guide search: org filter keeps that organization
+FAIL: guide search: legit pattern alone cannot make safe 
 PASS: guide tip must fit the message (no G05 on the USPS case)
 FAIL: tip relevance: organization and main red flag (no G05/G09 on USPS) []
 PASS: safe tip only for the sender's organization
-FAIL: checkpoint resume gives same result 
-FAIL: resume of a finished run refuses 
 PASS: console shows NEXT OPTIONS (routing visible)
 PASS: settings come from environment variables with defaults
-PASS: SCAMSHIELD_MODEL override takes effect (subprocess)
 
-71 of 94 tests passed.
-BREAK-GATE EXPERIMENT: 23 of 94 tests failed with the broken gate (the tests notice when the gate stops checking evidence).
+69 of 90 tests passed.
+BREAK-GATE EXPERIMENT: 21 of 90 tests failed with the broken gate (the tests notice when the gate stops checking evidence).
