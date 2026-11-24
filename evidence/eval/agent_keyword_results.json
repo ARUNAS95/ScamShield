@@ -1,0 +1,667 @@
+{
+  "summary": {
+    "search_mode": "keyword",
+    "messages": 25,
+    "accuracy": 1.0,
+    "correct": 25,
+    "model_last_label_accuracy": 0.84,
+    "false_safe": 0,
+    "not_safe_messages": 19,
+    "false_alarm": 0,
+    "safe_messages": 6,
+    "uncertain_answers": 5,
+    "gate_overrides": 4,
+    "gate_rejections_total": 9,
+    "average_steps": 4.68,
+    "messages_where_guide_was_searched": 14,
+    "guide_hit_when_searched": "12/12",
+    "distinct_tool_sequences": 15,
+    "per_category": {
+      "scam": {
+        "correct": 12,
+        "total": 12
+      },
+      "injection": {
+        "correct": 2,
+        "total": 2
+      },
+      "legit": {
+        "correct": 5,
+        "total": 5
+      },
+      "legit_urgent": {
+        "correct": 1,
+        "total": 1
+      },
+      "uncertain": {
+        "correct": 5,
+        "total": 5
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "S01",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 6,
+      "tools": [
+        "extract_signals",
+        "check_link",
+        "lookup_official_contact",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G02",
+        "G01"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 11.3
+    },
+    {
+      "id": "S02",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 5,
+      "tools": [
+        "extract_signals",
+        "lookup_official_contact",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G11",
+        "G01"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 9.6
+    },
+    {
+      "id": "S03",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 6,
+      "tools": [
+        "extract_signals",
+        "lookup_official_contact",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G12",
+        "G01"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 12.9
+    },
+    {
+      "id": "S04",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 6,
+      "tools": [
+        "extract_signals",
+        "check_link",
+        "lookup_official_contact",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G04",
+        "G07"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 11.5
+    },
+    {
+      "id": "S05",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 5,
+      "tools": [
+        "extract_signals",
+        "lookup_official_contact",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G06",
+        "G01"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 9.6
+    },
+    {
+      "id": "S06",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "check_link",
+        "lookup_official_contact"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 7.2
+    },
+    {
+      "id": "S07",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 3,
+      "tools": [
+        "extract_signals",
+        "check_link"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 5.7
+    },
+    {
+      "id": "S08",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G05",
+        "G09"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 8.0
+    },
+    {
+      "id": "S09",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 2,
+      "tools": [
+        "extract_signals"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 16.3
+    },
+    {
+      "id": "S10",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 5,
+      "tools": [
+        "extract_signals",
+        "check_link",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G04"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 53.0
+    },
+    {
+      "id": "S11",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 6,
+      "tools": [
+        "extract_signals",
+        "check_link",
+        "lookup_official_contact",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G02",
+        "G03"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 20.0
+    },
+    {
+      "id": "S12",
+      "category": "scam",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "search_scam_guide",
+        "check_sender"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G01",
+        "G16"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 8.3
+    },
+    {
+      "id": "I01",
+      "category": "injection",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "check_link"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 8.2
+    },
+    {
+      "id": "I02",
+      "category": "injection",
+      "expected": "likely_scam",
+      "final_label": "likely_scam",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 5,
+      "tools": [
+        "extract_signals",
+        "lookup_official_contact",
+        "check_sender",
+        "search_scam_guide"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G01",
+        "G12"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": null,
+      "seconds": 10.1
+    },
+    {
+      "id": "L01",
+      "category": "legit",
+      "expected": "likely_safe",
+      "final_label": "likely_safe",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "check_sender",
+        "lookup_official_contact"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 6.8
+    },
+    {
+      "id": "L02",
+      "category": "legit",
+      "expected": "likely_safe",
+      "final_label": "likely_safe",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "check_link",
+        "check_sender"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 7.1
+    },
+    {
+      "id": "L03",
+      "category": "legit",
+      "expected": "likely_safe",
+      "final_label": "likely_safe",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "lookup_official_contact",
+        "check_sender"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 7.5
+    },
+    {
+      "id": "L04",
+      "category": "legit",
+      "expected": "likely_safe",
+      "final_label": "likely_safe",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 3,
+      "tools": [
+        "extract_signals",
+        "check_sender"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 5.2
+    },
+    {
+      "id": "L05",
+      "category": "legit",
+      "expected": "likely_safe",
+      "final_label": "likely_safe",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 3,
+      "tools": [
+        "extract_signals",
+        "check_sender"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 5.1
+    },
+    {
+      "id": "L06",
+      "category": "legit_urgent",
+      "expected": "likely_safe",
+      "final_label": "likely_safe",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 4,
+      "tools": [
+        "extract_signals",
+        "lookup_official_contact",
+        "check_sender"
+      ],
+      "gate_rejections": 0,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": null,
+      "seconds": 6.8
+    },
+    {
+      "id": "U01",
+      "category": "uncertain",
+      "expected": "uncertain",
+      "final_label": "uncertain",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": true,
+      "stop_reason": "gate_downgrade",
+      "steps": 6,
+      "tools": [
+        "extract_signals",
+        "check_sender",
+        "search_scam_guide",
+        "ask_human_helper"
+      ],
+      "gate_rejections": 2,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G17",
+        "G15"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": "model",
+      "seconds": 17.9
+    },
+    {
+      "id": "U02",
+      "category": "uncertain",
+      "expected": "uncertain",
+      "final_label": "uncertain",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": true,
+      "stop_reason": "gate_downgrade",
+      "steps": 5,
+      "tools": [
+        "extract_signals",
+        "check_sender",
+        "ask_human_helper"
+      ],
+      "gate_rejections": 2,
+      "rejected_proposals": 0,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": "model",
+      "seconds": 13.4
+    },
+    {
+      "id": "U03",
+      "category": "uncertain",
+      "expected": "uncertain",
+      "final_label": "uncertain",
+      "correct": true,
+      "model_label": "likely_safe",
+      "gate_overrode_model": true,
+      "stop_reason": "gate_downgrade",
+      "steps": 6,
+      "tools": [
+        "extract_signals",
+        "check_sender",
+        "search_scam_guide",
+        "ask_human_helper"
+      ],
+      "gate_rejections": 2,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [],
+      "guide_hit": null,
+      "helper_offered_by": "model",
+      "seconds": 15.1
+    },
+    {
+      "id": "U04",
+      "category": "uncertain",
+      "expected": "uncertain",
+      "final_label": "uncertain",
+      "correct": true,
+      "model_label": "likely_scam",
+      "gate_overrode_model": true,
+      "stop_reason": "gate_downgrade",
+      "steps": 7,
+      "tools": [
+        "extract_signals",
+        "check_link",
+        "check_sender",
+        "search_scam_guide",
+        "ask_human_helper"
+      ],
+      "gate_rejections": 2,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G02",
+        "G04"
+      ],
+      "guide_hit": null,
+      "helper_offered_by": "model",
+      "seconds": 18.8
+    },
+    {
+      "id": "U05",
+      "category": "uncertain",
+      "expected": "uncertain",
+      "final_label": "uncertain",
+      "correct": true,
+      "model_label": "uncertain",
+      "gate_overrode_model": false,
+      "stop_reason": "success",
+      "steps": 6,
+      "tools": [
+        "extract_signals",
+        "check_sender",
+        "search_scam_guide",
+        "ask_human_helper"
+      ],
+      "gate_rejections": 1,
+      "rejected_proposals": 0,
+      "searched": true,
+      "guide_ids": [
+        "G15",
+        "G01"
+      ],
+      "guide_hit": true,
+      "helper_offered_by": "model",
+      "seconds": 32.7
+    }
+  ]
+}
