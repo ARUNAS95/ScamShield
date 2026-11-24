@@ -22,37 +22,40 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
 
 | Function | Where | What it does |
 |---|---|---|
-| `run_agent` | scamshield_agent.py:1256 | The main loop: input check, then per step ask the model (with up to 2 retries), parse, route `done` to the gate or a tool to `run_requested_tool`, and append the result + ledger + AVAILABLE ACTIONS to `messages`. It saves a checkpoint after every step and ends by calling `finish_run`. |
-| `ask_model` | scamshield_agent.py:919 | Calls Ollama `/api/chat` with `qwen3:8b`, `think=false`, `format=json`, `num_ctx` 8192 and a 180 s timeout. Tests replace it with a scripted model function. |
-| `parse_action` | scamshield_agent.py:938 | Strips think tags and code fences, then requires valid JSON with exactly the keys `action` (text) and `argument` (dictionary). It returns `(proposal, '')` or `(None, reason)`. |
-| `ROUTING` | scamshield_agent.py:683 | A table with one plain precondition per action (e.g. `ask_human_helper`: "after check_sender, and only once"). The same text is sent to the model when a proposal is rejected. |
-| `precondition_met` | scamshield_agent.py:710 | Checks one ROUTING precondition against the `context` state (links still unchecked, sender checked, searches left, broken tools). This is what makes routing conditional instead of a fixed order. |
-| `available_actions` | scamshield_agent.py:733 | Lists every action whose precondition holds right now. It is shown to the model after every step and stored in each trace step. |
-| `run_requested_tool` | scamshield_agent.py:809 | Rejects unknown or not-allowed actions, keeps only declared argument keys, runs the tool's `validate`, blocks repeated calls, runs the tool inside try/except, checks the result shape and runs `post_check`. On success it records evidence `E#`; on failure it records a tool failure and disables that tool. |
-| `post_check` | scamshield_agent.py:766 | After a tool says it worked, verifies the promised change (link in `link_results`, sender marked checked, alert line really in the log file). "Verify, do not assume" from the robust browser agent note. |
-| `evidence_ledger` | scamshield_agent.py:755 | One line per evidence item, sent with every tool result and never trimmed. A small model therefore never forgets which `E#` ids exist. |
-| `run_extract_signals` | scamshield_agent.py:386 | Regex scan for strong and weak warning signs, links, phone numbers, claimed organizations and text aimed at an AI, on NFKC-normalized text and on a copy with look-alike letters undone. It must be the first action. |
-| `run_check_link` | scamshield_agent.py:460 | Classifies a link from the message as official, look-alike, known scam, IP address, short link or unknown, using a local list and edit distance. It never opens the link. |
-| `run_check_sender` | scamshield_agent.py:495 | Is the real sender a saved contact? "Not saved" is recorded as a note, not a warning sign. |
-| `run_lookup_official_contact` | scamshield_agent.py:527 | Returns the real phone number of an organization the message claims to be, from a trusted list. Python later uses it in the "what to do" line. |
-| `run_search_scam_guide` | scamshield_agent.py:562 | Calls `rag.search` with the model's query and optional filter plus the warning signs Python found. At most 3 searches; a missing guide file raises and becomes a tool failure. |
-| `run_ask_human_helper` | scamshield_agent.py:609 | Asks for consent through the passed-in consent function, then writes a simulated alert to a log file. Nothing is ever sent. |
-| `supported_label` | scamshield_agent.py:962 | The label the recorded evidence supports: scam with 1 strong or 2 weak signs; safe only with a saved contact, at most 1 weak sign, all links official and no tool failure; otherwise uncertain. It ignores what the model says. |
-| `check_verdict` | scamshield_agent.py:1017 | The verdict gate: label valid, cited ids exist, explanation given, label matches the supported label (with the uncertain rules), and every strong sign is mentioned. Returns each rule with ok/detail, so feedback shows expected vs. actual. |
-| `handle_done` | scamshield_agent.py:1425 | Runs the gate; on rejection sends feedback or, after 2 rejections, sets `gate_downgraded`. On acceptance it runs the readability check (one rewrite, then template). |
-| `check_readability` | scamshield_agent.py:1108 | Verdict in the first sentence, at most 6 sentences of at most 22 words, no jargon, links or long numbers. Returns the list of problems. |
-| `choose_stop_reason` | scamshield_agent.py:1477 | Precedence: invalid_input > model_error > tool_failure > gate_downgrade > no_progress > step_limit > success. A tool failure is reported even if a verdict was accepted. |
-| `finish_run` | scamshield_agent.py:1491 | Picks the final label (accepted verdict, or Python's supported label, never "safe" after an unfinished run), offers human help for "uncertain", writes the "what to do" line and guide tip, and saves the JSON trace. Prints the result banner. |
-| `rag.search` | rag.py:192 | Scores guide entries 50% embedding cosine + 50% keyword overlap (or keyword only), applies the model's metadata filters, boosts entries whose red flags match the found warning signs and halves entries about another organization. Falls back to keyword search if embeddings are unavailable and says so. |
+| `run_agent` | scamshield_agent.py:1511 | The main loop: input check, then per step ask the model (with up to 2 retries), parse, route `done` to the gate or a tool to `run_requested_tool`, and append the result + ledger + AVAILABLE ACTIONS to `messages`. It saves a checkpoint after every step and ends by calling `finish_run`. |
+| `ask_model` | scamshield_agent.py:1135 | Calls Ollama `/api/chat` with `qwen3:8b`, `think=false`, `format=json`, `num_ctx` 8192 and a 180 s timeout. Tests replace it with a scripted model function. |
+| `parse_action` | scamshield_agent.py:1154 | Strips think tags and code fences, then requires valid JSON with exactly the keys `action` (text) and `argument` (dictionary). It returns `(proposal, '')` or `(None, reason)`. |
+| `ROUTING` | scamshield_agent.py:897 | A table with one plain precondition per action (e.g. `ask_human_helper`: "after check_sender, and only once"). The same text is sent to the model when a proposal is rejected. |
+| `precondition_met` | scamshield_agent.py:924 | Checks one ROUTING precondition against the `context` state (links still unchecked, sender checked, searches left, broken tools). This is what makes routing conditional instead of a fixed order. |
+| `available_actions` | scamshield_agent.py:947 | Lists every action whose precondition holds right now. It is shown to the model after every step and stored in each trace step. |
+| `run_requested_tool` | scamshield_agent.py:1023 | Rejects unknown or not-allowed actions, keeps only declared argument keys, runs the tool's `validate`, blocks repeated calls, runs the tool inside try/except, checks the result shape and runs `post_check`. On success it records evidence `E#`; on failure it records a tool failure and disables that tool. |
+| `post_check` | scamshield_agent.py:980 | After a tool says it worked, verifies the promised change (link in `link_results`, sender marked checked, alert line really in the log file). "Verify, do not assume" from the robust browser agent note. |
+| `evidence_ledger` | scamshield_agent.py:969 | One line per evidence item, sent with every tool result and never trimmed. A small model therefore never forgets which `E#` ids exist. |
+| `run_extract_signals` | scamshield_agent.py:599 | Regex scan for strong and weak warning signs, links, phone numbers, claimed organizations and text aimed at an AI, on NFKC-normalized text and on a copy with disguises undone (`g1ft`, `g i f t`, Cyrillic/Greek look-alike letters via `CONFUSABLES`, line 146). Links come from `find_links` (line 234), which restores defanged links, keeps `@`-hidden addresses and skips "p.m.Love"; a link in another alphabet or with a hidden address is a strong sign. It must be the first action. |
+| `rule_matches` | scamshield_agent.py:582 | One warning-sign rule: any of its `patterns`, or a `guarded_patterns` match that is not cancelled by an `unless` pattern (cancelled only when the text has no request words). This is how "can you send me a gift card" counts and "I'll send you a gift card for your birthday" does not. |
+| `run_check_link` | scamshield_agent.py:674 | Classifies a link from the message as official, look-alike, known scam, IP address, other alphabet, short link or unknown, using a local list and edit distance (`classify_domain`, line 321; `normalize_domain`, line 285, drops anything before an `@`). It never opens the link. |
+| `run_check_sender` | scamshield_agent.py:709 | Is the real sender a saved contact? "Not saved" is recorded as a note, not a warning sign. |
+| `run_lookup_official_contact` | scamshield_agent.py:741 | Returns the real phone number of an organization the message claims to be, from a trusted list. Python later uses it in the "what to do" line. |
+| `run_search_scam_guide` | scamshield_agent.py:776 | Calls `rag.search` with the model's query and optional filter plus the warning signs Python found. At most 3 searches; a missing guide file raises and becomes a tool failure. |
+| `run_ask_human_helper` | scamshield_agent.py:823 | Asks for consent through the passed-in consent function, then writes a simulated alert to a log file. Nothing is ever sent. |
+| `supported_label` | scamshield_agent.py:1178 | The label the recorded evidence supports: scam with 1 strong or 2 weak signs; safe only with a saved contact, at most 1 weak sign, all links official and no tool failure; otherwise uncertain. It ignores what the model says. |
+| `check_verdict` | scamshield_agent.py:1233 | The verdict gate: label valid, cited ids exist, explanation given, label matches the supported label (with the uncertain rules), and every strong sign is mentioned. Returns each rule with ok/detail, so feedback shows expected vs. actual. |
+| `handle_done` | scamshield_agent.py:1698 | Runs the gate; on rejection sends feedback or, after 2 rejections, sets `gate_downgraded`. A rejected likely_scam with no recorded sign gets feedback inviting "uncertain" + `ask_human_helper`. On acceptance it runs the readability check (one rewrite, then template). |
+| `check_readability` | scamshield_agent.py:1324 | Verdict in the first sentence, at most 6 sentences of at most 22 words, no jargon, links or long numbers. Returns the list of problems. |
+| `choose_stop_reason` | scamshield_agent.py:1775 | Precedence: invalid_input > model_error > tool_failure > gate_downgrade > no_progress > step_limit > success. A tool failure is reported even if a verdict was accepted. |
+| `finish_run` | scamshield_agent.py:1789 | Picks the final label (accepted verdict, or Python's supported label, never "safe" after an unfinished run, and never "safe" when the model raised a concern: `model_was_concerned`, line 1759), offers human help for "uncertain", sets `helper_offered_by` (`model_helper_source`, line 1767), writes the "what to do" line and a guide tip that fits the message (`tip_is_relevant`, line 1422), saves the JSON trace (with `system_prompt` and `first_request`) and marks the checkpoint finished. Prints the result banner. |
+| `rag.search` | rag.py:194 | Scores guide entries 50% embedding cosine + 50% keyword overlap (or keyword only), applies the model's metadata filters, boosts entries whose red flags match the found warning signs and halves entries about another organization. Falls back to keyword search if embeddings are unavailable and says so. |
 
 ## 3. The gate rules (say them like this)
 
 - **likely_scam**: at least 1 strong warning sign or at least 2 weak ones.
 - **likely_safe**: saved contact AND no strong signs AND at most 1 weak sign AND every link checked and official AND no tool failure.
-- **uncertain**: everything else. Rejected if a strong sign was found. Requires that human help was offered first.
+- **uncertain**: everything else. Rejected if a strong sign was found. Rule "help must be offered before uncertain".
 - Always: the label is one of the three, cited evidence ids exist, the explanation is not empty and mentions every strong sign.
 - Rejection feedback = the failed rule + expected vs. actual + "with the evidence so far, Python can support: X".
-- 2 rejections: Python uses the supported label (`gate_downgrade`) and its template explanation.
+- 2 rejections: Python uses the supported label (`gate_downgrade`) and its template explanation,
+  except that the model's concern only ever makes the answer more careful: if the supported label is
+  "safe" but the model said likely_scam or uncertain at any point, the final answer is "not sure" with help offered.
 
 ## 4. Likely professor questions, with short honest answers
 
@@ -96,40 +99,65 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
    trusted list, and the readability check rejects phone numbers and links in the explanation.
 
 9. **How do you know the tests can fail?**
-   The gate was deliberately broken (it believed every message was safe) and the safety tests failed.
-   The tests also use a scripted model that gives deliberately wrong answers.
+   `python3 tests.py --break-gate` replaces `supported_label` with one that always says "likely_safe"
+   and runs all tests; the number that fail is saved in `evidence/eval/break_gate_tests.txt`. The tests
+   also use a scripted model that gives deliberately wrong answers.
 
 10. **Isn't the evaluation biased, since you wrote the data?**
-    Yes, that is the main limitation. To reduce it, a held-out set was written before the round-1 rule
-    changes, in different wording, and not edited afterwards. It still has a miss (H03: a USPS text with
-    `.shop` and `.online` links ends as "not sure", not "scam").
+    Yes, that is the main limitation. Held-out set 1 was written before the round-1 rule changes, but the
+    rules were then adjusted after seeing its failures, so its later score is no longer a held-out score.
+    Held-out set 2 was written and committed (with its rules-only BEFORE score) before any round-3 change.
 
 11. **What does the RAG add?**
     The guide tip in the answer and evidence for unclear messages. The measured gain over keyword search
     is small on this data, and the document says so.
 
 12. **Why are all the commits on Nov 24?**
-    I built and tested the project locally on Nov 22 and 23 and committed it in logical chunks on Nov 24,
-    after the first review. The development log (`DEVLOG.md`) records what was done on which day.
+    Facts to start from: `git log` shows every commit on this branch dated Nov 24 (the first at 09:17);
+    `DEVLOG.md` has dated entries for Nov 22, 23 and 24, and the project files were created before the
+    first commit. **Answer this in your own words** (what you did on which day, and why you committed when you did).
 
 13. **Which AI tools did you use?**
-    An AI coding assistant helped write parts of the code, tests and documentation. I chose the problem
-    and the design, directed the work, reviewed every change, ran the evaluations and can explain each
-    part. (Answer this in your own words.)
+    Facts to start from: an AI coding assistant was used during development (code, tests and
+    documentation), and the project went through several review rounds in which a strict "critic" pass
+    listed problems and a "work" pass fixed them (see the "Critic review" entries in `DEVLOG.md`).
+    **Answer this in your own words** (what you decided yourself, what you checked, what you would explain).
 
-14. **What is the evidence ledger and why is it never trimmed?**
+14. **Why can the model's concern never produce "safe"?**
+    Python can block a label the evidence does not support, but a worried model may be noticing something
+    the regex rules missed (a new scam wording). So when the gate gives up or the run ends, and the
+    evidence supports "safe" but the model said likely_scam or uncertain at any point, the answer is "not
+    sure" with human help offered, and the explanation says the helper thought something looked wrong but
+    the checks could not confirm it (`model_concern_kept` in the trace). Test: "model concern never
+    becomes safe".
+
+15. **What do the `helper_offered_by` values mean?**
+    `model`: the model called `ask_human_helper` before any gate feedback told it to. `model_after_gate_hint`:
+    it did so after a gate rejection that mentioned `ask_human_helper`. `python`: Python offered help
+    because the final answer was "not sure" and nobody had offered it. `null`: no help was offered (scam or
+    safe). `eval.py` and `harness_runs.py` count these values.
+
+16. **How was held-out set 2 protected?**
+    `data/eval_holdout2.json` and `evidence/eval/holdout2_rules_BEFORE.txt` were committed together, before
+    any round-3 rule change (see `git log -- data/eval_holdout2.json`); the file is never edited after
+    that. The AFTER score is in `holdout2_rules_AFTER.txt`. Caveat: the round-3 rules came from the
+    critic's probe list, and some probes share wording with holdout2, so BEFORE is the honest held-out number.
+
+17. **What is the evidence ledger and why is it never trimmed?**
     The chat history keeps only the last 10 messages, so a small model could forget which `E#` ids exist.
     The ledger lists all evidence with every tool result, so citations stay valid.
 
-15. **What would you do next?**
+18. **What would you do next?**
     Test with real (anonymized) scam texts, ask older adults whether the explanations help, grow the
-    website list and handle other alphabets, and connect a real, consented family alert.
+    website list, and connect a real, consented family alert.
 
-16. **What happens with an empty message?** Python stops before the model is called (`invalid_input`).
+19. **What happens with an empty message?** Python stops before the model is called (`invalid_input`).
 
-17. **What is in a trace?** Per step: step, raw_reply, action, argument, parse_ok, validation_ok,
+20. **What is in a trace?** Per step: step, raw_reply, action, argument, parse_ok, validation_ok,
     available_actions, evidence_id, observation (the exact feedback), check_result (post-check or gate
-    rules), state_update, continue_or_stop, model_retries. Plus the final label, stop reason and evidence.
+    rules; a tool that raised an error gets "not run"), state_update, continue_or_stop, model_retries.
+    At the top: the exact system_prompt and first_request, the final label, stop reason, evidence,
+    helper_offered_by and model_concern_kept.
 
 ## 5. Numbers
 
