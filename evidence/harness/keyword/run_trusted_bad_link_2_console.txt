@@ -1,0 +1,30 @@
+CASE trusted_bad_link  RUN 2  MODE keyword
+SENDER : +1-555-0177
+MESSAGE: Grandma it's Emma! Look at the photos from my trip here: firstcity-bank-login.co/photos
+
+=== STEP 1 ===
+MODEL DECISION : extract_signals {}
+VALIDATION     : ok
+TOOL RESULT E1 : 0 strong, 0 weak warning signs; 1 link(s); claims to be: no known organization
+
+=== STEP 2 ===
+MODEL DECISION : check_link {"url": "firstcity-bank-login.co"}
+VALIDATION     : ok
+TOOL RESULT E2 : firstcity-bank-login.co is a LOOKALIKE of the official First City Bank website (strong warning sign).
+
+=== STEP 3 ===
+MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2"], "explanation": "This looks like a scam. The link in the message pretends to be the real First City Bank website. Do...
+GATE           : PASSED - evidence supports likely_scam
+
+====================== SCAMSHIELD RESULT ======================
+VERDICT     : LIKELY SCAM
+STOP REASON : success   (steps: 3, rejected proposals: 0, gate rejections: 0)
+TOOLS USED  : extract_signals -> check_link
+EVIDENCE    :
+  E1 extract_signals: 0 strong, 0 weak warning signs; 1 link(s); claims to be: no known organization
+  E2 check_link: firstcity-bank-login.co is a LOOKALIKE of the official First City Bank website (strong warning sign).
+EXPLANATION (model):
+  This looks like a scam. The link in the message pretends to be the real First City Bank website. Do not click on it.
+WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. You can delete it. If you are worried, talk to Priya (daughter).
+TRACE       : evidence/harness/keyword/run_trusted_bad_link_2_trace.json
+===============================================================
