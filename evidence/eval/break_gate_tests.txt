@@ -1,0 +1,85 @@
+BREAK-GATE EXPERIMENT: supported_label() now always returns likely_safe.
+
+PASS: valid JSON
+PASS: bad JSON
+PASS: missing keys
+PASS: code fences and think tags
+PASS: unknown tool rejected
+PASS: extract_signals must be first
+PASS: link not in message rejected
+PASS: wrong sender rejected
+PASS: organization not claimed rejected
+PASS: repeated call rejected
+PASS: extra argument keys ignored
+PASS: check_link unavailable without links
+PASS: domain classification (official, lookalike, known bad, short)
+PASS: extract_signals on scam message
+PASS: injection is a strong warning sign
+PASS: ordinary message has no warning signs
+PASS: any web address ending is a link
+PASS: ordinary text (Dr., St., $45.20, 8 pm., e.g.) is not a link
+FAIL: IP-address link is a strong warning sign 
+PASS: disguised gift card words found (g1ft, fullwidth, spaced)
+PASS: payment apps are strong warning signs
+PASS: new code request wordings
+PASS: false-alarm regressions stay safe (17 texts)
+FAIL: false-safe regressions are scams (15 texts) ('Grandma please buy a gіft cаrd and send me the numbers', 'likely_safe', ['gift_card'], [])
+FAIL: demo cases keep their labels (rules only) ('scam', 'likely_safe', ['gift_card', 'urgency', 'threat', 'money_request', 'lookalike_link'])
+PASS: link tricks: other alphabet, defanged, hidden @, sentence ends
+PASS: gift card as a present is not a warning sign
+PASS: fabricated evidence id rejected
+FAIL: model insisting scam is safe -> gate downgrade 
+FAIL: injection cannot make message safe 
+FAIL: trusted contact with bad link is not safe 
+PASS: scam must mention strong warning signs
+PASS: uncertain needs help offered first
+PASS: model concern never becomes safe (gate downgrade -> uncertain)
+PASS: model uncertain then gate gave up -> never safe
+PASS: rejected scam feedback invites uncertain + helper
+PASS: helper_offered_by = model when unprompted
+PASS: uncertain template for a saved contact
+PASS: helper reason must cite evidence
+PASS: ask_human_helper only after check_sender
+PASS: routing table covers every action
+PASS: done before extract_signals is a normal rejection
+FAIL: uncertain rejected when a strong sign was found 
+PASS: uncertain allowed with weak signs only
+PASS: gate accepts ordinary message (no false alarm)
+PASS: gate accepts ordinary message with urgency word
+FAIL: safe needs every link checked 
+PASS: consent yes writes simulated alert
+PASS: consent no writes nothing
+PASS: closed terminal counts as no consent
+PASS: message text not in system prompt
+PASS: message cannot close the markers
+PASS: prompt sentence limit and first request match the code
+FAIL: missing guide -> tool_failure, never safe 
+PASS: model unreachable -> model_error
+FAIL: model fails once, retry works -> success 
+FAIL: post-checks recorded for each tool 
+FAIL: failed post-check is a tool failure 
+PASS: helper post-check reads the alert log back
+PASS: tool exception step still has a check_result
+PASS: badly shaped result shows in tool_sequence
+FAIL: trace keeps the exact gate feedback 
+PASS: empty message -> invalid_input
+PASS: three bad replies -> no_progress
+FAIL: step limit 
+PASS: unfinished run never says safe
+PASS: stop reason precedence
+PASS: readability rules
+FAIL: template explanation passes its own checks 
+FAIL: hard wording: one rewrite, then template 
+PASS: RAG: red-flag boost ranks right entry first
+PASS: RAG: other-organization entries ranked lower
+PASS: RAG: embedding down -> keyword fallback
+FAIL: RAG: legit pattern alone cannot make safe 
+PASS: guide tip must fit the message (no G05 on the USPS case)
+PASS: safe tip only for the sender's organization
+FAIL: checkpoint resume gives same result 
+FAIL: resume of a finished run refuses 
+PASS: console shows NEXT OPTIONS (routing visible)
+PASS: settings come from environment variables with defaults
+
+61 of 80 tests passed.
+BREAK-GATE EXPERIMENT: 19 of 80 tests failed with the broken gate (the tests notice when the gate stops checking evidence).
