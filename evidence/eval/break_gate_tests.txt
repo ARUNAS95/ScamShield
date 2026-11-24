@@ -24,6 +24,7 @@ PASS: payment apps are strong warning signs
 PASS: new code request wordings
 PASS: false-alarm regressions stay safe (17 texts)
 FAIL: false-safe regressions are scams (15 texts) ('Grandma please buy a gіft cаrd and send me the numbers', 'likely_safe', ['gift_card'], [])
+FAIL: rule coverage regressions (16 scams, 6 harmless) ('Grandma can you send me $200 via Remitly?', 'likely_safe', ['payment_app', 'money_request'], [])
 FAIL: demo cases keep their labels (rules only) ('scam', 'likely_safe', ['gift_card', 'urgency', 'threat', 'money_request', 'lookalike_link'])
 PASS: link tricks: other alphabet, defanged, hidden @, sentence ends
 PASS: gift card as a present is not a warning sign
@@ -35,6 +36,10 @@ PASS: scam must mention strong warning signs
 PASS: uncertain needs help offered first
 PASS: model concern never becomes safe (gate downgrade -> uncertain)
 PASS: model uncertain then gate gave up -> never safe
+PASS: scam then safe is never safe
+PASS: uncertain then safe is never safe
+PASS: accepted safe after a concern becomes uncertain (backstop)
+PASS: model_catches_miss case ends not sure, never safe
 PASS: rejected scam feedback invites uncertain + helper
 PASS: helper_offered_by = model when unprompted
 PASS: uncertain template for a saved contact
@@ -59,6 +64,7 @@ FAIL: model fails once, retry works -> success
 FAIL: post-checks recorded for each tool 
 FAIL: failed post-check is a tool failure 
 PASS: helper post-check reads the alert log back
+PASS: help offered by Python is post-checked and traced
 PASS: tool exception step still has a check_result
 PASS: badly shaped result shows in tool_sequence
 FAIL: trace keeps the exact gate feedback 
@@ -75,11 +81,13 @@ PASS: RAG: other-organization entries ranked lower
 PASS: RAG: embedding down -> keyword fallback
 FAIL: RAG: legit pattern alone cannot make safe 
 PASS: guide tip must fit the message (no G05 on the USPS case)
+FAIL: tip relevance: organization and main red flag (no G05/G09 on USPS) []
 PASS: safe tip only for the sender's organization
 FAIL: checkpoint resume gives same result 
 FAIL: resume of a finished run refuses 
 PASS: console shows NEXT OPTIONS (routing visible)
 PASS: settings come from environment variables with defaults
+PASS: SCAMSHIELD_MODEL override takes effect (subprocess)
 
-61 of 80 tests passed.
-BREAK-GATE EXPERIMENT: 19 of 80 tests failed with the broken gate (the tests notice when the gate stops checking evidence).
+67 of 88 tests passed.
+BREAK-GATE EXPERIMENT: 21 of 88 tests failed with the broken gate (the tests notice when the gate stops checking evidence).
