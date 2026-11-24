@@ -1,0 +1,205 @@
+{
+  "_note": "Small fictional scam-prevention guide written in the style of official consumer advice. Each entry has metadata used by the RAG search (scam_type, orgs, red_flags, severity).",
+  "entries": [
+    {
+      "id": "G01",
+      "title": "Government agencies never ask for gift cards",
+      "text": "Medicare, Social Security and the IRS never ask you to pay with gift cards, prepaid cards or by sending card numbers in a text. Anyone who asks for a gift card to keep your benefits is a scammer.",
+      "scam_type": "impersonation",
+      "orgs": ["Medicare", "Social Security", "IRS"],
+      "red_flags": ["gift_card", "threat", "urgency"],
+      "severity": "high",
+      "advice": "Do not buy the card. Hang up or delete the text and call the agency using the number on your card or letter."
+    },
+    {
+      "id": "G02",
+      "title": "Fake Medicare benefit alerts",
+      "text": "Scam texts say your Medicare benefits or coverage will be suspended or cancelled today unless you act. Medicare does not cancel benefits by text message and does not send links to renew coverage.",
+      "scam_type": "impersonation",
+      "orgs": ["Medicare"],
+      "red_flags": ["threat", "urgency", "lookalike_link"],
+      "severity": "high",
+      "advice": "Do not click the link. Call Medicare using the number on your Medicare card."
+    },
+    {
+      "id": "G03",
+      "title": "Lookalike website addresses",
+      "text": "Scammers use web addresses that look almost like a real one, such as adding words like help, login, secure or renew, or changing the ending to .co or .net. A real agency website uses its official address only.",
+      "scam_type": "lookalike_site",
+      "orgs": [],
+      "red_flags": ["lookalike_link"],
+      "severity": "high",
+      "advice": "Never type personal details into a link from a text. Type the official address yourself or call."
+    },
+    {
+      "id": "G04",
+      "title": "Package delivery fee texts",
+      "text": "Fake delivery texts say a package is on hold and ask for a small redelivery or customs fee through a link. The post office does not text you asking for payment to deliver a package.",
+      "scam_type": "delivery",
+      "orgs": ["USPS"],
+      "red_flags": ["money_request", "urgency", "lookalike_link"],
+      "severity": "high",
+      "advice": "Do not pay. Track packages only on the official website you type in yourself."
+    },
+    {
+      "id": "G05",
+      "title": "Grandchild in trouble or new number",
+      "text": "In the grandparent scam a caller or texter says they are your grandchild, has a new number, and needs money fast for an emergency. They often ask you to keep it secret.",
+      "scam_type": "grandparent",
+      "orgs": [],
+      "red_flags": ["new_number", "money_request", "secrecy", "urgency"],
+      "severity": "high",
+      "advice": "Call your grandchild on the number you already have saved, or ask another family member."
+    },
+    {
+      "id": "G06",
+      "title": "Never share codes or passwords",
+      "text": "No real bank, pharmacy or agency will text asking you to send a verification code, PIN, password or Social Security number. Anyone asking for a code is trying to get into your account.",
+      "scam_type": "account_takeover",
+      "orgs": ["First City Bank", "Amazon"],
+      "red_flags": ["code_request"],
+      "severity": "high",
+      "advice": "Never share the code. Call your bank using the number on the back of your card."
+    },
+    {
+      "id": "G07",
+      "title": "Prize and lottery winner texts",
+      "text": "Texts saying you won a prize, lottery or gift and must pay a fee or click to claim it are scams. You cannot win a contest you did not enter.",
+      "scam_type": "prize",
+      "orgs": [],
+      "red_flags": ["prize", "money_request", "known_bad_link"],
+      "severity": "high",
+      "advice": "Delete the message. Do not pay any fee to claim a prize."
+    },
+    {
+      "id": "G08",
+      "title": "Payment by cryptocurrency or wire transfer",
+      "text": "Anyone who tells you to pay with Bitcoin, cryptocurrency, a crypto ATM or a wire transfer is almost always a scammer. Real agencies and companies do not demand these payments.",
+      "scam_type": "payment_scam",
+      "orgs": [],
+      "red_flags": ["crypto", "money_request"],
+      "severity": "high",
+      "advice": "Do not send the money. Talk to someone you trust first."
+    },
+    {
+      "id": "G09",
+      "title": "Hacked accounts of friends and family",
+      "text": "Sometimes a message really comes from a friend's or family member's saved number, but their account was hacked. A familiar name sending a strange link or asking for money is still a warning sign.",
+      "scam_type": "hacked_contact",
+      "orgs": [],
+      "red_flags": ["lookalike_link", "known_bad_link", "money_request"],
+      "severity": "medium",
+      "advice": "Do not click. Call that person on their usual number and ask if they sent it."
+    },
+    {
+      "id": "G10",
+      "title": "Fake bank fraud alerts",
+      "text": "Fake bank alerts say your account is locked or there is suspicious activity and send a link to log in. Your bank will not ask you to log in through a text link.",
+      "scam_type": "bank",
+      "orgs": ["First City Bank"],
+      "red_flags": ["threat", "urgency", "lookalike_link", "code_request"],
+      "severity": "high",
+      "advice": "Do not click. Call the number on the back of your bank card."
+    },
+    {
+      "id": "G11",
+      "title": "Fake tax or IRS threats",
+      "text": "Scammers pretend to be the IRS and threaten arrest or legal action unless you pay right away. The IRS first contacts people by mail, not by text.",
+      "scam_type": "impersonation",
+      "orgs": ["IRS"],
+      "red_flags": ["threat", "urgency", "money_request"],
+      "severity": "high",
+      "advice": "Do not pay. Call the IRS using a number from a letter or official website."
+    },
+    {
+      "id": "G12",
+      "title": "Social Security number suspended",
+      "text": "Texts or calls saying your Social Security number is suspended or linked to a crime are scams. Social Security numbers do not get suspended.",
+      "scam_type": "impersonation",
+      "orgs": ["Social Security"],
+      "red_flags": ["threat", "code_request", "urgency"],
+      "severity": "high",
+      "advice": "Do not give your number. Call Social Security using a number you look up yourself."
+    },
+    {
+      "id": "G13",
+      "title": "Shortened links hide where they go",
+      "text": "Short links such as bit.ly hide the real website address. In a text from someone you do not know, a short link is a reason to be careful.",
+      "scam_type": "lookalike_site",
+      "orgs": [],
+      "red_flags": ["shortened_link"],
+      "severity": "medium",
+      "advice": "Do not tap short links from unknown senders."
+    },
+    {
+      "id": "G14",
+      "title": "Messages that try to trick computer helpers",
+      "text": "Some scam messages include hidden instructions aimed at computer programs, such as saying the message is verified or should be marked safe. A real business does not need to tell a computer that its message is safe.",
+      "scam_type": "ai_manipulation",
+      "orgs": [],
+      "red_flags": ["ai_directed"],
+      "severity": "high",
+      "advice": "Treat the message as a scam and ask someone you trust."
+    },
+    {
+      "id": "G15",
+      "title": "Unknown callers asking you to call back",
+      "text": "A short message from an unknown number asking you to call back may be real, such as a doctor's office, but it can also be a trick. If you cannot tell, do not use the number in the message.",
+      "scam_type": "callback",
+      "orgs": [],
+      "red_flags": ["unknown_sender", "callback_request"],
+      "severity": "low",
+      "advice": "Call the office using a number you already have, such as from an appointment card, or ask a family member."
+    },
+    {
+      "id": "G16",
+      "title": "Real pharmacy refill reminders",
+      "text": "Real pharmacies send short refill reminders from their saved number. They may ask you to reply YES or to pick up your prescription, but they do not ask for codes, gift cards or payment links.",
+      "scam_type": "legit_pattern",
+      "orgs": ["Main Street Pharmacy"],
+      "red_flags": [],
+      "severity": "low",
+      "advice": "If the number is the one you saved for your pharmacy, this kind of reminder is normal."
+    },
+    {
+      "id": "G17",
+      "title": "Real appointment reminders",
+      "text": "Real doctors' offices send appointment reminders with the date and time and ask you to call the office. They do not ask for payment by gift card or for your passwords.",
+      "scam_type": "legit_pattern",
+      "orgs": [],
+      "red_flags": ["callback_request"],
+      "severity": "low",
+      "advice": "If you are unsure, call the office on the number on your appointment card."
+    },
+    {
+      "id": "G18",
+      "title": "Real bank alerts",
+      "text": "Real bank alerts come from the number you saved for your bank. They tell you about a purchase and ask you to call the number on your card, never to send a code or log in through a link.",
+      "scam_type": "legit_pattern",
+      "orgs": ["First City Bank"],
+      "red_flags": [],
+      "severity": "low",
+      "advice": "When in doubt, call the number on the back of your card."
+    },
+    {
+      "id": "G19",
+      "title": "Fake online shopping order problems",
+      "text": "Scam texts claim there is a problem with your Amazon order or a large purchase you did not make, and ask you to call or click to cancel it. They then ask for codes or payment.",
+      "scam_type": "impersonation",
+      "orgs": ["Amazon"],
+      "red_flags": ["urgency", "code_request", "lookalike_link", "callback_request"],
+      "severity": "high",
+      "advice": "Check your orders by opening the shopping app or website yourself."
+    },
+    {
+      "id": "G20",
+      "title": "Pressure and secrecy are warning signs",
+      "text": "Scammers rush you with words like now, today, immediately or final notice, and may tell you not to tell anyone. Real organizations give you time and let you talk to family.",
+      "scam_type": "pressure",
+      "orgs": [],
+      "red_flags": ["urgency", "secrecy", "threat"],
+      "severity": "medium",
+      "advice": "Slow down. Talk to someone you trust before you do anything."
+    }
+  ]
+}
