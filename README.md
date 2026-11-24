@@ -268,12 +268,7 @@ friend) are not shown for a message that claims to be an organization.
   scored as held-out.
 - **`python3 harness_runs.py --runs 3 [--mode keyword]`:** every demo case repeated with the live model.
 
-### Results (live `qwen3:8b`)
-
-> **To be regenerated after the round-3 fixes.** The numbers below are from the runs after the round-2
-> fixes; the round-3 code changes (concern-then-safe gate rule, rule coverage, tip relevance, the
-> traced help offer, the prompt word limit and the new `model_catches_miss` demo case) change the
-> source checksums, so all live evidence is regenerated and this section refreshed.
+### Results (live `qwen3:8b`, regenerated after the round-3 fixes)
 
 Labeled sets, one live run per message in each search mode (`evidence/eval/`). Held-out set 2 was written
 and committed before the round-2 rule changes (`evidence/eval/holdout2_rules_BEFORE.txt`).
@@ -282,23 +277,23 @@ and committed before the round-2 rule changes (`evidence/eval/holdout2_rules_BEF
 |---|---|---|---|---|---|---|
 | Final label correct | **25/25** | **25/25** | **11/12** | **11/12** | **13/14** | **13/14** |
 | False "safe" answers | 0 of 19 | 0 of 19 | 0 of 9 | 0 of 9 | 0 of 9 | 0 of 9 |
-| False alarms ("scam" on a safe message) | 0 of 6 | 0 of 6 | 0 of 3 | 0 of 3 | 0 of 5 | 1 of 5 |
-| Model's own last label correct | 96% | 96% | 100% | 92% | 86% | 86% |
-| Gate overrode the model | 1 | 1 | 1 | 2 | 1 | 1 |
-| Gate rejections (total) | 6 | 5 | 4 | 5 | 3 | 4 |
-| Average steps | 4.9 | 4.9 | 4.7 | 5.0 | 3.9 | 4.1 |
-| Distinct tool sequences | 12 | 13 | 10 | 9 | 8 | 9 |
+| False alarms ("scam" on a safe message) | 0 of 6 | 0 of 6 | 0 of 3 | 0 of 3 | 1 of 5 | 1 of 5 |
+| Model's own last label correct | 96% | 92% | 92% | 92% | 86% | 93% |
+| Gate overrode the model | 1 | 2 | 2 | 2 | 1 | 2 |
+| Gate rejections (total) | 8 | 8 | 5 | 5 | 4 | 5 |
+| Average steps | 5.1 | 5.0 | 4.9 | 5.0 | 4.2 | 4.3 |
+| Distinct tool sequences | 12 | 12 | 8 | 9 | 9 | 7 |
 
-Wrong answers (none of them "safe"):
+Wrong answers on the labeled sets (none of them "safe"):
 - **H03** (both modes): a USPS text with `.shop`/`.online` links. The links are only "unknown", so the
   evidence supports "not sure" rather than "scam".
-- **F11** ("I paid the fee today, thanks for the $40" from a saved contact): "not sure" with RAG and a
-  false alarm ("scam") with keyword search. Urgency plus a money word count as two weak signs. It was left
-  unfixed on purpose, so the held-out set is not tuned.
+- **F11** (both modes): "I paid the fee today, thanks for the $40" from a saved contact is a false alarm
+  ("scam"). Urgency plus a money word count as two weak signs. Left unfixed on purpose, so held-out set 2 is
+  not tuned.
 
 Who offered human help on the messages where it was offered (both search modes combined, from
-`helper_offered_by` in the result files): eval set, the model on its own 2 times and after a gate hint
-9 times; held-out set 1, 1 and 6; held-out set 2, 5 and 4.
+`helper_offered_by` in the result files): eval set, the model on its own 5 times and after a gate hint
+7 times; held-out set 1, 1 and 6; held-out set 2, 4 and 4.
 
 Guide retrieval, correct entry in the top 2 (`evidence/eval/retrieval_results.json`,
 `model_query_retrieval_results.json`):
@@ -306,9 +301,9 @@ Guide retrieval, correct entry in the top 2 (`evidence/eval/retrieval_results.js
 | Query | Keyword | Embeddings, no metadata | Metadata RAG |
 |---|---|---|---|
 | Full message text (21 messages) | 20/21 | 20/21 | **21/21** |
-| The model's own search queries (16 searches) | 15/16 | 15/16 | 15/16 |
+| The model's own search queries (17 searches) | 12/17 | 13/17 | **14/17** |
 
-Demo cases repeated 3 times in each search mode (`evidence/harness/`, 48 live runs):
+Demo cases repeated 3 times in each search mode (`evidence/harness/`, 54 live runs):
 
 | Case | Expected | RAG correct | Keyword correct | Stop reasons | Tools the model chose (most common) |
 |---|---|---|---|---|---|
@@ -318,30 +313,40 @@ Demo cases repeated 3 times in each search mode (`evidence/harness/`, 48 live ru
 | uncertain | not sure | 3/3 | 3/3 | success | extract > check_sender > search_guide > ask_human_helper |
 | injection ⚠️ | likely scam | 3/3 | 3/3 | success | extract > check_link > lookup_official_contact > check_sender > search_guide |
 | trusted_bad_link ⚠️ | likely scam | 3/3 | 3/3 | success | extract > check_link > check_sender > search_guide |
-| model_catches_miss ⚠️ | not sure | to be run | to be run | | (new in round 3; one single live check ended "not sure", see DEVLOG) |
+| model_catches_miss ⚠️ | not sure | 3/3 | **1/3** | RAG: 2 gate_downgrade, 1 success; keyword: 3 success | extract > check_sender > search_guide (> ask_human_helper) |
 | guide_missing ⚠️ | not sure | 3/3 | 3/3 | 5 tool_failure, 1 success | extract > check_sender > search_guide (FAILED) > ask_human_helper |
 | empty ⚠️ | not sure | 3/3 | 3/3 | invalid_input | none |
 
-**48/48 runs ended with the expected label.** In one RAG `guide_missing` run the model did not search
-the guide (extract > check_sender > ask_human_helper), so the tool failure did not happen in that run; the
-answer was still "not sure". On the uncertain demo case the model offered human help on its own in 1 of
-6 runs and after a gate hint in 5. Different tool orders per case and mode are listed as
-`distinct_tool_sequences` in `evidence/harness/*/results.json`.
+**52/54 demo runs ended with the expected label.** The two failures are real **false "safe" answers**:
+in 2 of the 3 keyword runs of `model_catches_miss` (a saved contact asking for cash to be handed to a
+stranger at the door), the rules found nothing, the model's guide search returned nothing relevant, and the
+model itself proposed "likely safe", so no concern was raised and the gate accepted the answer
+(`evidence/harness/keyword/run_model_catches_miss_1_trace.json`, `_2_`). In the other 4 runs the model was
+suspicious and the answer became "not sure" with human help. The guide has no entry about couriers
+collecting cash, and this case was not tuned after the failure. In one keyword `guide_missing` run the model
+did not search the guide, so the tool failure did not happen in that run; the answer was still "not sure".
+On the uncertain demo case the model offered human help on its own in 2 of 6 runs and after a gate hint in
+4. Different tool orders per case and mode are listed as `distinct_tool_sequences` in
+`evidence/harness/*/results.json`.
 
 ### What the results show (and do not show)
 
-- **No false "safe" answer in 150 live runs** (eval, both held-out sets and the demo harness, both search
-  modes; the PDF computes this total from every result file at build time). Where the model proposed "likely safe" without support, the gate rejected it; where the model was
-  worried but the rules found nothing, the answer became "not sure" with human help, never "safe".
+- **2 false "safe" answers in 156 live runs**, both on the one demo case built so that the rules miss it,
+  both in keyword mode. Everywhere else (eval, both held-out sets, all other demo cases) there was no false
+  "safe". When the model proposed "likely safe" without support the gate rejected it, and when the model was
+  worried but the rules found nothing the answer became "not sure", never "safe". **The remaining risk:** a
+  scam that both the rules and the model miss can still be called safe.
 - **The rules alone generalize poorly to new wording.** Each fresh held-out set exposed many misses before
   it was used for fixes: 6/12 on set 1 and 2/14 on set 2 (rules only). The scores after the fixes are
   optimistic because the fixes were made after seeing those kinds of failures.
-- **RAG does not change the outcome here.** It finds the right guide entry slightly more often with full
-  message text (21/21 vs. 20/21); with the model's own short queries all three modes tie (15/16). The final
-  labels do not depend on the search mode, because the guide never decides the verdict.
-- **The model still often needs a hint to ask for human help** on uncertain messages, and Python makes the
-  final call on every label. The model decides which evidence to gather, what to search for, when to stop,
-  how to explain, and it can make an answer more careful (never less).
+- **RAG helps retrieval a little, not the labels.** With the model's own queries metadata RAG found the right
+  guide entry most often (14/17 vs. 12/17 keyword); with full message text 21/21 vs. 20/21. The labeled-set
+  results are the same in both modes, because the guide never decides the verdict. On `model_catches_miss`
+  the RAG runs did better (3/3 vs. 1/3), but the model's judgment also varied between runs, so this is not
+  proof that RAG caused it.
+- **The model still often needs a hint to ask for human help**, and Python makes the final call on every
+  label. The model decides which evidence to gather, what to search for, when to stop, how to explain, and
+  it can make an answer more careful (never less).
 - **Limits of the evaluation:** the same person wrote the warning-sign rules, the guide and all test sets.
   Real scam texts are more varied.
 
