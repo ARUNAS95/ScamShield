@@ -777,6 +777,7 @@ def test_message_cannot_close_markers():
 def test_prompt_and_first_request_match_the_code():
     # The sentence limit in the prompt is the one check_readability enforces.
     assert ('at most %d short sentences' % agent.MAX_SENTENCES) in agent.make_system_prompt()
+    assert ('at most %d words each' % agent.MAX_WORDS_PER_SENTENCE) in agent.make_system_prompt()
     record = run('ordinary', [
         action('extract_signals'),
         action('check_sender', sender='+1-555-0142'),
@@ -1216,6 +1217,20 @@ def test_settings_come_from_environment_with_defaults():
         assert rag.EMBED_MODEL == 'nomic-embed-text'
 
 
+def test_model_setting_override_takes_effect():
+    import os
+    import subprocess
+    env = dict(os.environ)
+    env['SCAMSHIELD_MODEL'] = 'example-model:1b'
+    env['OLLAMA_URL'] = 'http://127.0.0.1:9/api/chat'
+    code = 'import scamshield_agent as a; print(a.MODEL); print(a.OLLAMA_URL)'
+    output = subprocess.run([sys.executable, '-c', code], cwd=str(Path(__file__).resolve().parent), env=env,
+                            capture_output=True, text=True, timeout=60)
+    assert output.returncode == 0, output.stderr
+    lines = output.stdout.strip().split('\n')
+    assert lines[-2:] == ['example-model:1b', 'http://127.0.0.1:9/api/chat'], lines
+
+
 # ------------------------------------------------------------------------
 
 def always_safe(context):
@@ -1311,11 +1326,13 @@ if __name__ == '__main__':
         ('RAG: embedding down -> keyword fallback', test_embedding_down_falls_back_to_keyword),
         ('RAG: legit pattern alone cannot make safe', test_legit_pattern_match_alone_cannot_make_safe),
         ('guide tip must fit the message (no G05 on the USPS case)', test_guide_tip_must_fit_the_message),
+        ('tip relevance: organization and main red flag (no G05/G09 on USPS)', test_tip_relevance_by_organization_and_main_flag),
         ('safe tip only for the sender\'s organization', test_safe_tip_only_for_the_senders_organization),
         ('checkpoint resume gives same result', test_checkpoint_resume_gives_same_result),
         ('resume of a finished run refuses', test_resume_of_finished_run_refuses),
         ('console shows NEXT OPTIONS (routing visible)', test_console_shows_next_options),
         ('settings come from environment variables with defaults', test_settings_come_from_environment_with_defaults),
+        ('SCAMSHIELD_MODEL override takes effect (subprocess)', test_model_setting_override_takes_effect),
     ]
     failed = 0
     for name, function in tests:
