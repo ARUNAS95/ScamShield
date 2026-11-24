@@ -11,11 +11,16 @@
     "safe_messages": 6,
     "uncertain_answers": 5,
     "gate_overrides": 1,
-    "gate_rejections_total": 6,
-    "average_steps": 5.0,
-    "messages_where_guide_was_searched": 18,
-    "guide_hit_when_searched": "13/16",
-    "distinct_tool_sequences": 12,
+    "gate_rejections_total": 5,
+    "average_steps": 4.88,
+    "messages_where_guide_was_searched": 17,
+    "guide_hit_when_searched": "14/15",
+    "distinct_tool_sequences": 13,
+    "helper_offered_by": {
+      "None": 19,
+      "model": 2,
+      "model_after_gate_hint": 4
+    },
     "per_category": {
       "scam": {
         "correct": 12,
@@ -66,7 +71,7 @@
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 12.3
+      "seconds": 18.0
     },
     {
       "id": "S02",
@@ -89,11 +94,11 @@
       "searched": true,
       "guide_ids": [
         "G11",
-        "G15"
+        "G01"
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 10.5
+      "seconds": 13.6
     },
     {
       "id": "S03",
@@ -115,12 +120,12 @@
       "rejected_proposals": 0,
       "searched": true,
       "guide_ids": [
-        "G02",
-        "G05"
+        "G12",
+        "G01"
       ],
-      "guide_hit": false,
+      "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 12.8
+      "seconds": 15.0
     },
     {
       "id": "S04",
@@ -148,7 +153,7 @@
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 12.3
+      "seconds": 14.1
     },
     {
       "id": "S05",
@@ -159,7 +164,7 @@
       "model_label": "likely_scam",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 5,
+      "steps": 6,
       "tools": [
         "extract_signals",
         "lookup_official_contact",
@@ -175,7 +180,7 @@
       ],
       "guide_hit": false,
       "helper_offered_by": null,
-      "seconds": 12.6
+      "seconds": 18.8
     },
     {
       "id": "S06",
@@ -198,12 +203,12 @@
       "rejected_proposals": 0,
       "searched": true,
       "guide_ids": [
-        "G03",
-        "G11"
+        "G10",
+        "G06"
       ],
-      "guide_hit": false,
+      "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 18.3
+      "seconds": 22.0
     },
     {
       "id": "S07",
@@ -230,7 +235,7 @@
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 11.1
+      "seconds": 11.9
     },
     {
       "id": "S08",
@@ -256,7 +261,7 @@
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 11.2
+      "seconds": 10.8
     },
     {
       "id": "S09",
@@ -277,7 +282,7 @@
       "guide_ids": [],
       "guide_hit": null,
       "helper_offered_by": null,
-      "seconds": 5.0
+      "seconds": 5.2
     },
     {
       "id": "S10",
@@ -299,11 +304,12 @@
       "rejected_proposals": 0,
       "searched": true,
       "guide_ids": [
-        "G04"
+        "G13",
+        "G16"
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 10.1
+      "seconds": 10.6
     },
     {
       "id": "S11",
@@ -327,11 +333,11 @@
       "searched": true,
       "guide_ids": [
         "G02",
-        "G03"
+        "G01"
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 12.0
+      "seconds": 12.5
     },
     {
       "id": "S12",
@@ -358,7 +364,7 @@
       ],
       "guide_hit": true,
       "helper_offered_by": "model",
-      "seconds": 14.1
+      "seconds": 15.0
     },
     {
       "id": "I01",
@@ -369,24 +375,18 @@
       "model_label": "likely_scam",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 6,
+      "steps": 3,
       "tools": [
         "extract_signals",
-        "check_link",
-        "lookup_official_contact",
-        "check_sender",
-        "search_scam_guide"
+        "check_link"
       ],
       "gate_rejections": 0,
       "rejected_proposals": 0,
-      "searched": true,
-      "guide_ids": [
-        "G10",
-        "G18"
-      ],
-      "guide_hit": true,
+      "searched": false,
+      "guide_ids": [],
+      "guide_hit": null,
       "helper_offered_by": null,
-      "seconds": 13.9
+      "seconds": 7.0
     },
     {
       "id": "I02",
@@ -413,7 +413,7 @@
       ],
       "guide_hit": true,
       "helper_offered_by": null,
-      "seconds": 11.5
+      "seconds": 11.9
     },
     {
       "id": "L01",
@@ -436,7 +436,7 @@
       "guide_ids": [],
       "guide_hit": null,
       "helper_offered_by": null,
-      "seconds": 8.2
+      "seconds": 9.0
     },
     {
       "id": "L02",
@@ -482,7 +482,7 @@
       "guide_ids": [],
       "guide_hit": null,
       "helper_offered_by": null,
-      "seconds": 9.0
+      "seconds": 9.1
     },
     {
       "id": "L04",
@@ -504,7 +504,7 @@
       "guide_ids": [],
       "guide_hit": null,
       "helper_offered_by": null,
-      "seconds": 6.4
+      "seconds": 6.2
     },
     {
       "id": "L05",
@@ -540,8 +540,8 @@
       "steps": 4,
       "tools": [
         "extract_signals",
-        "check_sender",
-        "lookup_official_contact"
+        "lookup_official_contact",
+        "check_sender"
       ],
       "gate_rejections": 0,
       "rejected_proposals": 0,
@@ -549,7 +549,7 @@
       "guide_ids": [],
       "guide_hit": null,
       "helper_offered_by": null,
-      "seconds": 9.3
+      "seconds": 8.3
     },
     {
       "id": "U01",
@@ -575,8 +575,8 @@
         "G17"
       ],
       "guide_hit": true,
-      "helper_offered_by": "model",
-      "seconds": 19.9
+      "helper_offered_by": "model_after_gate_hint",
+      "seconds": 18.8
     },
     {
       "id": "U02",
@@ -599,11 +599,11 @@
       "searched": true,
       "guide_ids": [
         "G15",
-        "G12"
+        "G05"
       ],
       "guide_hit": true,
-      "helper_offered_by": "model",
-      "seconds": 20.5
+      "helper_offered_by": "model_after_gate_hint",
+      "seconds": 19.3
     },
     {
       "id": "U03",
@@ -614,20 +614,20 @@
       "model_label": "uncertain",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 6,
+      "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
         "search_scam_guide",
         "ask_human_helper"
       ],
-      "gate_rejections": 1,
+      "gate_rejections": 0,
       "rejected_proposals": 0,
       "searched": true,
       "guide_ids": [],
       "guide_hit": null,
       "helper_offered_by": "model",
-      "seconds": 19.1
+      "seconds": 13.4
     },
     {
       "id": "U04",
@@ -635,7 +635,7 @@
       "expected": "uncertain",
       "final_label": "uncertain",
       "correct": true,
-      "model_label": "likely_safe",
+      "model_label": "likely_scam",
       "gate_overrode_model": true,
       "stop_reason": "gate_downgrade",
       "steps": 7,
@@ -654,8 +654,8 @@
         "G04"
       ],
       "guide_hit": null,
-      "helper_offered_by": "model",
-      "seconds": 21.8
+      "helper_offered_by": "model_after_gate_hint",
+      "seconds": 23.7
     },
     {
       "id": "U05",
@@ -681,8 +681,8 @@
         "G01"
       ],
       "guide_hit": true,
-      "helper_offered_by": "model",
-      "seconds": 23.0
+      "helper_offered_by": "model_after_gate_hint",
+      "seconds": 26.4
     }
   ]
 }

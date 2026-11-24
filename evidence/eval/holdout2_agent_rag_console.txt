@@ -1,0 +1,27 @@
+F01  likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+F02  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+F03  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
+F04  likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+F05  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+F06  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+F07  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+F08  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+F09  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+F10  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+F11  likely_safe  -> uncertain    WRONG success         steps=5  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+F12  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+F13  uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+F14  uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+
+AGENT (rag search): 13/14 correct = 93%
+  false "safe" answers : 0 of 9 messages that are not safe
+  false alarms (scam)  : 0 of 5 safe messages
+  uncertain answers    : 3
+  model last label right: 86%   gate overrides: 1   gate rejections: 3
+  average steps        : 3.93   distinct tool sequences: 8
+  guide searched in 6 messages; correct guide entry used: 2/3
+  human help offered by: {"None": 10, "model": 2, "model_after_gate_hint": 2}
+  scam          7/7
+  legit         4/5
+  uncertain     2/2
+Saved: evidence/eval/holdout2_agent_rag_results.json

@@ -1,6 +1,8 @@
 {
   "goal": "Decide whether one text message is likely a scam, likely safe, or uncertain, and explain why in plain words an older adult can understand.",
   "model": "qwen3:8b",
+  "system_prompt": null,
+  "first_request": null,
   "case": "empty",
   "message": {
     "sender": "+1-555-0163",
@@ -29,5 +31,6 @@
   "helper_offered": false,
   "helper_offered_by": null,
   "helper_consent": null,
+  "model_concern_kept": false,
   "trace": []
 }
