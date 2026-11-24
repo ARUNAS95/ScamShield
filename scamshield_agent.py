@@ -1142,7 +1142,8 @@ def make_system_prompt():
     prompt += 'If you are unsure, search_scam_guide can tell you whether a message like this matches a known scam '
     prompt += 'or a normal pattern.\n\n'
     prompt += 'Explanation rules: start with the verdict ("This looks like a scam." / "This message looks safe." / '
-    prompt += '"We are not sure about this message."). Use at most %d short sentences of everyday words. ' % MAX_SENTENCES
+    prompt += ('"We are not sure about this message."). Use at most %d short sentences of everyday words, '
+               'at most %d words each. ' % (MAX_SENTENCES, MAX_WORDS_PER_SENTENCE))
     prompt += 'Mention every strong warning sign. Do not write links, phone numbers, or words like phishing, '
     prompt += 'domain or URL; say "the link in the message" instead.\n'
     return prompt
