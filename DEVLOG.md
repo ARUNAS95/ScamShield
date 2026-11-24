@@ -363,6 +363,19 @@ separately after this change.
    - Test: "helper then safe is never safe".
 - Test count: 94 (up from 88). `python3 tests.py --break-gate`: **23 of 94 fail** with the broken gate.
 
+## Nov 24, 2026: Live results after the round-4 fixes
+
+- 156 live runs again. Eval 25/25 (RAG) and 24/25 (keyword), held-out 1 11/12 in both, held-out 2 12/14
+  (RAG) and 13/14 (keyword); demo harness 53/54.
+- **1 false "safe"** (was 2): keyword run 1 of `model_catches_miss`, where the model was not worried. In
+  keyword runs 2 and 3 the model offered human help on its own and the new "help counts as concern" rule
+  turned its later "safe" into "not sure".
+- **The cost of more caution:** L03 (a real bank purchase alert, keyword) and F09 (a birthday gift card
+  from family, RAG) ended "not sure" because the model was worried or offered help first.
+- `guide_missing`: the model searched the guide in only 2 of 6 runs, so the tool failure appears in
+  `evidence/harness/rag/run_guide_missing_2_console.txt` and keyword run 1; the demo script and the PDF now
+  point to a run where it really failed.
+
 ## What came from the course and what is new
 
 | From the course (Agent Airways, bare-bones notebook, PR #31, Harness assignment, robust browser agent note, Nov 4 notes) | New in ScamShield |

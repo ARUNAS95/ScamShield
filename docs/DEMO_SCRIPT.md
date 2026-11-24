@@ -2,7 +2,7 @@
 
 Five short live runs: an ordinary message (safe), a clear scam, an uncertain message (routing and
 human help), and two problem cases: a tool failure, and a scam the rules miss (when the model is worried
-the answer becomes "not sure"; if the model is not worried either, it can be called safe: 2 of 6 saved runs, both keyword mode). The prompt injection is an optional extra if time is left.
+the answer becomes "not sure"; if the model is not worried either, it can be called safe: 1 of 6 saved runs, keyword mode). The prompt injection is an optional extra if time is left.
 Every command uses `--consent yes`, so the simulated family-alert question never waits for typing.
 
 ## Before class (5 minutes, not part of the talk)
@@ -20,7 +20,7 @@ python3 scamshield_agent.py --case ordinary --consent yes --quiet   # warms up t
   `evidence/harness/rag/run_ordinary_1_console.txt`,
   `evidence/harness/rag/run_scam_1_console.txt`,
   `evidence/harness/rag/run_uncertain_1_console.txt`,
-  `evidence/harness/rag/run_guide_missing_1_console.txt`,
+  `evidence/harness/rag/run_guide_missing_2_console.txt`,
   `evidence/harness/rag/run_model_catches_miss_1_console.txt`,
   `evidence/harness/rag/run_injection_1_console.txt` (optional extra).
 - Have the slide "How it works" (the diagram) ready to switch back to.
@@ -121,7 +121,7 @@ Point at:
 2. Banner: **NOT SURE**, **STOP REASON : tool_failure**. Say: "After a tool failure the answer can never be 'safe'."
 
 The model does not always search the guide. If it does not, there is no tool failure in this run (the
-answer is still "not sure"): show the saved run where it did, `evidence/harness/rag/run_guide_missing_1_console.txt`.
+answer is still "not sure"): show the saved run where it did, `evidence/harness/rag/run_guide_missing_2_console.txt`.
 
 ### 3:50 to 4:45: run 5, a scam the rules miss (the model's concern)
 
@@ -141,7 +141,7 @@ Point at:
    rejects that too: "you raised a concern earlier; answer uncertain and use ask_human_helper".
 4. Banner: **NOT SURE - ASK SOMEONE YOU TRUST**, human help offered. Say: "The rules missed it; the
    model's concern made it 'not sure'. Python can block the model's label, but the model's worry can only
-   make the answer more careful. If the model is not worried either, nothing catches it: in 2 of our 6
+   make the answer more careful. If the model is not worried either, nothing catches it: in 1 of our 6
    saved runs (keyword mode) it was called safe. That is the main limit of this design."
 
 The model decides the tool order and whether it is worried. If it is not worried, the evidence alone
@@ -176,7 +176,7 @@ test 'injection cannot make message safe' shows that with a scripted model that 
 | Ollama is slow (a step takes more than about 20 s) | Press Ctrl+C and show the matching saved console log, e.g. `cat evidence/harness/rag/run_uncertain_1_console.txt`. Say: "This is the same command, recorded earlier." |
 | Ollama is not running | `ollama serve` in another tab, or use the saved console logs. Optionally show the safe failure: the run retries the model call twice and then stops with `model_error`, never "safe". |
 | `model_catches_miss` run is slow or ends differently | Show `evidence/harness/rag/run_model_catches_miss_1_console.txt`; if the live model ever called it safe, say so honestly: the rules cannot see this trick, and only a worried model or a human can. |
-| `guide_missing` run did not search the guide (no tool failure) | Show `evidence/harness/rag/run_guide_missing_1_console.txt`, a saved run where the search failed and the stop reason is `tool_failure`. |
+| `guide_missing` run did not search the guide (no tool failure) | Show `evidence/harness/rag/run_guide_missing_2_console.txt`, a saved run where the search failed and the stop reason is `tool_failure`. |
 | The model chooses a different tool order than expected | Good: point out that the order is the model's decision and Python only checks it. |
 | A `MODEL ERROR ... (retry 1 of 2)` line appears | Point at it: a failed model call is retried and the retry is recorded in the trace. |
 | Questions about a different message | `python3 scamshield_agent.py --message "Your package is waiting, pay $2 at usps-help.co" --sender "+1-555-0123" --consent yes` (fictional only). |
