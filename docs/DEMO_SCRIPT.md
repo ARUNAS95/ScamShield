@@ -23,8 +23,8 @@ python3 scamshield_agent.py --case ordinary --consent yes --quiet   # warms up t
   `evidence/harness/run_scam_1_console.txt`,
   `evidence/harness/run_uncertain_1_console.txt`,
   a `guide_missing` run where the search really failed (find it with
-  `grep -l "search_scam_guide(FAILED)" evidence/harness/run_guide_missing_*_console.txt`),
-  `evidence/harness/run_model_catches_miss_1_console.txt` (backup),
+  `evidence/harness/run_guide_missing_1_console.txt`),
+  `evidence/harness/run_model_catches_miss_3_console.txt` (backup; runs 1 and 2 are the honest "safe" failures),
   `evidence/harness/run_injection_1_console.txt` (backup).
 - Have the slide "How it works" (the diagram) ready to switch back to.
 
@@ -115,7 +115,7 @@ Point at:
 python3 scamshield_agent.py --case guide_missing --consent yes
 ```
 
-Say: "Same doctor's-office text, but the scam guide file is missing."
+Say: "A delivery text from an unknown number that names USPS, and the scam guide file is missing."
 
 Point at:
 1. If the model searches the guide: `TOOL RESULT : TOOL FAILURE: ... FileNotFoundError ...`. Say: "The
@@ -177,8 +177,8 @@ test 'injection cannot make message safe' shows that with a scripted model that 
 |---|---|
 | Ollama is slow (a step takes more than about 20 s) | Press Ctrl+C and show the matching saved console log, e.g. `cat evidence/harness/run_uncertain_1_console.txt`. Say: "This is the same command, recorded earlier." |
 | Ollama is not running | `ollama serve` in another tab, or use the saved console logs. Optionally show the safe failure: the run retries the model call twice and then stops with `model_error`, never "safe". |
-| `model_catches_miss` run is slow or ends differently | Show `evidence/harness/run_model_catches_miss_1_console.txt`; if the live model ever called it safe, say so honestly: the rules cannot see this trick, and only a worried model or a human can. |
-| `guide_missing` run did not search the guide (no tool failure) | Show the saved run found with `grep -l "search_scam_guide(FAILED)" evidence/harness/run_guide_missing_*_console.txt`, where the search failed and the stop reason is `tool_failure`. |
+| `model_catches_miss` run is slow or ends differently | Show `evidence/harness/run_model_catches_miss_3_console.txt`; if the live model ever called it safe, say so honestly: the rules cannot see this trick, and only a worried model or a human can. |
+| `guide_missing` run did not search the guide (no tool failure) | Show `evidence/harness/run_guide_missing_1_console.txt`, where the search failed and the stop reason is `tool_failure`. |
 | The model chooses a different tool order than expected | Good: point out that the order is the model's decision and Python only checks it. |
 | A `MODEL ERROR ... (retry 1 of 2)` line appears | Point at it: a failed model call is retried and the retry is recorded in the trace. |
 | Questions about a different message | `python3 scamshield_agent.py --message "Your package is waiting, pay $2 at usps-help.co" --sender "+1-555-0123" --consent yes` (fictional only). |

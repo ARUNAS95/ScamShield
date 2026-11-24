@@ -453,8 +453,9 @@ live results (eval and harness) are regenerated after this change.
   careful. This idea comes straight from `check_goal()` in the Agent Airways class agent.
 - **A design decision I went back and forth on:** whether to use LangGraph. I asked whether it was
   necessary, and decided on plain Python because the rubric does not require it, it would not make the
-  answers more accurate, and a plain loop shows every decision in the demo. I also chose metadata RAG as
-  my one innovation instead of adding several, and later questioned whether a 1,000-message dataset was
+  answers more accurate, and a plain loop shows every decision in the demo. I first added metadata RAG with
+  embeddings as an innovation, then cut it back to a simple metadata search over the guide when a review
+  showed it did not change the answers and only added things to explain. I also questioned whether a 1,000-message dataset was
   over-complicating the project; I settled on a smaller, blind-written 614-message test.
 - **The hardest problem for me:** making the agent really agentic and really safe at the same time. The
   critic reviews kept finding ways a scam could still be called "safe" (a flip from "scam" to "safe", a
