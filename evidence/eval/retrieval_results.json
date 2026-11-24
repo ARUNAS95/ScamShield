@@ -1,0 +1,686 @@
+{
+  "summary": {
+    "keyword": {
+      "hit_at_2": 0.952,
+      "hits": 20,
+      "messages": 21,
+      "keyword_fallbacks": 0
+    },
+    "rag_no_metadata": {
+      "hit_at_2": 0.952,
+      "hits": 20,
+      "messages": 21,
+      "keyword_fallbacks": 0
+    },
+    "rag": {
+      "hit_at_2": 1.0,
+      "hits": 21,
+      "messages": 21,
+      "keyword_fallbacks": 0
+    }
+  },
+  "rows": [
+    {
+      "id": "S01",
+      "category": "scam",
+      "expected_guide": [
+        "G02",
+        "G03"
+      ],
+      "keyword": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S02",
+      "category": "scam",
+      "expected_guide": [
+        "G11"
+      ],
+      "keyword": {
+        "top2": [
+          "G20",
+          "G11"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G20",
+          "G11"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G20",
+          "G11"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S03",
+      "category": "scam",
+      "expected_guide": [
+        "G12"
+      ],
+      "keyword": {
+        "top2": [
+          "G12",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G12",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G12",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S04",
+      "category": "scam",
+      "expected_guide": [
+        "G04"
+      ],
+      "keyword": {
+        "top2": [
+          "G04",
+          "G03"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G04",
+          "G03"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G04",
+          "G03"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S05",
+      "category": "scam",
+      "expected_guide": [
+        "G19",
+        "G06"
+      ],
+      "keyword": {
+        "top2": [
+          "G06",
+          "G19"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G06",
+          "G19"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G06",
+          "G19"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S06",
+      "category": "scam",
+      "expected_guide": [
+        "G10"
+      ],
+      "keyword": {
+        "top2": [
+          "G10",
+          "G18"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G10",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G10",
+          "G03"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S07",
+      "category": "scam",
+      "expected_guide": [
+        "G07"
+      ],
+      "keyword": {
+        "top2": [
+          "G07",
+          "G03"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G07",
+          "G03"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G07",
+          "G09"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S08",
+      "category": "scam",
+      "expected_guide": [
+        "G05"
+      ],
+      "keyword": {
+        "top2": [
+          "G05",
+          "G14"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G05",
+          "G14"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G05",
+          "G15"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S09",
+      "category": "scam",
+      "expected_guide": [
+        "G08"
+      ],
+      "keyword": {
+        "top2": [
+          "G08",
+          "G14"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G08",
+          "G14"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G08",
+          "G07"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S10",
+      "category": "scam",
+      "expected_guide": [
+        "G13",
+        "G04"
+      ],
+      "keyword": {
+        "top2": [
+          "G04",
+          "G13"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G04",
+          "G13"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G04",
+          "G13"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S11",
+      "category": "scam",
+      "expected_guide": [
+        "G02",
+        "G03"
+      ],
+      "keyword": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "S12",
+      "category": "scam",
+      "expected_guide": [
+        "G09",
+        "G01",
+        "G05"
+      ],
+      "keyword": {
+        "top2": [
+          "G01",
+          "G15"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G01",
+          "G15"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G01",
+          "G05"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "I01",
+      "category": "injection",
+      "expected_guide": [
+        "G14",
+        "G10"
+      ],
+      "keyword": {
+        "top2": [
+          "G06",
+          "G10"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G06",
+          "G10"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G10",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "I02",
+      "category": "injection",
+      "expected_guide": [
+        "G14",
+        "G12"
+      ],
+      "keyword": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": false,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G02",
+          "G01"
+        ],
+        "hit": false,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G15",
+          "G14"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "L01",
+      "category": "legit",
+      "expected_guide": [
+        "G16"
+      ],
+      "keyword": {
+        "top2": [
+          "G16",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G16",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G16",
+          "G17"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "L02",
+      "category": "legit",
+      "expected_guide": [
+        "G16"
+      ],
+      "keyword": {
+        "top2": [
+          "G16",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G16",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G16",
+          "G09"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "L03",
+      "category": "legit",
+      "expected_guide": [
+        "G18"
+      ],
+      "keyword": {
+        "top2": [
+          "G18",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G18",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G18",
+          "G06"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "L06",
+      "category": "legit_urgent",
+      "expected_guide": [
+        "G16"
+      ],
+      "keyword": {
+        "top2": [
+          "G16",
+          "G17"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G16",
+          "G17"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G16",
+          "G17"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "U01",
+      "category": "uncertain",
+      "expected_guide": [
+        "G17",
+        "G15"
+      ],
+      "keyword": {
+        "top2": [
+          "G15",
+          "G17"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G17",
+          "G15"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G15",
+          "G17"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "U02",
+      "category": "uncertain",
+      "expected_guide": [
+        "G05",
+        "G15"
+      ],
+      "keyword": {
+        "top2": [
+          "G05",
+          "G12"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G05",
+          "G15"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G05",
+          "G15"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    },
+    {
+      "id": "U05",
+      "category": "uncertain",
+      "expected_guide": [
+        "G15",
+        "G17"
+      ],
+      "keyword": {
+        "top2": [
+          "G15",
+          "G18"
+        ],
+        "hit": true,
+        "retrieval_mode": "keyword"
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G15",
+          "G18"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag_no_metadata"
+      },
+      "rag": {
+        "top2": [
+          "G15",
+          "G18"
+        ],
+        "hit": true,
+        "retrieval_mode": "rag"
+      }
+    }
+  ]
+}
