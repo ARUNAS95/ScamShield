@@ -1255,6 +1255,9 @@ def why_label_needs(label, context):
         + '; '.join(problems)
 
 
+CONCERN_FEEDBACK = 'you raised a concern earlier; answer uncertain and use ask_human_helper'
+
+
 def help_first_note(context):
     if context['sender_checked']:
         return 'use ask_human_helper first'
@@ -1293,6 +1296,11 @@ def check_verdict(argument, context):
         ok = supported == 'likely_safe'
         checks.append({'rule': 'evidence supports likely_safe', 'ok': ok,
                        'detail': 'ok' if ok else why_label_needs('likely_safe', context)})
+        # The model's concern can only make the answer more careful: after
+        # it proposed likely_scam or uncertain, "safe" is never accepted.
+        concerned = model_was_concerned(context)
+        checks.append({'rule': 'likely_safe is not allowed after you raised a concern', 'ok': not concerned,
+                       'detail': CONCERN_FEEDBACK if concerned else 'ok'})
     elif label == 'likely_scam':
         ok = supported == 'likely_scam'
         checks.append({'rule': 'evidence supports likely_scam', 'ok': ok,
@@ -1728,9 +1736,10 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
 
 def handle_done(argument, context, record, verbose):
     """Check a proposed verdict. Returns (feedback_for_model, accepted_or_None)."""
-    context['model_labels'].append(argument.get('label'))
     record['validation_ok'] = True
+    # The gate looks at the labels the model proposed BEFORE this one.
     accepted, checks = check_verdict(argument, context)
+    context['model_labels'].append(argument.get('label'))
     record['check_result'] = {'gate': checks, 'supported_label': supported_label(context)}
 
     if not accepted:
@@ -1749,9 +1758,13 @@ def handle_done(argument, context, record, verbose):
             return None, None
         record['state_update'] = 'Gate rejected the verdict; feedback sent to the model.'
         supported = supported_label(context)
-        hint = 'With the evidence so far, Python can support: ' + supported
-        if supported == 'uncertain' and not context['helper_offered']:
-            hint += ' (' + help_first_note(context) + ')'
+        if supported == 'likely_safe' and model_was_concerned(context):
+            # Never invite "safe" after the model raised a concern.
+            hint = 'You raised a concern, so likely_safe will not be accepted; answer uncertain'
+        else:
+            hint = 'With the evidence so far, Python can support: ' + supported
+            if supported == 'uncertain' and not context['helper_offered']:
+                hint += ' (' + help_first_note(context) + ')'
         if argument.get('label') == 'likely_scam' and supported != 'likely_scam':
             # The model sees danger that the rules did not record. Python
             # cannot confirm a scam without a recorded warning sign, but the
@@ -1827,6 +1840,13 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         source = 'template'
     elif accepted is not None:
         label, explanation, source = accepted
+        if label == 'likely_safe' and model_was_concerned(context):
+            # Backstop for the gate rule above: an accepted "safe" after the
+            # model said likely_scam or uncertain becomes uncertain + help.
+            label = 'uncertain'
+            context['model_concern_kept'] = True
+            explanation = template_explanation(label, context)
+            source = 'template'
     else:
         # The model did not give an accepted answer: Python decides from evidence.
         label = supported_label(context)
