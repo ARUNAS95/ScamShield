@@ -26,7 +26,14 @@ Two parts:
 --set holdout  12 held-out messages in data/eval_holdout.json, written
                in different wording from the rules BEFORE the round-1
                rule changes (paraphrases, look-alike letters, new web
-               address endings, payment apps). They are never tuned.
+               address endings, payment apps). The rules were adjusted
+               after seeing its failures, so it is no longer a true
+               held-out score.
+--set holdout2 14 messages in data/eval_holdout2.json, written BEFORE the
+               round-3 rule changes (brand gift cards, a Cyrillic
+               look-alike link, a defanged link, harmless risky words
+               from saved contacts). Its before/after scores are in
+               evidence/eval/holdout2_rules_BEFORE.txt and _AFTER.txt.
 
 Results are saved in evidence/eval/.
 """
@@ -46,6 +53,7 @@ HERE = Path(__file__).resolve().parent
 EVAL_FILES = {
     'eval': HERE / 'data' / 'eval_set.json',
     'holdout': HERE / 'data' / 'eval_holdout.json',
+    'holdout2': HERE / 'data' / 'eval_holdout2.json',
 }
 OUT_DIR = HERE / 'evidence' / 'eval'
 
@@ -397,7 +405,7 @@ if __name__ == '__main__':
     parser.add_argument('--rules', action='store_true',
                         help='check the warning-sign rules alone (instant, no model, no embeddings)')
     parser.add_argument('--set', choices=list(EVAL_FILES), default='eval',
-                        help='which labeled set: eval (25 messages) or holdout (12 held-out messages)')
+                        help='which labeled set: eval (25 messages), holdout (12) or holdout2 (14, written before round 3)')
     args = parser.parse_args()
     if not args.retrieval and not args.agent and not args.model_queries and not args.rules:
         parser.print_help()
