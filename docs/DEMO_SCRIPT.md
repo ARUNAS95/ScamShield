@@ -150,7 +150,7 @@ would support "safe": that is the honest limit of the rules (see Known limitatio
 ### 4:45 to 5:00: wrap-up
 
 ```bash
-python3 -m json.tool evidence/guide_missing_trace.json | head -40
+python3 -m json.tool evidence/harness/rag/run_guide_missing_2_trace.json | head -40   # a saved run where the guide search really failed
 ```
 
 Say: "Every step is saved with the raw model reply, the validation result, the observation and the

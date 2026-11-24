@@ -488,7 +488,7 @@ for (let i = 0; i < D.holdout2_after_wrong.length; i++) {
   wrongIds.push(D.holdout2_after_wrong[i].id + ' (expected ' + D.holdout2_after_wrong[i].expected + ', rules say ' +
     D.holdout2_after_wrong[i].supported + ')');
 }
-text(s, 'Wrong live answers (none "safe"): ' + (D.live_wrong.length ? D.live_wrong.join('; ') : 'none') +
+text(s, 'Wrong answers on the labeled sets (none "safe"): ' + (D.live_wrong.length ? D.live_wrong.join('; ') : 'none') +
   '.   Rules only: ' + (wrongIds.length ? wrongIds.join('; ') : 'none'),
   { x: 0.6, y: 6.3, w: 12.1, h: 0.65, fontSize: 13, color: MUTED, italic: true });
 s.addNotes('All numbers on this slide are read from the evidence files when the deck is built. The offline tests use ' +
