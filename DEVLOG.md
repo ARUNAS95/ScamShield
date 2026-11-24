@@ -376,6 +376,50 @@ separately after this change.
   `evidence/harness/rag/run_guide_missing_2_console.txt` and keyword run 1; the demo script and the PDF now
   point to a run where it really failed.
 
+## Nov 24, 2026: Simplification after the over-complication review
+
+A strict review against the rubric ("a small, reliable agent can receive full credit; no extra points
+for complexity", and criterion 6: I must be able to explain my own work) found the core right-sized but
+the extras too big for a small individual project. The extras were cut without touching the core.
+
+**What was cut, and why** (none of it earns a rubric point, and each part was one more thing to explain):
+- **Checkpointing** (`--resume`, `--stop-after`, the checkpoint file and its "finished" marker). It came
+  from the Canvas Nov 4 notes as an idea, not a requirement. It is now listed under "Possible extensions"
+  in the README.
+- **Embeddings and the three search modes.** The guide search used `nomic-embed-text` embeddings (a
+  second Ollama model, an embedding cache file, a cosine function, a fallback path) and had three modes
+  (keyword, embeddings without metadata, full) so they could be compared. Finding 7 already showed the
+  embeddings added almost nothing on this data. Now there is one search: keyword scoring plus the metadata
+  rules (org filter, red-flag boost, other-organization penalty), honestly called "metadata search over
+  the scam guide". Only `qwen3:8b` is needed. `eval.py --retrieval`, `--model-queries` and `--mode`, and
+  `harness_runs.py --mode` are gone; eval and harness run one mode.
+- **A duplicate safety backstop.** The "model concern never becomes safe" rule was enforced three times.
+  It now lives in one place: the gate rejects a "safe" after any model concern, and when the gate gives up,
+  `finish_run` uses the supported label but never "safe" for a concerned model. The removed backstop in
+  `finish_run` could only fire if the gate had already failed. `helper_offered_by` now has two values,
+  `model` and `python`; the third value (`model_after_gate_hint`) and its counting were dropped. The traces
+  still show that the model often offers help only after the gate's feedback, and the README says so.
+- **The environment-variable subprocess test.** `OLLAMA_URL` and `SCAMSHIELD_MODEL` still work (like the
+  class notebook); only the slow subprocess test was removed.
+
+**What was kept, and why:** the loop, the 6 tools, the parser and validator, routing with `NEXT OPTIONS`,
+the verdict gate and the "safe" rule (including the phone-number rule), link and text normalization (it
+carries most of the detection quality), the readability check, human help with consent, the problem
+cases, the post-checks, model-call retries, the stop reasons, the harness and all four test sets. These
+are what the rubric grades or what keeps the answers safe.
+
+**Naming:** the held-out sets are now called test set 2 (`eval_holdout.json`) and test set 3
+(`eval_holdout2.json`): they were written before rule fixes and then used to fix rules, so they are no
+longer held out. The 614-message set is the large blind test set: it was written by a separate AI agent
+that never saw the rules, and it is frozen.
+
+**Checks after the change:** 90 offline tests pass (94 before: the two checkpoint tests, the embedding
+fallback test, the backstop test and the subprocess test were removed; one test for the org filter was
+added). `python3 tests.py --break-gate`: 21 of 90 fail with the broken gate
+(`evidence/eval/break_gate_tests.txt`). The rules-only results are unchanged (test set 1 25/25, test set 2
+11/12, test set 3 13/14, large blind test set 526/614). Python code went from 4,555 to 4,134 lines. The
+live results (eval and harness) are regenerated after this change.
+
 ## What came from the course and what is new
 
 | From the course (Agent Airways, bare-bones notebook, PR #31, Harness assignment, robust browser agent note, Nov 4 notes) | New in ScamShield |
@@ -384,8 +428,8 @@ separately after this change.
 | Python decides success (`check_goal`) | Never-trimmed evidence ledger with `E#` ids |
 | "Treat page text as data" | Prompt-injection signals as strong warning signs, random-tag message markers |
 | Trace fields (step, raw_reply, ..., continue_or_stop) from the bare-bones notebook and PR #31 | Readability check and Python-written "what to do" line |
-| Repeated runs with an external runner | Metadata RAG with keyword fallback, and its evaluation |
-| State management / Verification / Checkpointing bullets in the course Canvas post "additional notes on Nov. 4 lecture and references" | Checkpoint after every step and `--resume` in plain Python (refuses to re-run a finished run) |
+| Repeated runs with an external runner | Metadata search over the scam guide (keyword scoring + metadata rules) |
+| State management / Verification / Checkpointing bullets in the course Canvas post "additional notes on Nov. 4 lecture and references" | State in the `context` dictionary and verification by the gate; checkpointing was built and then cut in the simplification (a possible extension) |
 | Retries and "verify, do not assume" (robust browser agent note) | Post-check of every tool's state change, model-call retries recorded in the trace |
 | Human approval with `input()` | Consent as a passed-in function, so automated runs never block |
 
