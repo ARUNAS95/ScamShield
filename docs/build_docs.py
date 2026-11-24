@@ -342,6 +342,79 @@ def parse_rules(text):
             'false_alarm': int(flags.group(2)) if flags else None, 'wrong': wrong}
 
 
+def wilson(hits, total):
+    """95% confidence range (Wilson score), the same formula eval.py uses."""
+    if not total:
+        return None
+    z = 1.96
+    p = hits / total
+    centre = (p + z * z / (2 * total)) / (1 + z * z / total)
+    half = z * (p * (1 - p) / total + z * z / (4 * total * total)) ** 0.5 / (1 + z * z / total)
+    return [round(max(0.0, centre - half), 3), round(min(1.0, centre + half), 3)]
+
+
+def percent_range(ci):
+    if not ci:
+        return PENDING
+    return '%d%% to %d%%' % (int(round(ci[0] * 100)), int(round(ci[1] * 100)))
+
+
+def large_test_numbers(rules_text, agent_data):
+    """Deck values for the large blind test set: rules only (always, from the
+    rules text file) and the live agent (only when its results file exists)."""
+    out = {'rules': None, 'agent': None, 'categories': []}
+    rules = parse_rules(rules_text)
+    rules_cats = {}
+    not_safe_total = 0
+    safe_total = 0
+    if rules_text:
+        for line in rules_text.splitlines():
+            parts = line.split()
+            if len(parts) > 4 and parts[4] in ('OK', 'WRONG') and parts[0][:1] == 'X':
+                cat = rules_cats.setdefault(parts[1], {'correct': 0, 'total': 0})
+                cat['total'] += 1
+                if parts[2] == 'likely_safe':
+                    safe_total += 1
+                else:
+                    not_safe_total += 1
+                if parts[4] == 'OK':
+                    cat['correct'] += 1
+    if rules:
+        ci = wilson(rules['correct'], rules['total'])
+        out['rules'] = {'score': slash(rules['correct'], rules['total']),
+                        'percent': '%d%%' % int(round(100.0 * rules['correct'] / rules['total'])),
+                        'range': percent_range(ci), 'ci': ci, 'accuracy': rules['correct'] / float(rules['total']),
+                        'false_safe': of(rules['false_safe'], not_safe_total),
+                        'false_alarm': of(rules['false_alarm'], safe_total)}
+    agent_cats = {}
+    if agent_data and agent_data.get('summary'):
+        s = agent_data['summary']
+        agent_cats = s.get('per_category') or {}
+        out['agent'] = {'score': slash(s.get('correct'), s.get('messages')),
+                        'percent': ('%d%%' % int(round(100 * s['accuracy']))) if s.get('accuracy') is not None else PENDING,
+                        'range': percent_range(s.get('accuracy_ci95')), 'ci': s.get('accuracy_ci95'),
+                        'accuracy': s.get('accuracy'),
+                        'false_safe': of(s.get('false_safe'), s.get('not_safe_messages')),
+                        'false_safe_range': percent_range(s.get('false_safe_rate_ci95')),
+                        'false_alarm': of(s.get('false_alarm'), s.get('safe_messages'))}
+    # the 6 weakest categories (lowest score first; the agent's when it exists)
+    ranked = agent_cats if agent_cats else rules_cats
+    names = sorted(ranked, key=lambda n: (ranked[n]['correct'] / float(ranked[n]['total']), -ranked[n]['total'], n))
+    for name in names[:6]:
+        row = {'category': name, 'rules': PENDING, 'agent': PENDING}
+        if name in rules_cats:
+            row['rules'] = slash(rules_cats[name]['correct'], rules_cats[name]['total'])
+        if name in agent_cats:
+            row['agent'] = slash(agent_cats[name]['correct'], agent_cats[name]['total'])
+        out['categories'].append(row)
+    out['category_count'] = len(rules_cats or agent_cats)
+    out['messages'] = (rules or {}).get('total') or (out['agent'] and agent_data['summary'].get('messages')) or PENDING
+    # how wide the range is for a small set, for the speaker notes: 80% right on 50 messages
+    out['small_example'] = percent_range(wilson(40, 50))
+    out['ranked_by'] = 'agent' if agent_cats else 'rules'
+    return out
+
+
 def parse_break_gate(text):
     """'BREAK-GATE EXPERIMENT: 19 of 80 tests failed ...' -> {'failed': 19, 'total': 80}"""
     if text is None:
@@ -976,6 +1049,8 @@ def main():
         'injection_runs': injection_runs, 'injection_fooled': rag_runs['model_fooled_injection'] + kw_runs['model_fooled_injection'],
         'injection_gate_rejections': rag_runs['injection_gate_rejections'] + kw_runs['injection_gate_rejections'],
         'example': None, 'gate_example': gate_example, 'problems': problem_deck, 'learned': learned_deck,
+        'large': large_test_numbers(read_text(EVAL_DIR + 'large_rules.txt'),
+                                    read_json(EVAL_DIR + 'large_agent_rag_results.json')),
     }
     for numbers in [eval_rag, eval_kw, hold_rag, hold_kw, hold2_rag, hold2_kw]:
         numbers.pop('wrong_rows', None)
