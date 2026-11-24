@@ -1347,7 +1347,10 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
     if trace_path is None:
         trace_path = EVIDENCE_DIR / (case_name + '_trace.json')
     save_json(trace_path, record)
-    record['trace_file'] = str(trace_path)
+    try:
+        record['trace_file'] = str(Path(trace_path).resolve().relative_to(HERE))
+    except ValueError:
+        record['trace_file'] = str(trace_path)
     print_final_banner(record)
     return record
 
