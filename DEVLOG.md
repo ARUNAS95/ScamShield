@@ -3,6 +3,11 @@
 A record of what was planned, what broke, and what changed. Each entry
 lists the problem, how it was found, the fix, and where the evidence is.
 
+Naming: "Critic review round N" is a strict review of the repository; the
+"round-N fixes" are the changes made after it. Some older commit messages
+call the round-2 fixes "round-3"; the commits cannot be renamed, so this
+note records the mapping.
+
 ## Nov 22, 2026: Planning
 
 - Read the approved proposal feedback: fictional messages, a small scam-prevention guide,
@@ -237,6 +242,65 @@ because its failures drove the round-1 fixes.
 `python3 tests.py --break-gate` replaces `supported_label` with "always likely_safe" and runs all
 tests: **19 of 80 fail** (`evidence/eval/break_gate_tests.txt`). The earlier counts (10 of 46 above,
 and 16 of 63 in the round-1 README) came from one-off manual experiments; it is now reproducible.
+
+## Nov 24, 2026: Critic review round 3
+
+A third review found one remaining safety hole, rule gaps, and places where the documents claimed more
+than the code or the evidence shows. Each code fix has offline tests (88 tests in total, up from 80).
+The live evidence is regenerated after these changes.
+
+### The "concern then safe" hole (safety)
+- **Problem:** the round-2 rule only applied when the gate gave up. If the model said likely_scam (rejected:
+  no recorded sign) and then likely_safe, the gate accepted "safe", because the feedback had even told it
+  "Python can support: likely_safe". The model's concern was lost.
+- **Fix:** `check_verdict` now rejects likely_safe after the model proposed likely_scam or uncertain earlier
+  in the run ("you raised a concern earlier; answer uncertain and use ask_human_helper"), the feedback no
+  longer offers "safe" after a concern, and `finish_run` turns an accepted "safe" after a concern into
+  "uncertain" with help as a backstop. Tests: "scam then safe is never safe", "uncertain then safe is
+  never safe", "accepted safe after a concern becomes uncertain (backstop)".
+
+### A demo case the rules miss
+- `model_catches_miss`: a saved contact (Emma) asks for cash to be handed to a stranger at the door. No rule
+  matches, so the evidence alone supports "safe". In one live check (`--case model_catches_miss`, RAG) the
+  model searched the guide, proposed likely_scam twice and offered human help after the gate hint; the gate
+  rejected both scam answers and the run ended **not sure** (`gate_downgrade`), never "safe". The repeated
+  runs are in `evidence/harness/` after the evidence is regenerated.
+
+### Rule coverage
+- New request wordings: Remitly, Wise, Google Pay, Apple Pay and Western Union; "I need you to wire 2000"
+  (a wire amount counts only with request words, so "thanks for the wire" does not); bank routing and
+  account details, sign-in codes, online banking logins and Medicare numbers; crypto wallet addresses,
+  USDT and "wallet address". "Venmo me back" is no longer flagged, and a card photo counts only for a bank
+  card, so "a photo of the front of the card I made for you" is harmless.
+- These are a regression list in `tests.py` (16 scams, 6 harmless texts), not a held-out score. The eval
+  set stays 25/25, held-out set 1 11/12 and held-out set 2 13/14 (rules only), and every demo case keeps
+  its label.
+
+### Smaller fixes
+- **Guide tips:** an entry about an organization is shown only for that organization, a general entry
+  only when its main (first) red flag was found, and family-and-friends entries never for a message that
+  claims an organization. The USPS injection case shows neither the grandparent (G05) nor the hacked
+  friend (G09) tip; the Medicare scam still shows G01 and G02.
+- **Help offered by Python** is post-checked like the tool (the alert log is read back) and saved as a
+  trace step (`raw_reply` null, `state_update` "offered by Python"). The `steps` count stays the number of
+  model steps.
+- **Prompt:** the explanation rules now say "at most 22 words each" (the readability limit).
+- **Settings:** a subprocess test shows that `SCAMSHIELD_MODEL` really overrides the model.
+
+### Documents
+- The post-check is described honestly: for the local lookups it confirms the result was recorded
+  consistently (there is no outside state to inspect); the alert is read back from the log; the
+  independent check is the verdict gate.
+- The document build now reads the held-out set 2 live results, adds them to the PDF table and the
+  results slide, and computes the total of live runs and false "safe" answers from every result file.
+- The autonomy claims in the PDF were reworded to match the traces (the model usually checks the link,
+  sender and guide before proposing "likely scam"; it offers human help most often after a gate hint).
+- The README quotes the Canvas post on state management, verification and checkpointing and no longer
+  presents the LangSmith comparison as course material.
+- The authorship statement in the PDF was replaced by an accurate draft, marked for Aruna to rewrite.
+
+### Testing the tests again
+`python3 tests.py --break-gate`: **21 of 88 fail** with the broken gate (`evidence/eval/break_gate_tests.txt`).
 
 ## What came from the course and what is new
 
