@@ -391,15 +391,46 @@ separately after this change.
 
 ## My decisions and what I learned (written by Aruna)
 
-_To be filled in by me, in my own words. Prompts only; no answers are written here._
+> **DRAFT. Edit this into your own words before submitting.** It was drafted from the decisions I made
+> in the development sessions (Nov 22 to 24). Change anything that does not sound like me or that I would
+> say differently.
 
-- **Why I chose this project:** ...
-- **Who I imagined using it, and what they need from it:** ...
-- **The design decision I am most sure about, and why:** ...
-- **A design decision I went back and forth on:** ...
-- **The hardest problem for me:** ...
-- **A moment the model surprised me (good or bad):** ...
-- **What the evaluation taught me that I did not expect:** ...
-- **How I used AI tools while building it, and how I checked their work:** ...
-- **What I would do differently:** ...
-- **What I would build next with more time:** ...
+- **Why I chose this project:** Scam texts target older adults, and the usual advice ("don't click
+  links") never says *why* a message is suspicious. The professor approved the idea and asked for
+  plain-language explanations, a suspicious, an ordinary and an uncertain demo, and a recommendation to
+  ask a person when the agent cannot tell. That last part mattered most to me: saying "I'm not sure, ask
+  someone" is better than a confident wrong answer.
+- **Who I imagined using it, and what they need from it:** an older adult reading a text on their phone,
+  and a family member who helps them. They need a short verdict first, the reason in everyday words, and
+  one concrete thing to do, with the real phone number, never one copied from the message.
+- **The design decision I am most sure about, and why:** Python decides whether a verdict is allowed,
+  not the model. The model chooses which checks to run and explains the result, but it can never say
+  "safe" unless the recorded evidence supports it, and a worried model can only make the answer more
+  careful. This idea comes straight from `check_goal()` in the Agent Airways class agent.
+- **A design decision I went back and forth on:** whether to use LangGraph. I asked whether it was
+  necessary, and decided on plain Python because the rubric does not require it, it would not make the
+  answers more accurate, and a plain loop shows every decision in the demo. I also chose metadata RAG as
+  my one innovation instead of adding several, and later questioned whether a 1,000-message dataset was
+  over-complicating the project; I settled on a smaller, blind-written 614-message test.
+- **The hardest problem for me:** making the agent really agentic and really safe at the same time. The
+  critic reviews kept finding ways a scam could still be called "safe" (a flip from "scam" to "safe", a
+  fake call-back number, help offered and then "safe"), and each fix had to be checked against fresh live
+  runs, not just the model's word.
+- **A moment the model surprised me (good or bad):** on the very first test call, the model invented an
+  argument for a tool that takes none. Later, its first instinct on a normal-looking text from an unknown
+  number was often "safe", and in one run it called a cash-courier scam from a family contact "safe"
+  because neither the rules nor the model noticed it.
+- **What the evaluation taught me that I did not expect:** how little a small test set proves. With 50
+  messages an accuracy of 80% could really be anywhere from about 67% to 89%, which is why I wanted 500+
+  messages. I also learned that hand-written rules generalize poorly: each fresh held-out set exposed many
+  misses before it was used for fixes (6/12 and 2/14), and the RAG gain was much smaller than I expected.
+- **How I used AI tools while building it, and how I checked their work:** I used Claude Code. It wrote
+  most of the code, tests and documentation from my instructions, and I set up a loop where a work agent
+  fixed issues and separate critic agents graded the project against the rubric. I checked the results by
+  running the tests and the live evaluations myself, required that every number in the documents come
+  from saved evidence, and asked that failures be reported honestly instead of tuned away.
+- **What I would do differently:** write the held-out test messages before writing any detection rules,
+  keep the code smaller, and commit my work day by day instead of in a few large batches.
+- **What I would build next with more time:** test on real (consented, anonymized) messages, handle
+  screenshots and voice notes as the proposal suggested, measure false alarms on everyday family texts,
+  and add a real, consent-based way to alert a family member.

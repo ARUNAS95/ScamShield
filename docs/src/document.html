@@ -349,15 +349,17 @@ the rebuild is tested on macOS.</p>
 <section class="flow">
 <h2>9. Individual work</h2>
 <!-- DRAFT for Aruna to review and rewrite in her own words -->
-<p>This is an individual project. I ({{STUDENT}}) chose the project and the design (the plain-Python course loop,
-the verdict gate and the metadata RAG), reviewed and directed every change, ran and checked the evaluations, and
-prepared the demo. An AI coding assistant (Claude Code) wrote most of the code, tests and documentation from my
-instructions, and separate AI critic passes reviewed the work against the rubric; I verified their findings by
-running the code. The repository contains the agent loop and tools (<code>scamshield_agent.py</code>), the verdict
-gate and readability check, the metadata RAG (<code>rag.py</code>), the fictional messages, contacts, website list
-and scam guide (<code>data/</code>), the offline tests (<code>tests.py</code>), the evaluation and held-out sets
-(<code>eval.py</code>), the repeated-run harness (<code>harness_runs.py</code>) and the development log
-(<code>DEVLOG.md</code>).</p>
+<p>This is an individual project. I ({{STUDENT}}) chose the project, its scope and the design (the plain-Python
+course loop, the verdict gate and metadata RAG as the one innovation), made the key decisions during the work
+(no LangGraph, held-out tests written before rule changes, honest reporting of failures, a blind-written large
+test set), and ran and checked the evaluations. An AI coding assistant (Claude Code) wrote most of the code,
+tests and documentation from my instructions; separate AI critic passes graded the work against the rubric over
+several review rounds, a work agent fixed what they found, and I verified the results by running the tests and
+the live evaluations. The commits were made under my own git account at my request. The repository contains the
+agent loop and tools (<code>scamshield_agent.py</code>), the verdict gate and readability check, the metadata RAG
+(<code>rag.py</code>), the fictional messages, contacts, website list and scam guide (<code>data/</code>), the
+offline tests (<code>tests.py</code>), the evaluation and held-out sets (<code>eval.py</code>), the
+repeated-run harness (<code>harness_runs.py</code>) and the development log (<code>DEVLOG.md</code>).</p>
 <h3>Course materials reused</h3>
 <ul>
   <li><b>Agent Airways class agent:</b> the JSON action loop, tool registry with <code>validate()</code> and

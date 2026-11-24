@@ -136,18 +136,23 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
     is small on this data, and the document says so.
 
 12. **Why are all the commits on Nov 24?**
-    Facts to start from: `git log` shows every commit on this branch dated Nov 24 (the first at 09:17);
-    `DEVLOG.md` has dated entries for Nov 22, 23 and 24, and the project files were created before the
-    first commit. **Answer this in your own words** (what you did on which day, and why you committed when you did).
+    Facts: `git log` shows every commit dated Nov 24 (the first at 09:17); `DEVLOG.md` has entries for
+    Nov 22 (planning), Nov 23 (building) and Nov 24 (evaluation and review rounds).
+    *Draft answer, put it in your own words:* "I planned the project on Nov 22 and built the first version
+    locally on Nov 23 with the coding assistant. I created the GitHub repository on the morning of Nov 24
+    and committed the existing work in logical pieces, then every review-and-fix round that day was
+    committed as it happened. The commits were made by the coding assistant on my machine under my own git
+    account, at my request, which is also why several have the same timestamp."
 
 13. **Which AI tools did you use?**
-    Facts to start from (the same facts as the draft authorship statement in section 9 of the PDF): an AI
-    coding assistant (Claude Code) wrote most of the code, tests and documentation from your instructions;
-    you chose the project and the design (plain-Python course loop, verdict gate, metadata RAG), reviewed and
-    directed every change, ran and checked the evaluations, and prepared the demo. Separate AI critic passes
-    reviewed the work against the rubric in four review rounds, and the fixes are listed in the "Critic
-    review" entries in `DEVLOG.md`; you verified the findings by running the code.
-    **Answer this in your own words** (what you decided yourself, what you checked, what you would explain).
+    *Draft answer, put it in your own words:* "I used Claude Code. I chose the project, the scope and the
+    design (the plain-Python loop from class, the verdict gate, metadata RAG as the one innovation) and made
+    the key calls during the work: no LangGraph, a held-out test written before rule changes, honest
+    reporting of failures, and a 614-message test written by a separate agent that never saw the rules.
+    The assistant wrote most of the code, tests and documentation. I set up a loop where critic agents
+    graded the project against the rubric and a work agent fixed what they found, over five rounds. I
+    checked the results by running the tests and the live Ollama evaluations, and every number in the
+    report is generated from saved evidence files."
 
 14. **Why can the model's concern never produce "safe"?**
     Python can block a label the evidence does not support, but a worried model may be noticing something
