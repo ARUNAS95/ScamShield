@@ -1,0 +1,619 @@
+RULES ONLY (no model), set = large, 614 messages
+id   category   expected     supported          evidence
+X0001 scam_impersonation_medicare likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak), unofficial_number(strong) | links: none | saved contact: False
+X0002 scam_impersonation_medicare likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0003 scam_impersonation_medicare likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: medicare-benefits-renew.co=lookalike | saved contact: False
+X0004 scam_impersonation_medicare likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0005 scam_impersonation_medicare likely_scam  likely_scam  OK    signs: money_request(weak), lookalike_link(strong) | links: medicare.gov-refund.top=lookalike | saved contact: False
+X0006 scam_impersonation_medicare likely_scam  uncertain    WRONG signs: shortened_link(weak) | links: bit.ly=shortened | saved contact: False
+X0007 scam_impersonation_medicare likely_scam  likely_scam  OK    signs: urgency(weak), unofficial_number(strong) | links: none | saved contact: False
+X0008 scam_impersonation_medicare likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0009 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: code_request(strong), urgency(weak), threat(weak), unofficial_number(strong) | links: none | saved contact: False
+X0010 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: code_request(strong), money_request(weak), lookalike_link(strong) | links: ssa-gov-verify.net=lookalike | saved contact: False
+X0011 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: code_request(strong), unofficial_number(strong) | links: none | saved contact: False
+X0012 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: none | saved contact: False
+X0013 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0014 scam_impersonation_ssa likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0015 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak), unofficial_number(strong) | links: none | saved contact: False
+X0016 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: socialsecurity-update.online=lookalike | saved contact: False
+X0017 scam_impersonation_irs likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), threat(weak), money_request(weak) | links: none | saved contact: False
+X0018 scam_impersonation_irs likely_scam  likely_scam  OK    signs: money_request(weak), lookalike_link(strong) | links: irs-refund-claim.info=lookalike | saved contact: False
+X0019 scam_impersonation_irs likely_scam  likely_scam  OK    signs: threat(weak), unofficial_number(strong) | links: none | saved contact: False
+X0020 scam_impersonation_irs likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak), secrecy(weak) | links: none | saved contact: False
+X0021 scam_impersonation_irs likely_scam  likely_scam  OK    signs: code_request(strong), money_request(weak) | links: none | saved contact: False
+X0022 scam_impersonation_irs likely_scam  likely_scam  OK    signs: ip_link(strong) | links: 192.168.44.10=ip_address | saved contact: False
+X0023 scam_impersonation_irs likely_scam  likely_scam  OK    signs: code_request(strong), lookalike_link(strong) | links: irs.gov.account-check.co=lookalike | saved contact: False
+X0024 scam_impersonation_irs likely_scam  likely_scam  OK    signs: threat(weak), money_request(weak) | links: none | saved contact: False
+X0025 scam_impersonation_usps likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: usps-redelivery.top=lookalike | saved contact: False
+X0026 scam_impersonation_usps likely_scam  uncertain    WRONG signs: money_request(weak) | links: uspsparcel-help.shop=unknown | saved contact: False
+X0027 scam_impersonation_usps likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0028 scam_impersonation_usps likely_scam  likely_scam  OK    signs: unofficial_number(strong) | links: none | saved contact: False
+X0029 scam_impersonation_usps likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: usps.com-tracking-id.info=lookalike | saved contact: False
+X0030 scam_impersonation_usps likely_scam  likely_scam  OK    signs: money_request(weak), shortened_link(weak) | links: tinyurl.com=shortened | saved contact: False
+X0031 scam_impersonation_usps likely_scam  likely_scam  OK    signs: lookalike_letters_link(strong) | links: usрs-track.com=other_alphabet | saved contact: False
+X0032 scam_impersonation_usps likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak), lookalike_link(strong) | links: usps-servicecenter.net=lookalike | saved contact: False
+X0033 scam_impersonation_bank likely_scam  likely_scam  OK    signs: threat(weak), lookalike_link(strong) | links: firstcitybank-secure.co=lookalike | saved contact: False
+X0034 scam_impersonation_bank likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0035 scam_impersonation_bank likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0036 scam_impersonation_bank likely_scam  likely_scam  OK    signs: card_details_request(strong), threat(weak) | links: none | saved contact: False
+X0037 scam_impersonation_bank likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0038 scam_impersonation_bank likely_scam  likely_scam  OK    signs: urgency(weak), known_bad_link(strong) | links: secure-verify-account.net=known_bad | saved contact: False
+X0039 scam_impersonation_bank likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: firstcitybank.example.login-check.top=lookalike | saved contact: False
+X0040 scam_impersonation_bank likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0041 scam_impersonation_bank likely_scam  uncertain    WRONG signs: threat(weak) | links: none | saved contact: False
+X0042 scam_impersonation_pharmacy likely_scam  likely_scam  OK    signs: money_request(weak), lookalike_link(strong) | links: mainstreet-pharmacy-rx.co=lookalike | saved contact: False
+X0043 scam_impersonation_pharmacy likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0044 scam_impersonation_pharmacy likely_scam  likely_scam  OK    signs: threat(weak), unofficial_number(strong) | links: none | saved contact: False
+X0045 scam_impersonation_pharmacy likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak), lookalike_link(strong) | links: cheap-rx-mainstreet.shop=lookalike | saved contact: False
+X0046 scam_impersonation_pharmacy likely_scam  likely_scam  OK    signs: gift_card(strong), threat(weak), money_request(weak) | links: none | saved contact: False
+X0047 scam_impersonation_pharmacy likely_scam  likely_scam  OK    signs: lookalike_letters_link(strong), money_request(weak) | links: xn--mainstretpharmacy-9kb.com=other_alphabet | saved contact: False
+X0048 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0049 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: threat(weak), lookalike_link(strong) | links: amazon-account-restore.net=lookalike | saved contact: False
+X0050 scam_impersonation_amazon likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0051 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0052 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak), lookalike_link(strong) | links: amaz0n-rewards.top=lookalike | saved contact: False
+X0053 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: False
+X0054 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: hidden_address_link(strong), money_request(weak), ip_link(strong) | links: 203.0.113.45=ip_address | saved contact: False
+X0055 scam_impersonation_amazon likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0056 scam_delivery_fee likely_scam  uncertain    WRONG signs: money_request(weak) | links: parcel-fee-pay.online=unknown | saved contact: False
+X0057 scam_delivery_fee likely_scam  likely_scam  OK    signs: money_request(weak), shortened_link(weak) | links: tinyurl.com=shortened | saved contact: False
+X0058 scam_delivery_fee likely_scam  uncertain    WRONG signs: money_request(weak) | links: dhl-duty-help.top=unknown | saved contact: False
+X0059 scam_delivery_fee likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0060 scam_delivery_fee likely_scam  likely_scam  OK    signs: money_request(weak), shortened_link(weak) | links: bit.ly=shortened | saved contact: False
+X0061 scam_delivery_fee likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: track-my-parcel-now.info=unknown | saved contact: False
+X0062 scam_account_locked likely_scam  likely_scam  OK    signs: threat(weak), known_bad_link(strong) | links: secure-verify-account.net=known_bad | saved contact: False
+X0063 scam_account_locked likely_scam  uncertain    WRONG signs: threat(weak) | links: none | saved contact: False
+X0064 scam_account_locked likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0065 scam_account_locked likely_scam  uncertain    WRONG signs: none | links: venmo-verify-center.co=unknown | saved contact: False
+X0066 scam_account_locked likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0067 scam_account_locked likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak) | links: none | saved contact: False
+X0068 scam_prize likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: none | saved contact: False
+X0069 scam_prize likely_scam  likely_scam  OK    signs: prize(weak), known_bad_link(strong) | links: prize-claim-now.co=known_bad | saved contact: False
+X0070 scam_prize likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak), known_bad_link(strong) | links: free-gift-rewards.info=known_bad | saved contact: False
+X0071 scam_prize likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak), prize(weak) | links: none | saved contact: False
+X0072 scam_prize likely_scam  likely_scam  OK    signs: code_request(strong), prize(weak) | links: none | saved contact: False
+X0073 scam_prize likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: gift-winner.shop=unknown | saved contact: False
+X0074 scam_prize likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: none | saved contact: False
+X0075 scam_prize likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0076 scam_tech_support likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0077 scam_tech_support likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0078 scam_tech_support likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0079 scam_tech_support likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0080 scam_tech_support likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0081 scam_tech_support likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: none | saved contact: False
+X0082 scam_tech_support likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0083 scam_romance likely_scam  likely_scam  OK    signs: crypto(strong), payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0084 scam_romance likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0085 scam_romance likely_scam  likely_scam  OK    signs: gift_card(strong), secrecy(weak) | links: none | saved contact: False
+X0086 scam_romance likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: False
+X0087 scam_romance likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0088 scam_romance likely_scam  likely_scam  OK    signs: payment_app(strong), threat(weak), money_request(weak) | links: none | saved contact: False
+X0089 scam_crypto likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak) | links: none | saved contact: False
+X0090 scam_crypto likely_scam  likely_scam  OK    signs: crypto(strong), payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0091 scam_crypto likely_scam  likely_scam  OK    signs: crypto(strong), urgency(weak) | links: wallet-sync-secure.online=unknown | saved contact: False
+X0092 scam_crypto likely_scam  likely_scam  OK    signs: crypto(strong) | links: none | saved contact: False
+X0093 scam_crypto likely_scam  likely_scam  OK    signs: crypto(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0094 scam_crypto likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0095 scam_crypto likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0096 scam_job   likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0097 scam_job   likely_scam  likely_scam  OK    signs: payment_app(strong) | links: none | saved contact: False
+X0098 uncertain_job_offer uncertain    uncertain    OK    signs: money_request(weak) | links: none | saved contact: False
+X0099 scam_job   likely_scam  likely_scam  OK    signs: crypto(strong) | links: none | saved contact: False
+X0100 scam_job   likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: False
+X0101 scam_job   likely_scam  likely_scam  OK    signs: code_request(strong), money_request(weak) | links: none | saved contact: False
+X0102 scam_grandparent likely_scam  likely_scam  OK    signs: money_request(weak), secrecy(weak) | links: none | saved contact: False
+X0103 scam_grandparent likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak), new_number(weak) | links: none | saved contact: False
+X0104 scam_grandparent likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0105 scam_grandparent likely_scam  likely_scam  OK    signs: gift_card(strong), threat(weak), money_request(weak) | links: none | saved contact: False
+X0106 scam_grandparent likely_scam  likely_scam  OK    signs: payment_app(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0107 scam_grandparent likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: none | saved contact: False
+X0108 uncertain_new_number_opener uncertain    uncertain    OK    signs: new_number(weak) | links: none | saved contact: False
+X0109 scam_grandparent likely_scam  likely_scam  OK    signs: crypto(strong), payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0110 scam_hacked_contact likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+X0111 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: True
+X0112 scam_hacked_contact likely_scam  likely_scam  OK    signs: card_details_request(strong) | links: none | saved contact: True
+X0113 scam_hacked_contact likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: True
+X0114 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak), secrecy(weak) | links: none | saved contact: True
+X0115 scam_hacked_contact likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: none | saved contact: True
+X0116 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong) | links: none | saved contact: True
+X0117 scam_hacked_contact likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+X0118 scam_hacked_contact likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+X0119 scam_hacked_contact likely_scam  likely_scam  OK    signs: code_request(strong), prize(weak) | links: none | saved contact: True
+X0120 scam_hacked_contact likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: True
+X0121 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: True
+X0122 scam_hacked_contact likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak) | links: none | saved contact: True
+X0123 scam_hacked_contact likely_scam  likely_scam  OK    signs: known_bad_link(strong) | links: free-gift-rewards.info=known_bad | saved contact: True
+X0124 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), money_request(weak) | links: none | saved contact: True
+X0125 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: True
+X0126 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), urgency(weak), money_request(weak) | links: none | saved contact: True
+X0127 scam_hacked_contact likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+X0128 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: True
+X0129 scam_hacked_contact likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: True
+X0130 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: True
+X0131 scam_hacked_contact likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+X0132 scam_hacked_contact likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: True
+X0133 scam_hacked_contact likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+X0134 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: True
+X0135 scam_hacked_contact likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+X0136 scam_hacked_contact likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+X0137 scam_hacked_contact likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: firstcitybank-login.co=lookalike | saved contact: True
+X0138 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak), secrecy(weak) | links: none | saved contact: True
+X0139 scam_hacked_contact likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: True
+X0140 scam_hacked_contact likely_scam  likely_scam  OK    signs: unofficial_number(strong) | links: none | saved contact: True
+X0141 scam_hacked_contact likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: firstcity-alerts.online=lookalike | saved contact: True
+X0142 scam_hacked_contact likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+X0143 scam_hacked_contact likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+X0144 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: True
+X0145 scam_hacked_contact likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: mainstreetpharmacy-refill.top=lookalike | saved contact: True
+X0146 scam_hacked_contact likely_scam  likely_scam  OK    signs: unofficial_number(strong) | links: none | saved contact: True
+X0147 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong) | links: none | saved contact: True
+X0148 scam_hacked_contact likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+X0149 scam_prompt_injection likely_scam  likely_scam  OK    signs: gift_card(strong), ai_directed(strong), money_request(weak), prize(weak) | links: none | saved contact: False
+X0150 scam_prompt_injection likely_scam  likely_scam  OK    signs: ai_directed(strong) | links: none | saved contact: False
+X0151 scam_prompt_injection likely_scam  likely_scam  OK    signs: ai_directed(strong) | links: none | saved contact: False
+X0152 scam_prompt_injection likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0153 scam_prompt_injection likely_scam  likely_scam  OK    signs: gift_card(strong), ai_directed(strong) | links: none | saved contact: True
+X0154 scam_prompt_injection likely_scam  likely_scam  OK    signs: prize(weak), known_bad_link(strong) | links: prize-claim-now.co=known_bad | saved contact: False
+X0155 scam_prompt_injection likely_scam  likely_scam  OK    signs: ai_directed(strong), known_bad_link(strong) | links: secure-verify-account.net=known_bad | saved contact: False
+X0156 scam_prompt_injection likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0157 scam_prompt_injection likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak) | links: none | saved contact: False
+X0158 scam_prompt_injection likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0159 scam_prompt_injection likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+X0160 scam_prompt_injection likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0161 scam_obfuscation likely_scam  likely_scam  OK    signs: gift_card(strong), prize(weak) | links: none | saved contact: False
+X0162 scam_obfuscation likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0163 scam_obfuscation likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0164 scam_obfuscation likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0165 scam_obfuscation likely_scam  uncertain    WRONG signs: threat(weak) | links: none | saved contact: False
+X0166 scam_obfuscation likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0167 scam_obfuscation likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: False
+X0168 scam_obfuscation likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0169 scam_obfuscation likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak) | links: none | saved contact: False
+X0170 scam_obfuscation likely_scam  likely_scam  OK    signs: card_details_request(strong) | links: none | saved contact: False
+X0171 scam_obfuscation likely_scam  likely_scam  OK    signs: gift_card(strong), code_request(strong) | links: none | saved contact: True
+X0172 scam_obfuscation likely_scam  uncertain    WRONG signs: threat(weak) | links: none | saved contact: False
+X0173 scam_obfuscation likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0174 scam_obfuscation likely_scam  uncertain    WRONG signs: none | links: paypa1-restore.co=unknown | saved contact: False
+X0175 scam_obfuscation likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: none | saved contact: False
+X0176 scam_obfuscation likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0177 scam_link_tricks likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: firstcitybank.example-secure.co=lookalike | saved contact: False
+X0178 scam_link_tricks likely_scam  likely_scam  OK    signs: prize(weak), lookalike_link(strong) | links: irs-gov-refunds.net=lookalike | saved contact: False
+X0179 scam_link_tricks likely_scam  likely_scam  OK    signs: hidden_address_link(strong), ip_link(strong) | links: 198.51.100.7=ip_address | saved contact: False
+X0180 scam_link_tricks likely_scam  likely_scam  OK    signs: ip_link(strong) | links: 203.0.113.88=ip_address | saved contact: False
+X0181 scam_link_tricks likely_scam  likely_scam  OK    signs: lookalike_letters_link(strong) | links: xn--usps-qva.com=other_alphabet | saved contact: False
+X0182 scam_link_tricks likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: firstc1tybank.example.verify-now.top=lookalike | saved contact: False
+X0183 scam_link_tricks likely_scam  likely_scam  OK    signs: urgency(weak), lookalike_link(strong) | links: ssa.gov.benefits-update.info=lookalike | saved contact: False
+X0184 scam_link_tricks likely_scam  likely_scam  OK    signs: money_request(weak), lookalike_link(strong) | links: amazon.com.order-cancel.shop=lookalike | saved contact: False
+X0185 scam_link_tricks likely_scam  likely_scam  OK    signs: urgency(weak), lookalike_link(strong) | links: medlcare.gov=lookalike | saved contact: False
+X0186 scam_link_tricks likely_scam  likely_scam  OK    signs: money_request(weak), lookalike_link(strong) | links: mainstreetpharmacy.example.rx-pay.online=lookalike | saved contact: False
+X0187 scam_link_tricks likely_scam  uncertain    WRONG signs: shortened_link(weak) | links: goo.gl=shortened | saved contact: False
+X0188 scam_link_tricks likely_scam  likely_scam  OK    signs: money_request(weak), shortened_link(weak) | links: t.co=shortened | saved contact: False
+X0189 scam_link_tricks likely_scam  likely_scam  OK    signs: lookalike_link(strong) | links: firstcitybank.example%2elogin-secure.net=lookalike | saved contact: False
+X0190 scam_link_tricks likely_scam  likely_scam  OK    signs: lookalike_letters_link(strong) | links: іrs.gov-check.com=other_alphabet | saved contact: False
+X0191 scam_qr    likely_scam  likely_scam  OK    signs: threat(weak), money_request(weak) | links: none | saved contact: False
+X0192 scam_qr    likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0193 scam_qr    likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0194 scam_qr    likely_scam  likely_scam  OK    signs: crypto(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0195 scam_qr    likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0196 scam_reply_cancel likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: none | saved contact: False
+X0197 scam_reply_cancel likely_scam  likely_scam  OK    signs: money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0198 scam_reply_cancel likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0199 scam_reply_cancel likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0200 scam_reply_cancel likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0201 scam_reply_cancel likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0202 scam_voicemail likely_scam  likely_scam  OK    signs: unofficial_number(strong) | links: none | saved contact: False
+X0203 scam_voicemail likely_scam  likely_scam  OK    signs: unofficial_number(strong) | links: none | saved contact: False
+X0204 scam_voicemail likely_scam  uncertain    WRONG signs: none | links: voicemail-box-play.online=unknown | saved contact: False
+X0205 scam_voicemail likely_scam  likely_scam  OK    signs: unofficial_number(strong) | links: none | saved contact: False
+X0206 scam_voicemail likely_scam  likely_scam  OK    signs: unofficial_number(strong) | links: none | saved contact: False
+X0207 scam_voicemail likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0208 scam_voicemail likely_scam  likely_scam  OK    signs: money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0209 scam_weak_combo likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak) | links: none | saved contact: False
+X0210 scam_weak_combo likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: none | saved contact: False
+X0211 scam_weak_combo likely_scam  likely_scam  OK    signs: money_request(weak), secrecy(weak) | links: none | saved contact: False
+X0212 scam_weak_combo likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak) | links: none | saved contact: False
+X0213 scam_weak_combo likely_scam  likely_scam  OK    signs: urgency(weak), secrecy(weak) | links: none | saved contact: False
+X0214 scam_weak_combo likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0215 scam_weak_combo likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: none | saved contact: False
+X0216 scam_weak_combo likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: none | saved contact: False
+X0217 scam_weak_combo likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak) | links: none | saved contact: False
+X0218 scam_weak_combo likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0219 scam_short likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0220 scam_short likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0221 scam_short likely_scam  likely_scam  OK    signs: gift_card(strong) | links: none | saved contact: False
+X0222 scam_short likely_scam  likely_scam  OK    signs: payment_app(strong) | links: none | saved contact: False
+X0223 scam_short likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0224 scam_short likely_scam  uncertain    WRONG signs: shortened_link(weak) | links: bit.ly=shortened | saved contact: False
+X0225 scam_short likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0226 scam_misc  likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0227 scam_misc  likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0228 scam_misc  likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), threat(weak), money_request(weak) | links: none | saved contact: False
+X0229 scam_misc  likely_scam  likely_scam  OK    signs: crypto(strong) | links: none | saved contact: False
+X0230 scam_misc  likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0231 scam_misc  likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0232 scam_misc  likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: False
+X0233 scam_misc  likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0234 scam_misc  likely_scam  uncertain    WRONG signs: money_request(weak) | links: ezpass-tolls-pay.top=unknown | saved contact: False
+X0235 scam_misc  likely_scam  likely_scam  OK    signs: threat(weak), money_request(weak) | links: netflix-billing-update.co=unknown | saved contact: False
+X0236 scam_misc  likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0237 scam_misc  likely_scam  likely_scam  OK    signs: code_request(strong), money_request(weak) | links: none | saved contact: False
+X0238 scam_misc  likely_scam  likely_scam  OK    signs: gift_card(strong) | links: none | saved contact: False
+X0239 scam_misc  likely_scam  likely_scam  OK    signs: code_request(strong), unofficial_number(strong), unofficial_number(strong) | links: none | saved contact: False
+X0240 scam_misc  likely_scam  likely_scam  OK    signs: code_request(strong) | links: appleid-unlock-help.net=unknown | saved contact: False
+X0241 scam_misc  likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0242 scam_misc  likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0243 scam_misc  likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+X0244 scam_misc  likely_scam  likely_scam  OK    signs: code_request(strong), money_request(weak) | links: none | saved contact: False
+X0245 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0246 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0247 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0248 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0249 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0250 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0251 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0252 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0253 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0254 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0255 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0256 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0257 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0258 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0259 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0260 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0261 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0262 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0263 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0264 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0265 safe_family likely_safe  likely_safe  OK    signs: secrecy(weak) | links: none | saved contact: True
+X0266 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0267 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0268 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0269 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0270 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0271 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0272 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0273 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0274 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0275 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0276 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0277 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0278 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0279 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0280 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0281 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0282 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0283 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0284 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0285 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0286 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0287 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0288 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0289 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0290 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0291 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0292 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0293 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0294 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0295 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0296 safe_family likely_safe  likely_scam  WRONG signs: code_request(strong) | links: none | saved contact: True
+X0297 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0298 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0299 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0300 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0301 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0302 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0303 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0304 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0305 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0306 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0307 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0308 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0309 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0310 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0311 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0312 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0313 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0314 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0315 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0316 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0317 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0318 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0319 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0320 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0321 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0322 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0323 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0324 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0325 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0326 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0327 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0328 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0329 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0330 safe_gift_present likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0331 safe_gift_present likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0332 safe_gift_present likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0333 safe_gift_present likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0334 safe_gift_present likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0335 safe_gift_present likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0336 safe_gift_present likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0337 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0338 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0339 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0340 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0341 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0342 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0343 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0344 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0345 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+X0346 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0347 safe_pharmacy likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0348 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0349 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0350 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+X0351 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0352 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0353 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0354 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0355 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0356 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0357 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+X0358 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+X0359 safe_pharmacy likely_safe  likely_scam  WRONG signs: urgency(weak), money_request(weak) | links: none | saved contact: True
+X0360 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0361 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0362 safe_pharmacy likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0363 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0364 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0365 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0366 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: firstcitybank.example=official | saved contact: True
+X0367 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0368 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: firstcitybank.example=official | saved contact: True
+X0369 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0370 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0371 safe_bank_alert likely_safe  likely_scam  WRONG signs: code_request(strong) | links: none | saved contact: True
+X0372 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0373 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0374 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0375 safe_bank_alert likely_safe  likely_scam  WRONG signs: urgency(weak), money_request(weak) | links: none | saved contact: True
+X0376 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0377 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0378 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0379 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: firstcitybank.example=official | saved contact: True
+X0380 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0381 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0382 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0383 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0384 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0385 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0386 safe_official_link likely_safe  likely_safe  OK    signs: none | links: medicare.gov=official | saved contact: True
+X0387 safe_official_link likely_safe  likely_safe  OK    signs: none | links: usps.com=official | saved contact: True
+X0388 safe_official_link likely_safe  likely_safe  OK    signs: none | links: amazon.com=official | saved contact: True
+X0389 safe_official_link likely_safe  likely_safe  OK    signs: none | links: ssa.gov=official | saved contact: True
+X0390 safe_official_link likely_safe  likely_safe  OK    signs: none | links: irs.gov=official | saved contact: True
+X0391 safe_official_link likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0392 safe_official_link likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0393 safe_official_link likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0394 safe_official_link likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+X0395 safe_official_link likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0396 safe_official_link likely_safe  likely_safe  OK    signs: none | links: firstcitybank.example=official | saved contact: True
+X0397 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0398 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0399 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0400 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0401 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0402 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0403 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0404 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0405 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0406 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0407 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0408 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0409 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0410 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0411 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0412 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0413 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0414 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0415 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0416 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0417 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0418 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0419 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0420 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0421 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0422 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0423 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0424 uncertain_community uncertain    uncertain    OK    signs: threat(weak) | links: none | saved contact: False
+X0425 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0426 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0427 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0428 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0429 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0430 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0431 uncertain_community uncertain    uncertain    OK    signs: urgency(weak) | links: none | saved contact: False
+X0432 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0433 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0434 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0435 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0436 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0437 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0438 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0439 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0440 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0441 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0442 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0443 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0444 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0445 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0446 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0447 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0448 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0449 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0450 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0451 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0452 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0453 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0454 uncertain_delivery uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0455 uncertain_delivery uncertain    uncertain    OK    signs: urgency(weak) | links: none | saved contact: False
+X0456 uncertain_delivery uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0457 uncertain_delivery uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0458 uncertain_delivery uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0459 uncertain_delivery uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0460 uncertain_delivery uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0461 uncertain_delivery uncertain    uncertain    OK    signs: urgency(weak) | links: none | saved contact: False
+X0462 uncertain_delivery uncertain    uncertain    OK    signs: none | links: usps.com=official | saved contact: False
+X0463 uncertain_delivery uncertain    uncertain    OK    signs: none | links: amazon.com=official | saved contact: False
+X0464 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: sharemypics.example=unknown | saved contact: False
+X0465 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: grandmaskitchenblog.example=unknown | saved contact: False
+X0466 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: stlukesparish.example=unknown | saved contact: False
+X0467 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: oakwoodtown.example=unknown | saved contact: False
+X0468 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: luncheonmenu.example=unknown | saved contact: False
+X0469 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: sunrisehomecare.example=unknown | saved contact: False
+X0470 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: videoshare.example=unknown | saved contact: False
+X0471 uncertain_unknown_link uncertain    uncertain    OK    signs: none | links: riversideeyeclinic.example=unknown | saved contact: False
+X0472 uncertain_contact_ambiguous uncertain    uncertain    OK    signs: none | links: citytransit.example=unknown | saved contact: True
+X0473 uncertain_contact_ambiguous uncertain    uncertain    OK    signs: none | links: artcontest.example=unknown | saved contact: True
+X0474 uncertain_contact_ambiguous uncertain    uncertain    OK    signs: none | links: photoalbum.example=unknown | saved contact: True
+X0475 uncertain_contact_ambiguous uncertain    uncertain    OK    signs: none | links: quizfun.example=unknown | saved contact: True
+X0476 uncertain_contact_ambiguous likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0477 uncertain_contact_ambiguous uncertain    uncertain    OK    signs: shortened_link(weak) | links: tinyurl.com=shortened | saved contact: True
+X0478 uncertain_contact_ambiguous likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0479 uncertain_contact_ambiguous likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0480 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: money_request(weak) | links: none | saved contact: False
+X0481 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0482 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: medicare.gov=official | saved contact: False
+X0483 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: irs.gov=official | saved contact: False
+X0484 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: ssa.gov=official | saved contact: False
+X0485 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: firstcitybank.example=official | saved contact: False
+X0486 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0487 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: urgency(weak) | links: none | saved contact: False
+X0488 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0489 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0490 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0491 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0492 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0493 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0494 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0495 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0496 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0497 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0498 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0499 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0500 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0501 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0502 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0503 uncertain_other uncertain    likely_scam  WRONG signs: code_request(strong) | links: none | saved contact: False
+X0504 uncertain_other uncertain    likely_scam  WRONG signs: code_request(strong) | links: none | saved contact: False
+X0505 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0506 uncertain_other uncertain    uncertain    OK    signs: money_request(weak) | links: none | saved contact: False
+X0507 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0508 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0509 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0510 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0511 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0512 uncertain_other uncertain    uncertain    OK    signs: money_request(weak) | links: none | saved contact: False
+X0513 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0514 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0515 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0516 scam_impersonation_medicare likely_scam  likely_scam  OK    signs: urgency(weak), unofficial_number(strong) | links: none | saved contact: False
+X0517 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: crypto(strong), urgency(weak), money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0518 scam_impersonation_irs likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak), lookalike_link(strong) | links: irs-taxresolve-center.online=lookalike | saved contact: False
+X0519 scam_impersonation_usps likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak), lookalike_link(strong) | links: usps-postal-redeliver.shop=lookalike | saved contact: False
+X0520 scam_impersonation_bank likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+X0521 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0522 scam_impersonation_pharmacy likely_scam  likely_scam  OK    signs: gift_card(strong), payment_app(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0523 scam_tech_support likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0524 scam_romance likely_scam  likely_scam  OK    signs: crypto(strong), payment_app(strong), money_request(weak) | links: none | saved contact: False
+X0525 scam_crypto likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak) | links: none | saved contact: False
+X0526 scam_job   likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak), prize(weak) | links: none | saved contact: False
+X0527 scam_grandparent likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak), money_request(weak), secrecy(weak) | links: none | saved contact: False
+X0528 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), urgency(weak), money_request(weak) | links: none | saved contact: True
+X0529 scam_hacked_contact likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), money_request(weak) | links: none | saved contact: True
+X0530 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), urgency(weak), money_request(weak) | links: none | saved contact: True
+X0531 scam_prompt_injection likely_scam  likely_scam  OK    signs: gift_card(strong), ai_directed(strong), money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0532 scam_prize likely_scam  likely_scam  OK    signs: crypto(strong), urgency(weak), money_request(weak), prize(weak) | links: none | saved contact: False
+X0533 scam_link_tricks likely_scam  likely_scam  OK    signs: code_request(strong), new_number(weak), lookalike_link(strong) | links: medicare.gov.member-portal.secure-login.info=lookalike | saved contact: False
+X0534 scam_qr    likely_scam  likely_scam  OK    signs: urgency(weak), threat(weak), money_request(weak) | links: none | saved contact: False
+X0535 scam_voicemail likely_scam  likely_scam  OK    signs: urgency(weak), unofficial_number(strong) | links: none | saved contact: False
+X0536 scam_reply_cancel likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: none | saved contact: False
+X0537 scam_obfuscation likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0538 scam_misc  likely_scam  likely_scam  OK    signs: gift_card(strong), urgency(weak), threat(weak), money_request(weak) | links: none | saved contact: False
+X0539 scam_misc  likely_scam  likely_scam  OK    signs: crypto(strong), urgency(weak) | links: none | saved contact: False
+X0540 scam_weak_combo likely_scam  uncertain    WRONG signs: urgency(weak) | links: none | saved contact: False
+X0541 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0542 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0543 safe_family likely_safe  likely_scam  WRONG signs: gift_card(strong) | links: none | saved contact: True
+X0544 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0545 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0546 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0547 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0548 safe_money_mention likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0549 safe_pharmacy likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+X0550 safe_pharmacy likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0551 safe_bank_alert likely_safe  likely_scam  WRONG signs: code_request(strong) | links: none | saved contact: True
+X0552 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: firstcitybank.example=official | saved contact: True
+X0553 safe_official_link likely_safe  likely_safe  OK    signs: none | links: medicare.gov=official | saved contact: True
+X0554 safe_gift_present likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0555 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0556 safe_abbrev_time likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0557 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0558 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0559 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0560 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0561 uncertain_delivery uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0562 uncertain_org_unknown_sender uncertain    uncertain    OK    signs: none | links: medicare.gov=official | saved contact: False
+X0563 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0564 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0565 uncertain_contact_ambiguous uncertain    uncertain    OK    signs: none | links: healthnewsdaily.example=unknown | saved contact: True
+X0566 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0567 scam_impersonation_medicare likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+X0568 scam_impersonation_ssa likely_scam  likely_scam  OK    signs: code_request(strong), secrecy(weak), unofficial_number(strong) | links: none | saved contact: False
+X0569 scam_impersonation_irs likely_scam  likely_scam  OK    signs: code_request(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0570 scam_impersonation_usps likely_scam  likely_scam  OK    signs: money_request(weak), lookalike_link(strong) | links: usps.customs-clearance.top=lookalike | saved contact: False
+X0571 scam_impersonation_bank likely_scam  likely_scam  OK    signs: threat(weak), lookalike_link(strong) | links: firstcitybank-upgrade.net=lookalike | saved contact: False
+X0572 scam_impersonation_amazon likely_scam  likely_scam  OK    signs: money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0573 scam_tech_support likely_scam  uncertain    WRONG signs: urgency(weak) | links: quickconnect-help.co=unknown | saved contact: False
+X0574 scam_romance likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: False
+X0575 scam_crypto likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak) | links: none | saved contact: False
+X0576 scam_job   likely_scam  likely_scam  OK    signs: crypto(strong), money_request(weak) | links: none | saved contact: False
+X0577 scam_grandparent likely_scam  uncertain    WRONG signs: threat(weak) | links: none | saved contact: False
+X0578 scam_hacked_contact likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: True
+X0579 scam_hacked_contact likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: True
+X0580 scam_hacked_contact likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+X0581 scam_prompt_injection likely_scam  likely_scam  OK    signs: ai_directed(strong), money_request(weak), lookalike_link(strong) | links: amazon-refund-desk.online=lookalike | saved contact: False
+X0582 scam_prompt_injection likely_scam  likely_scam  OK    signs: gift_card(strong), ai_directed(strong), money_request(weak) | links: none | saved contact: True
+X0583 scam_obfuscation likely_scam  likely_scam  OK    signs: code_request(strong), urgency(weak), threat(weak) | links: none | saved contact: False
+X0584 scam_link_tricks likely_scam  likely_scam  OK    signs: lookalike_letters_link(strong), urgency(weak), money_request(weak) | links: amazon.com.security-check.xn--accnt-4ya.top=other_alphabet | saved contact: False
+X0585 scam_voicemail likely_scam  likely_scam  OK    signs: crypto(strong), urgency(weak), money_request(weak), unofficial_number(strong) | links: none | saved contact: False
+X0586 scam_reply_cancel likely_scam  likely_scam  OK    signs: urgency(weak), money_request(weak) | links: none | saved contact: False
+X0587 scam_misc  likely_scam  likely_scam  OK    signs: gift_card(strong), payment_app(strong), urgency(weak), money_request(weak) | links: none | saved contact: False
+X0588 scam_misc  likely_scam  likely_scam  OK    signs: code_request(strong), urgency(weak), money_request(weak), prize(weak) | links: none | saved contact: False
+X0589 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0590 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0591 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0592 safe_family likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0593 safe_family likely_safe  likely_safe  OK    signs: urgency(weak) | links: none | saved contact: True
+X0594 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0595 safe_money_mention likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0596 safe_pharmacy likely_safe  likely_safe  OK    signs: money_request(weak) | links: mainstreetpharmacy.example=official | saved contact: True
+X0597 safe_pharmacy likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0598 safe_bank_alert likely_safe  likely_safe  OK    signs: none | links: firstcitybank.example=official | saved contact: True
+X0599 safe_bank_alert likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+X0600 safe_official_link likely_safe  likely_safe  OK    signs: money_request(weak) | links: ssa.gov=official | saved contact: True
+X0601 safe_official_link likely_safe  likely_safe  OK    signs: none | links: amazon.com=official | saved contact: True
+X0602 safe_wifi  likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0603 safe_gift_present likely_safe  likely_safe  OK    signs: secrecy(weak) | links: none | saved contact: True
+X0604 safe_abbrev_time likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+X0605 uncertain_appointment uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0606 uncertain_community uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0607 uncertain_community uncertain    uncertain    OK    signs: money_request(weak) | links: none | saved contact: False
+X0608 uncertain_neighbor uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0609 uncertain_wrong_number uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0610 uncertain_delivery uncertain    uncertain    OK    signs: urgency(weak) | links: none | saved contact: False
+X0611 uncertain_org_unknown_sender uncertain    likely_scam  WRONG signs: code_request(strong) | links: firstcitybank.example=official | saved contact: False
+X0612 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+X0613 uncertain_other uncertain    uncertain    OK    signs: urgency(weak) | links: none | saved contact: False
+X0614 uncertain_other uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+
+RULES ONLY (large): 526/614 supported labels match the expected label
+  false "safe": 13   false alarms (scam on a safe message): 6
