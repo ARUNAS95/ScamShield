@@ -39,9 +39,15 @@ PASS: model uncertain then gate gave up -> never safe
 PASS: scam then safe is never safe
 PASS: uncertain then safe is never safe
 PASS: accepted safe after a concern becomes uncertain (backstop)
-PASS: model_catches_miss case ends not sure, never safe
+PASS: model_catches_miss ends not sure when the model is worried
 PASS: rejected scam feedback invites uncertain + helper
 PASS: helper_offered_by = model when unprompted
+PASS: helper then safe is never safe
+PASS: phone numbers compared by their last digits
+FAIL: unofficial number is a strong sign after lookup 
+FAIL: phone number not looked up -> not safe 
+PASS: official number in the message stays safe
+PASS: message without a phone number needs no lookup
 PASS: uncertain template for a saved contact
 PASS: helper reason must cite evidence
 PASS: ask_human_helper only after check_sender
@@ -89,5 +95,5 @@ PASS: console shows NEXT OPTIONS (routing visible)
 PASS: settings come from environment variables with defaults
 PASS: SCAMSHIELD_MODEL override takes effect (subprocess)
 
-67 of 88 tests passed.
-BREAK-GATE EXPERIMENT: 21 of 88 tests failed with the broken gate (the tests notice when the gate stops checking evidence).
+71 of 94 tests passed.
+BREAK-GATE EXPERIMENT: 23 of 94 tests failed with the broken gate (the tests notice when the gate stops checking evidence).
