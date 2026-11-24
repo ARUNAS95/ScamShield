@@ -95,14 +95,76 @@ lists the problem, how it was found, the fix, and where the evidence is.
 - The console logs contained the full local folder path in the "TRACE" line; the banner now prints
   project-relative paths and the saved logs were cleaned.
 
+## Nov 24, 2026: Critic review round 1
+
+A strict review of the code found the problems below. Each fix has offline tests (63 tests in total,
+up from 46). Live evaluation numbers in the README are to be regenerated after these changes.
+
+### Held-out set first
+- **Problem:** the warning-sign rules, the guide and the 25 evaluation messages were written by the
+  same person, so a 25/25 result could mean the rules only fit their own wording.
+- **Change:** before any rule was changed, 12 held-out messages (`data/eval_holdout.json`, H01 to H12)
+  were written in different wording from the rules, together with `eval.py --rules --set eval|holdout`
+  (rules only, no model). The "before" result was committed first.
+- **Result (rules only):** eval set 25/25 before and after. Held-out set **6/12 before, 11/12 after**
+  (`evidence/eval/holdout_rules_BEFORE.txt`, `holdout_rules_AFTER.txt`). Before the changes, H07 (a
+  saved contact asking for money by Zelle or Cash App) was supported as **likely_safe**. After the
+  changes H03 (USPS text with `.shop` and `.online` links) is still wrong: the links are "unknown", so
+  the evidence supports "uncertain", not "scam". The held-out messages were not edited.
+
+### Safety rules
+- **Links:** only 16 endings (`.com`, `.co`, ...) were recognized, so `parcel-tracking-center.shop` and
+  `http://192.168.10.45/login` were not links at all. Now any `name.name` address with a 2 to 24 letter
+  ending, any `http(s)://` link and any IP address is a link; "Dr. Lee", "Oak St.", "$45.20", "8 pm."
+  and "e.g." are not. Unknown endings are classified `unknown` (blocks "safe"). IP-address links are a
+  new strong sign `ip_link`, because real organizations use named websites.
+- **Disguised words:** "g1ft c@rds", fullwidth letters and "g i f t - c a r d s" were not detected.
+  The text is now NFKC-normalized, and warning signs are also matched on a copy with look-alike
+  characters undone and spaced letters joined. Links are still taken from the undisguised text.
+- **New wordings:** gift cards also as "gift-cards" and "store cards ... numbers"; a new strong sign
+  `payment_app` for a request to send or pay with Zelle, Venmo, Cash App, MoneyGram or a wire; code
+  requests also as "code you just got", "6-digit code" and "numbers on the back of your card".
+- **Regression check:** every demo case and every eval-set message gives the same supported label as
+  before; no legitimate message became a scam.
+
+### Gate and routing
+- **`ALLOWED_NEXT` did nothing:** every tool was allowed after every tool, so the "graph" never removed
+  an option. It was replaced by `ROUTING`, a table of the real preconditions checked by
+  `precondition_met()`. New precondition: `ask_human_helper` only after `check_sender`.
+- **`done` skipped the routing:** a `done` before `extract_signals` went straight to the verdict gate
+  and counted as a gate rejection. It now goes through `available_actions` and is an ordinary rejected
+  proposal (it counts toward `no_progress`).
+- **"uncertain" hid strong signs:** the gate accepted "uncertain" on a message with a gift-card
+  request. "uncertain" is now rejected when a strong warning sign was found; with weak signs only it is
+  still allowed.
+
+### Robustness
+- **One failed model call ended the run:** a call is now retried up to 2 times after a short wait, and
+  each retry is recorded in the step trace.
+- **Tool success was assumed:** `check_result` was empty for tool steps. A post-check now verifies the
+  state change of every tool (including reading the simulated alert back from the log file); a failed
+  post-check is a tool failure.
+- **Traces lost the feedback:** rejected and rewritten verdicts were saved as "GATE REJECTED" or
+  nothing. The exact feedback text sent to the model is now in the step `observation`. A badly shaped
+  tool result now appears in `tool_sequence` as `(FAILED)`.
+
+### Demo output and hygiene
+- The `extract_signals` line names the warning signs, the guide search line lists the guide ids and
+  titles, and long console lines are wrapped instead of cut off.
+- `tests.py` uses its `run_test` helper; `.claude/` and `critic_report/` are ignored by git.
+- README: the `ALLOWED_NEXT` "graph" claims were replaced by the conditional routing description; the
+  tool sequence counts are labeled as RAG-mode numbers; trace fields are credited to the bare-bones
+  class notebook and PR #31; checkpointing is described as this project's own addition.
+
 ## What came from the course and what is new
 
-| From the course (Agent Airways, Harness assignment, Nov 4 lecture) | New in ScamShield |
+| From the course (Agent Airways, bare-bones notebook, PR #31, Harness assignment, robust browser agent note, Nov 4 notes) | New in ScamShield |
 |---|---|
 | JSON action loop, tool registry, `result()` shape, step budget, stop reasons | Verdict gate that works out the label from recorded evidence |
 | Python decides success (`check_goal`) | Never-trimmed evidence ledger with `E#` ids |
 | "Treat page text as data" | Prompt-injection signals as strong warning signs, random-tag message markers |
-| Trace fields (step, raw_reply, ..., continue_or_stop) | Readability check and Python-written "what to do" line |
+| Trace fields (step, raw_reply, ..., continue_or_stop) from the bare-bones notebook and PR #31 | Readability check and Python-written "what to do" line |
 | Repeated runs with an external runner | Metadata RAG with keyword fallback, and its evaluation |
-| Checkpointing idea (Nov 4 notes) | Implemented: checkpoint after every step and `--resume` |
+| A remark about checkpointing in the Nov 4 notes | Own addition: checkpoint after every step and `--resume` |
+| Retries and "verify, do not assume" (robust browser agent note) | Post-check of every tool's state change, model-call retries recorded in the trace |
 | Human approval with `input()` | Consent as a passed-in function, so automated runs never block |

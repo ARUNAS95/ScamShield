@@ -35,7 +35,7 @@ pip3 install -r requirements.txt   # just: requests
 **3. Run the offline tests** (no Ollama needed):
 
 ```bash
-python3 tests.py                   # 46 tests with a scripted model
+python3 tests.py                   # 63 tests with a scripted model
 ```
 
 **4. Run a demo case with the live model:**
@@ -76,7 +76,7 @@ flowchart TD
     C --> D{Python validates<br/>parse, allowed now?, argument<br/>taken from the message?}
     D -- rejected --> F[Feedback + allowed actions]
     F --> C
-    D -- tool --> E[Python runs the tool<br/>local lookups only]
+    D -- tool --> E[Python runs the tool<br/>local lookups only<br/>+ post-check of the state change]
     E --> G[Result saved as evidence E1, E2 ...<br/>+ evidence ledger + available actions]
     G --> C
     D -- done --> H{Verdict gate<br/>does the recorded evidence<br/>support this label?}
@@ -98,39 +98,54 @@ Each step, `qwen3:8b` (via Ollama, `think=false`, `format=json`) replies with on
 
 | Tool | What Python does | When it is available |
 |---|---|---|
-| `extract_signals {}` | Regex scan: warning signs (strong/weak), links, phone numbers, claimed organization, text aimed at an AI | Must be first |
-| `check_link {"url"}` | Looks the link up: official, lookalike (e.g. `medicare-help.co`, `medlcare.gov`), known scam, short link, unknown. **Never opens it.** | Only for links found in the message |
-| `check_sender {"sender"}` | Is the sender a saved contact? | Only the real sender |
-| `lookup_official_contact {"org"}` | Real phone number from the trusted list | Only an organization the message claims to be |
+| `extract_signals {}` | Regex scan: warning signs (strong/weak), links, phone numbers, claimed organization, text aimed at an AI. The text is NFKC-normalized and also scanned with look-alike letters undone (`g1ft c@rd`, `g i f t`) | First, and only once |
+| `check_link {"url"}` | Looks the link up: official, lookalike (e.g. `medicare-help.co`, `medlcare.gov`), known scam, number-only (IP) address, short link, unknown (any other ending, e.g. `.shop`). **Never opens it.** | Only links found in the message, while one is still unchecked |
+| `check_sender {"sender"}` | Is the sender a saved contact? | Only the real sender, once |
+| `lookup_official_contact {"org"}` | Real phone number from the trusted list | Only an organization the message claims to be, not yet looked up |
 | `search_scam_guide {"query", "filters"?}` | Metadata RAG over the scam-prevention guide (see below) | Up to 3 searches |
-| `ask_human_helper {"reason"}` | Simulated alert to a family member, only with consent | Reason must cite an evidence id |
-| `done {"label","evidence","explanation"}` | Goes to the verdict gate | After `extract_signals` |
+| `ask_human_helper {"reason"}` | Simulated alert to a family member, only with consent | Only after `check_sender`, once; the reason must cite an evidence id |
+| `done {"label","evidence","explanation"}` | Not a tool: an allowed `done` goes to the verdict gate | After `extract_signals`. It goes through the same availability check as the tools, so a `done` before `extract_signals` is an ordinary rejected proposal (it counts toward `no_progress`) |
 
 There is no fixed order beyond `extract_signals` first. The model decides what to check and when it
-has enough evidence. In the live evaluation it used **14 different tool sequences on 25 messages**,
-from 2 to 5 tools (for example, a crypto-ATM text needed only `extract_signals > search_scam_guide`,
-while a Medicare lookalike text used five tools). The allowed transitions are a small graph
-(`ALLOWED_NEXT` in `scamshield_agent.py`) that Python enforces, and tools that make no sense
-disappear from the "available actions" list (no links → no `check_link`).
+has enough evidence. In the live evaluation with metadata RAG it used **14 different tool sequences on
+25 messages**, from 2 to 5 tools (keyword mode: 15 sequences, 1 to 5 tools); for example, a crypto-ATM
+text needed only `extract_signals > search_scam_guide`, while a Medicare lookalike text used five tools.
+
+**Routing is conditional, not a fixed graph.** `ROUTING` in `scamshield_agent.py` is a small table
+with one plain precondition per action (the right-hand column above), and `precondition_met()` checks
+it against what Python has observed so far. `available_actions()` lists only the actions whose
+precondition holds (no links → no `check_link`; sender already checked → no `check_sender`; helper
+only after the sender check), and a proposal for any other action is rejected with that precondition
+as the reason.
 
 ### How Python checks the model
 
-- **Before a tool runs:** invalid JSON, unknown tools, tools used out of order, a link not in the
-  message, a sender that is not the real sender, an organization not claimed, a repeated call, or a
-  helper reason without evidence are all rejected, with the allowed actions sent back.
+- **Before a tool runs:** invalid JSON, unknown tools, an action whose routing precondition does not
+  hold, a link not in the message, a sender that is not the real sender, an organization not claimed,
+  a repeated call, or a helper reason without evidence are all rejected, with the allowed actions sent back.
+- **After a tool runs (post-check):** Python verifies that the promised state change really happened
+  (the link is in `link_results`, the sender is marked checked, the contact is stored, the retrieval
+  mode is recorded, the simulated alert line is read back from the log file, the signals are marked
+  extracted). A failed post-check counts as a tool failure. The result is saved in the step's `check_result`.
+- **Model call failures:** a failed call to Ollama is retried up to 2 times after a short wait
+  (`MAX_MODEL_RETRIES`, `MODEL_RETRY_WAIT`); each retry is recorded in the step trace. Only then does
+  the run stop with `model_error`.
 - **Evidence:** every tool result gets an id (E1, E2, ...) and Python-written facts. A ledger of all
   evidence is sent with every tool result and is never trimmed.
 - **Verdict gate** (like `check_goal()` in the Agent Airways agent): Python works out the label the
   recorded evidence supports:
-  - **likely_scam:** at least 1 strong warning sign (gift card, crypto, request for a code or password,
-    lookalike or known scam link, text trying to trick an AI) or at least 2 weak ones (urgency, threat,
-    money request, prize, new number, secrecy, short link);
+  - **likely_scam:** at least 1 strong warning sign (gift card, crypto, a request to pay with a money
+    app such as Zelle, Venmo, Cash App or MoneyGram, request for a code or password, lookalike or known
+    scam link, a link made only of numbers, text trying to trick an AI) or at least 2 weak ones (urgency,
+    threat, money request, prize, new number, secrecy, short link);
   - **likely_safe:** a saved contact, no strong signs, at most 1 weak sign, and every link checked and official;
   - **uncertain:** anything else.
 
-  The model's label must match (choosing "uncertain" over "scam" is allowed: more careful is fine;
-  an unsupported "safe" never is). Cited ids must exist, the explanation must mention every strong
-  warning sign, and "uncertain" requires that human help was offered. A rejection says exactly what
+  The model's label must match. Choosing "uncertain" over "scam" is allowed only when the evidence is
+  weak signs alone; with a strong warning sign, "uncertain" is rejected ("strong sign X found; the
+  evidence supports likely_scam"), because "not sure" would hide a clear danger. An unsupported "safe"
+  is never accepted. Cited ids must exist, the explanation must mention every strong warning sign, and
+  "uncertain" requires that human help was offered. A rejection says exactly what
   is expected and what was found. After 2 rejections Python uses the supported label (`gate_downgrade`).
 - **Readability:** verdict in the first sentence, at most 6 sentences of at most 22 words, no jargon
   (phishing, domain, URL...), no links or phone numbers. One rewrite is allowed, then Python uses a
@@ -143,7 +158,8 @@ disappear from the "available actions" list (no links → no `check_link`).
   about the hidden instruction. The offline test `injection cannot make message safe` uses a scripted model that *is*
   fooled and shows the gate blocking its "safe" answer.
 
-**Stop reasons** (precedence): `invalid_input` > `model_error` > `tool_failure` > `gate_downgrade` >
+**Stop reasons** (precedence): `invalid_input` > `model_error` (after 2 retries) > `tool_failure` (an
+exception, a badly shaped result or a failed post-check) > `gate_downgrade` >
 `no_progress` (3 rejected proposals in a row) > `step_limit` (10 steps) > `success`. Every run also has
 a `final_label`; an unfinished run is never reported as safe, and "not sure" always comes with an
 offer of human help.
@@ -153,9 +169,9 @@ offer of human help.
 | Course part | What ScamShield does | What it does not cover |
 |---|---|---|
 | Context and memory | `messages` list (system prompt, marked message, replies, tool results, trimmed to the last 10) plus a never-trimmed evidence ledger; the `context` dictionary holds state; checkpoint after every step with `--resume` | No memory across messages; each check starts fresh |
-| Tools and execution flow | 6 tools + `done`, chosen by the model; `ALLOWED_NEXT` graph and availability rules; 10-step budget | No parallel tool calls |
+| Tools and execution flow | 6 tools + `done`, chosen by the model; conditional routing (`ROUTING` preconditions); post-check after every tool; model-call retries; 10-step budget | No parallel tool calls |
 | Runtime, security and privacy | Arguments must come from the message; links are never opened; message text is labeled data; consent before any (simulated) alert; everything runs locally | Regex warning signs and a small website list can be fooled by new tricks |
-| Evaluation | Deterministic gate; 46 offline tests; labeled evaluation set; repeated live runs | No LLM-as-judge; small fictional data set |
+| Evaluation | Deterministic gate; 63 offline tests; labeled evaluation set; held-out set; rules-only check; repeated live runs | No LLM-as-judge; small fictional data set |
 
 ### Metadata RAG (the innovation)
 
@@ -169,17 +185,35 @@ keyword search and records `keyword_fallback` in the trace.
 
 ## Testing and evidence
 
-- **`python3 tests.py`:** 46 offline tests with a scripted model, including deliberately wrong model
-  answers: parsing, argument grounding, fabricated evidence, "safe" forced on a scam, injection,
-  trusted contact with a bad link, gate false-alarm checks on normal messages, consent yes/no and a
-  closed terminal, missing guide, Ollama down, step limit, no progress, stop-reason precedence,
-  readability, RAG ranking and fallback, and checkpoint resume. Deliberately breaking the gate makes
-  10 of them fail.
-- **`python3 eval.py --retrieval` / `--model-queries` / `--agent --mode rag|keyword`:** 25 labeled
-  fictional messages separate from the demo cases (12 scams, 2 injections, 6 legitimate, 5 uncertain).
+- **`python3 tests.py`:** 63 offline tests with a scripted model, including deliberately wrong model
+  answers: parsing, argument grounding, routing preconditions, fabricated evidence, "safe" forced on a
+  scam, "uncertain" on a strong sign, injection, trusted contact with a bad link, gate false-alarm
+  checks on normal messages, link detection and disguised words, consent yes/no and a closed terminal,
+  missing guide, Ollama down and a single failed model call, failed post-checks, step limit, no
+  progress, stop-reason precedence, readability, RAG ranking and fallback, and checkpoint resume.
+  Deliberately breaking the gate (it believes every message is safe) makes 16 of them fail.
+- **`python3 eval.py --rules --set eval|holdout`:** instant, no model and no embeddings. Runs
+  `extract_signals`, `check_link` on every link and `check_sender` directly and compares the label the
+  evidence supports with the expected label. This measures the warning-sign rules on their own.
+- **`python3 eval.py --retrieval` / `--model-queries` / `--agent --mode rag|keyword` (add `--set holdout`
+  for the held-out set):** `--set eval` (default) is 25 labeled fictional messages separate from the demo
+  cases (12 scams, 2 injections, 6 legitimate, 5 uncertain). `--retrieval` needs Ollama running with
+  `nomic-embed-text` (otherwise the two embedding modes fall back to keyword search and say so);
+  `--agent` needs `qwen3:8b`.
+- **Held-out set (`data/eval_holdout.json`, `--set holdout`):** 12 fictional messages (7 scams, 3
+  legitimate, 2 uncertain) written *before* the round-1 rule changes and deliberately worded differently
+  from the rules: paraphrases ("store cards ... read me the numbers"), look-alike and fullwidth letters,
+  spaced letters, `.shop`/`.online` addresses, an IP-address link, payment apps, a "6-digit code you just
+  got" request and a saved contact whose account seems hacked. They are not edited to make the rules
+  pass. Rules-only result: 6/12 before the round-1 changes, 11/12 after
+  (`evidence/eval/holdout_rules_BEFORE.txt`, `holdout_rules_AFTER.txt`). The one still wrong is H03
+  (a USPS text with `.shop`/`.online` links): the links are only "unknown", so the evidence supports
+  "not sure", not "scam". Not safe, but weaker than a careful human.
 - **`python3 harness_runs.py --runs 3 [--mode keyword]`:** every demo case repeated with the live model.
 
 ### Results (live `qwen3:8b`)
+
+Numbers below will be regenerated after the round-1 fixes.
 
 Labeled evaluation set, one run per message (`evidence/eval/`):
 
@@ -230,19 +264,22 @@ Development findings (what broke and what changed) are in [DEVLOG.md](DEVLOG.md)
 
 The rubric makes LangGraph optional and gives no credit for complexity. A framework would not make
 the answers more accurate (the tools, the gate and the RAG do that), and it would hide the loop that
-the demonstration has to show. ScamShield keeps the course's plain loop, but still uses the graph idea
-from the Nov 4 lecture (`ALLOWED_NEXT` edges), explicit state (`context`), verification (the gate) and
-checkpointing (`--resume`). JSON traces and the console output play the role LangSmith plays for tracing.
+the demonstration has to show. ScamShield keeps the course's plain loop with explicit state
+(`context`), conditional routing written as plain preconditions (`ROUTING`), and verification (the
+gate and the post-checks). Checkpointing (`--resume`, a checkpoint after every step) is this project's
+own addition, inspired by a remark in the Nov 4 notes; it is not taken from the LangGraph slides.
+JSON traces and the console output play the role LangSmith plays for tracing.
 
 ## Project structure
 
 ```
 scamshield_agent.py   agent loop, tools, validation, verdict gate, readability, traces, CLI
 rag.py                metadata RAG search over the guide (+ --build for embeddings)
-tests.py              46 offline tests (scripted model)
-eval.py               retrieval comparison and live evaluation on the labeled set
+tests.py              63 offline tests (scripted model)
+eval.py               rules-only check, retrieval comparison and live evaluation (eval or held-out set)
 harness_runs.py       repeated live runs of the demo cases
-data/                 fictional messages, contacts, organizations, websites, guide, eval set, embeddings
+data/                 fictional messages, contacts, organizations, websites, guide, eval set,
+                      held-out set (eval_holdout.json), embeddings
 evidence/             saved traces, console logs and results (eval/, harness/)
 DEVLOG.md             development findings
 ```
@@ -250,6 +287,11 @@ DEVLOG.md             development findings
 ## Known limitations
 
 - Fictional text messages only; the warning-sign rules, website list and guide are small and hand-written.
+  Look-alike letters from other alphabets (e.g. Cyrillic) are not undone. A message that claims to be
+  an organization but links to an unknown website is "not sure", not "scam" (held-out H03).
+- Payment apps count as a strong sign only when the message asks you to send or pay with one, so
+  "I sent you $20 on Venmo" is not flagged; a real request from family to pay by Zelle would still be
+  flagged (a deliberate, careful choice).
 - Small local model: it sometimes proposes a verdict too early or says "safe" too quickly. The gate
   catches this, but it costs steps.
 - English only; no images, voice notes or real phone integration.
@@ -258,6 +300,10 @@ DEVLOG.md             development findings
 
 ## Credits
 
-- Loop structure, tool registry, `result()` shape, trace fields and testing style follow the CSYE 7374
-  Agent Airways class agent and the Google AI Harness assignment.
+- Loop structure, tool registry, `result()` shape and testing style follow the CSYE 7374 Agent Airways
+  class agent and the Google AI Harness assignment.
+- The step trace fields (step, raw_reply, action, argument, parse_ok, validation_ok, observation,
+  check_result, state_update, continue_or_stop) follow the bare-bones agent class notebook and PR #31;
+  the lesson that checker feedback must show expected vs. actual values is from PR #31.
+- Retries, post-action checks and "verify, do not assume" follow the robust browser agent note.
 - Google AI Harness course: https://g.dev/ai/ai-harness
