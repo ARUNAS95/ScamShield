@@ -19,3 +19,7 @@ evidence/family_alerts.log
 
 # Mac OS
 .DS_Store
+
+# Local tool folders (not part of the project)
+.claude/
+critic_report/
