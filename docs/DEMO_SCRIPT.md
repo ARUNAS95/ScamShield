@@ -120,15 +120,18 @@ Say: "A delivery text from an unknown number that names USPS, and the scam guide
 Point at:
 1. If the model searches the guide: `TOOL RESULT : TOOL FAILURE: ... FileNotFoundError ...`. Say: "The
    failure is recorded, the tool disappears from NEXT OPTIONS, and the model continues."
-2. Banner: **NOT SURE**, **STOP REASON : tool_failure**. Say: "After a tool failure the answer can never be 'safe'."
+2. `GATE : REJECTED`: in all 3 saved runs the model then proposed "likely_safe" (twice), and the gate
+   rejected it because a tool failed. Say: "The model wanted to say safe. Python decided 'not sure',
+   because the check was incomplete."
+3. Banner: **NOT SURE**, **STOP REASON : tool_failure**. Say: "After a tool failure the answer can never be 'safe'."
 
-The model does not always search the guide. If it does not, there is no tool failure in this run (the
-answer is still "not sure"): show a saved run where it did (the `guide_missing` fallback log above).
+The model searched the guide in all 3 saved runs. If a live run does not search it, there is no tool
+failure (the answer is still "not sure"): show the saved run `evidence/harness/run_guide_missing_1_console.txt`.
 
 ### 4:30 to 5:00: wrap-up
 
 ```bash
-python3 -m json.tool evidence/guide_missing_trace.json | head -40   # the trace of the run you just did
+python3 -m json.tool evidence/harness/run_guide_missing_1_trace.json | head -40   # a saved run where the search failed
 ```
 
 Say: "Every step is saved with the raw model reply, the validation result, the observation and the
@@ -148,13 +151,13 @@ recognizes this wording."
 Point at:
 1. `STEP 1`: `strong: none; weak: none`. Say: "The rules missed it."
 2. `check_sender`: a saved contact. On evidence alone, Python could support "safe".
-3. The model proposes `likely_scam`, and `GATE : REJECTED` because no warning sign was recorded. The
-   feedback invites "uncertain" and `ask_human_helper`. If the model then tries `likely_safe`, the gate
-   rejects that too: "you raised a concern earlier; answer uncertain and use ask_human_helper".
+3. The model either worries on its own (in saved run 3 it called `ask_human_helper` directly) or proposes
+   `likely_scam`, which the gate rejects because no warning sign was recorded; the feedback then invites
+   "uncertain" and `ask_human_helper`. A later "likely_safe" is rejected: "you raised a concern earlier".
 4. Banner: **NOT SURE - ASK SOMEONE YOU TRUST**, human help offered. Say: "The rules missed it; the
    model's concern made it 'not sure'. Python can block the model's label, but the model's worry can only
-   make the answer more careful. If the model is not worried either, nothing catches it: in an earlier
-   saved run it was called safe. That is the main limit of this design."
+   make the answer more careful. If the model is not worried either, nothing catches it: in 2 of the 3
+   saved runs (runs 1 and 2) it was called safe. That is the main limit of this design."
 
 The model decides the tool order and whether it is worried. If it is not worried, the evidence alone
 would support "safe": that is the honest limit of the rules (see Known limitations in the README).

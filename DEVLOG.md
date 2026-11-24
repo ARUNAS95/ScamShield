@@ -463,12 +463,12 @@ live results (eval and harness) are regenerated after this change.
   runs, not just the model's word.
 - **A moment the model surprised me (good or bad):** on the very first test call, the model invented an
   argument for a tool that takes none. Later, its first instinct on a normal-looking text from an unknown
-  number was often "safe", and in one run it called a cash-courier scam from a family contact "safe"
+  number was often "safe", and in some runs it called a cash-courier scam from a family contact "safe"
   because neither the rules nor the model noticed it.
 - **What the evaluation taught me that I did not expect:** how little a small test set proves. With 50
   messages an accuracy of 80% could really be anywhere from about 67% to 89%, which is why I wanted 500+
   messages. I also learned that hand-written rules generalize poorly: each fresh held-out set exposed many
-  misses before it was used for fixes (6/12 and 2/14), and the RAG gain was much smaller than I expected.
+  misses before it was used for fixes (6/12 and 2/14), and embedding search mattered only on one hard case, which I traded away to keep the agent small.
 - **How I used AI tools while building it, and how I checked their work:** I used Claude Code. It wrote
   most of the code, tests and documentation from my instructions, and I set up a loop where a work agent
   fixed issues and separate critic agents graded the project against the rubric. I checked the results by

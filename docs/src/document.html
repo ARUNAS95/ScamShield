@@ -182,7 +182,7 @@ and the guide tip are always added by Python.</p>
   support, but it never turns the model's worry into "safe". Once the model has proposed "scam" or "not sure", or has asked for human help itself, a later
   "safe" is rejected by the gate ("you raised a concern earlier; answer uncertain and use ask_human_helper"), and
   if the gate gives up or the run ends while the evidence supports "safe", the answer is "not sure" with human help
-  offered. <code>finish_run</code> applies the same rule again as a backstop.</li>
+  offered. When the gate gives up, <code>finish_run</code> uses the supported label but never "safe" for a worried model.</li>
 </ul>
 </section>
 
@@ -236,7 +236,7 @@ the tests notice a broken gate.</p>
 <p>Four labeled sets of fictional messages, separate from the demo cases. One live run per message with
 <code>qwen3:8b</code>.</p>
 <ul>
-  <li><b>Evaluation set</b> ({{EVAL_MESSAGES}} messages): written with the rules.</li>
+  <li><b>Test set 1</b> ({{EVAL_MESSAGES}} messages): written with the rules.</li>
   <li><b>Test set 2</b> and <b>test set 3</b>: each was written before a round of rule fixes and then used to fix the
   rules. They are no longer held out, so their scores after the fixes are optimistic.</li>
   <li><b>Large blind test set</b> ({{LARGE_MESSAGES}} messages): written by a separate AI agent that never saw the
@@ -354,7 +354,7 @@ several review rounds, a work agent fixed what they found, and I verified the re
 the live evaluations. The commits were made under my own git account at my request. The repository contains the
 agent loop and tools (<code>scamshield_agent.py</code>), the verdict gate and readability check, the metadata search over the scam guide
 (<code>rag.py</code>), the fictional messages, contacts, website list and scam guide (<code>data/</code>), the
-offline tests (<code>tests.py</code>), the evaluation and held-out sets (<code>eval.py</code>), the
+offline tests (<code>tests.py</code>), the labeled test sets and their evaluation (<code>eval.py</code>), the
 repeated-run harness (<code>harness_runs.py</code>) and the development log (<code>DEVLOG.md</code>).</p>
 <h3>Course materials reused</h3>
 <ul>

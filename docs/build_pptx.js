@@ -509,7 +509,7 @@ for (let i = 0; i < stats.length; i++) {
   T(s, stats[i][1], { x: x + 0.15, y: 2.92, w: 2.55, h: 0.95, fontSize: 16, color: INK });
 }
 const lines = [
-  [{ text: 'Evaluation set (' + (evalSet.messages || PENDING) + ' messages): ', options: { bold: true } },
+  [{ text: 'Test set 1 (' + (evalSet.messages || PENDING) + ' messages): ', options: { bold: true } },
     { text: 'live agent ' + evalSet.correct + ' correct, false "safe" ' + evalSet.false_safe }],
   [{ text: 'Test sets 2 and 3: ', options: { bold: true } },
     { text: 'live agent ' + t2.correct + ' and ' + t3.correct + ' correct. Written before rule fixes, then used ' +
@@ -538,7 +538,7 @@ T(s, [
   { text: L.messages + ' messages written by a separate AI agent that never saw the rules (frozen). ' },
   { text: 'Rules only: ' + (LR ? LR.score + ' (' + LR.percent + ', 95% range ' + LR.range + ')' : PENDING) + '. ',
     options: { bold: true } },
-  { text: 'Live agent: ' + (LA ? LA.score + ' (' + LA.percent + ', 95% range ' + LA.range + ')' : PENDING) + '.',
+  { text: (LA ? 'Live agent: ' + LA.score + ' (' + LA.percent + ', 95% range ' + LA.range + ').' : 'Live run of all 614: not done (about 2 hours), future work.'),
     options: { bold: true } },
 ], { x: LEFT + 0.3, y: 5.7, w: CONTENT_W - 0.9, h: 1.25, fontSize: 18, color: WHITE, valign: 'middle' });
 s.addNotes('Every number here is read from the saved evidence files when the deck is built. ' +
