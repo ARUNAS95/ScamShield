@@ -488,7 +488,7 @@ def test_uncertain_needs_help_offered_first():
     ])
     assert record['final_label'] == 'uncertain' and record['stop_reason'] == 'success'
     # The gate's rejection told the model to use ask_human_helper first.
-    assert record['gate_rejections'] == 1 and record['helper_offered_by'] == 'model_after_gate_hint'
+    assert record['gate_rejections'] == 1 and record['helper_offered_by'] == 'model'
 
 
 CONCERN_MESSAGE = {'sender': '+1-555-0177', 'text': 'Hi Grandma, can you help me with something this weekend?'}
@@ -566,19 +566,6 @@ def test_uncertain_then_safe_is_never_safe():
     assert agent.check_verdict(proposal, context)[0] is False
 
 
-def test_accepted_safe_after_concern_becomes_uncertain():
-    # Backstop in finish_run: even if an accepted "safe" reached it after
-    # the model had said likely_scam, the final answer is uncertain + help.
-    context, runtime = fresh_context('ordinary')
-    agent.run_requested_tool('extract_signals', {}, context, runtime)
-    agent.run_requested_tool('check_sender', {'sender': '+1-555-0142'}, context, runtime)
-    context['model_labels'] = ['likely_scam', 'likely_safe']
-    record = agent.finish_run(context, runtime, [], 'verdict', ('likely_safe', 'This message looks safe.', 'model'),
-                              'test_backstop', 'no', TEMP / 'backstop.json', False)
-    assert record['final_label'] == 'uncertain' and record['model_concern_kept'] is True
-    assert record['helper_offered'] is True and record['explanation_source'] == 'template'
-
-
 def test_model_catches_miss_scripted_concern_ends_uncertain():
     # The rules miss this courier scam from a saved contact. The model is
     # worried; the answer must end "not sure", never "safe".
@@ -591,7 +578,7 @@ def test_model_catches_miss_scripted_concern_ends_uncertain():
     ])
     assert record['supported_label'] == 'likely_safe'
     assert record['final_label'] == 'uncertain' and record['stop_reason'] == 'success'
-    assert record['helper_offered_by'] == 'model_after_gate_hint'
+    assert record['helper_offered_by'] == 'model'
 
 
 def test_rejected_scam_feedback_invites_uncertain_and_helper():
@@ -605,7 +592,7 @@ def test_rejected_scam_feedback_invites_uncertain_and_helper():
     message = record['trace'][2]['observation']['message']
     assert 'answer uncertain' in message and 'ask_human_helper' in message
     assert record['final_label'] == 'uncertain' and record['stop_reason'] == 'success'
-    assert record['helper_offered_by'] == 'model_after_gate_hint'
+    assert record['helper_offered_by'] == 'model'
 
 
 def test_helper_offered_by_model_on_its_own():
@@ -637,7 +624,7 @@ def test_helper_then_safe_is_never_safe():
     context, runtime = fresh_context('ordinary')
     context['helper_offered_by'] = 'python'
     assert agent.model_was_concerned(context) is False
-    context['helper_offered_by'] = 'model_after_gate_hint'
+    context['helper_offered_by'] = 'model'
     assert agent.model_was_concerned(context) is True
 
 
@@ -1342,7 +1329,6 @@ if __name__ == '__main__':
         ('model uncertain then gate gave up -> never safe', test_model_uncertain_then_gave_up_never_safe),
         ('scam then safe is never safe', test_scam_then_safe_is_never_safe),
         ('uncertain then safe is never safe', test_uncertain_then_safe_is_never_safe),
-        ('accepted safe after a concern becomes uncertain (backstop)', test_accepted_safe_after_concern_becomes_uncertain),
         ('model_catches_miss ends not sure when the model is worried', test_model_catches_miss_scripted_concern_ends_uncertain),
         ('rejected scam feedback invites uncertain + helper', test_rejected_scam_feedback_invites_uncertain_and_helper),
         ('helper_offered_by = model when unprompted', test_helper_offered_by_model_on_its_own),

@@ -1163,7 +1163,7 @@ def run_requested_tool(name, argument, context, runtime):
     context['calls_made'][call_key] = evidence_id
     context['tool_sequence'].append(name)
     if name == 'ask_human_helper':
-        context['helper_offered_by'] = model_helper_source(context)
+        context['helper_offered_by'] = 'model'   # finish_run sets 'python' for its own offer
     return outcome, 'ran'
 
 
@@ -1607,7 +1607,7 @@ def new_context(message, guide_path):
         'tool_sequence': [], 'tool_failures': [], 'broken_tools': [], 'post_checks': [],
         'gate_rejections': 0, 'readability_rewrites': 0, 'rejected_proposals': 0,
         'consecutive_rejections': 0, 'gate_downgraded': False, 'model_labels': [],
-        'helper_hint_given': False, 'model_concern_kept': False,
+        'model_concern_kept': False,
     }
 
 
@@ -1837,8 +1837,6 @@ def handle_done(argument, context, record, verbose):
                      + ('' if context['helper_offered'] else ' (' + help_first_note(context) + ')'))
         feedback = result(False, 'GATE REJECTED your answer: ' + ' | '.join(failed) + '. ' + hint
                           + '. Fix it, or gather more evidence first.')
-        if 'ask_human_helper' in feedback['message']:
-            context['helper_hint_given'] = True
         record['observation'] = feedback   # the exact feedback the model gets
         return feedback, None
 
@@ -1871,17 +1869,7 @@ def model_was_concerned(context):
     for label in context['model_labels']:
         if label in ('likely_scam', 'uncertain'):
             return True
-    if context['helper_offered_by'] in ('model', 'model_after_gate_hint'):
-        return True
-    return False
-
-
-def model_helper_source(context):
-    """'model' when the model asked for human help on its own, or
-    'model_after_gate_hint' when a gate rejection had told it to."""
-    if context['helper_hint_given']:
-        return 'model_after_gate_hint'
-    return 'model'
+    return context['helper_offered_by'] == 'model'
 
 
 def choose_stop_reason(context, ended_by):
@@ -1907,26 +1895,17 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         explanation = 'We could not check this message because it is empty or too long.'
         source = 'template'
     elif accepted is not None:
+        # The gate already refused "safe" after a concern (check_verdict).
         label, explanation, source = accepted
-        if label == 'likely_safe' and model_was_concerned(context):
-            # Backstop for the gate rule above: an accepted "safe" after the
-            # model said likely_scam or uncertain, or asked for human help
-            # itself, becomes uncertain + help.
-            label = 'uncertain'
-            context['model_concern_kept'] = True
-            explanation = template_explanation(label, context)
-            source = 'template'
     else:
         # The model did not give an accepted answer: Python decides from evidence.
         label = supported_label(context)
         if label == 'likely_safe' and not context['gate_downgraded']:
             label = 'uncertain'   # never call a message safe after an unfinished run
         if label == 'likely_safe' and model_was_concerned(context):
-            # Python can block a label the evidence does not support, but the
-            # model's concern can only make the answer MORE careful, never
-            # less: if the model ever said likely_scam or uncertain, or asked
-            # for human help itself, the final answer is never "safe" (it
-            # becomes uncertain + human help).
+            # The gate gave up, but the model was worried earlier: its concern
+            # can only make the answer more careful, so not "safe" but
+            # uncertain + human help.
             label = 'uncertain'
             context['model_concern_kept'] = True
         explanation = template_explanation(label, context)
@@ -1953,8 +1932,6 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
                       'available_actions': available_actions(context), 'evidence_id': None,
                       'observation': outcome, 'check_result': {'post_check': context['post_checks'][-1]},
                       'state_update': 'offered by Python', 'continue_or_stop': 'stop', 'model_retries': []})
-    elif context['helper_offered'] and context['helper_offered_by'] is None:
-        context['helper_offered_by'] = model_helper_source(context)
 
     if stop_reason == 'invalid_input':
         action_line = 'If you are unsure about a message, ask someone you trust.'
