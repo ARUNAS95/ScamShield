@@ -327,6 +327,42 @@ The live evidence is regenerated after these changes.
 - Docs-only fixes: slide 10 title, README tool-sequence count and limitation wording, test name for the
   `model_catches_miss` case, EXPLAIN round count and a robust-note section table.
 
+## Nov 24, 2026: Round-4 fixes (after critic review round 4)
+
+The two gaps documented above were fixed after all, with tests. The live evidence is regenerated
+separately after this change.
+
+1. **A phone number that is not the official number.**
+   - Problem: `lookup_official_contact` returned the real First City Bank number (1-800-555-0106), but
+     nothing compared it with the number in the message (1-800-555-0199), so the "your account is
+     locked, call this number" text from the saved bank contact ended "safe".
+   - Fix: `lookup_official_contact` now compares every phone number in the message with the official
+     number (digits only, a leading country code 1 removed, last 10 digits). If none is official, the
+     strong sign `unofficial_number` is added ("asks you to call a number that is not the official
+     First City Bank number"); if one is, the fact "the number in the message is the official ...
+     number" is recorded. A number that is the official number of another organization the message
+     names is not flagged. "Safe" now also needs this lookup whenever the message gives a phone number
+     for an organization it claims; the gate rejection says so and points to `lookup_official_contact`
+     (not to human help, so a safe message can still be confirmed). `eval.py --rules` and the test
+     helper now run `lookup_official_contact` for every claimed organization.
+   - Tests: "phone numbers compared by their last digits", "unofficial number is a strong sign after
+     lookup", "phone number not looked up -> not safe" (also a scripted model that skips the lookup),
+     "official number in the message stays safe", "message without a phone number needs no lookup".
+   - Label changes: none. Rules-only results are unchanged (eval 25/25, holdout 11/12, holdout2 13/14);
+     no test-set message both names an organization and gives a phone number. Of the demo cases only
+     `ordinary` does, and it stays "safe" after the lookup.
+   - Two short live checks (`qwen3:8b`, not saved as evidence): the bank text ended **likely_scam** (the
+     model looked up the bank and named the wrong number); the `ordinary` case ended **likely_safe**
+     after one gate rejection (the model said "safe" before the lookup, then did the lookup).
+2. **Human help, then "safe".**
+   - Problem: `model_was_concerned` only looked at earlier scam/uncertain labels, so a model that called
+     `ask_human_helper` and then said "safe" got "safe".
+   - Fix: `model_was_concerned` is also true when the model itself asked for human help
+     (`helper_offered_by` is `model` or `model_after_gate_hint`). Python's own help offer does not
+     count. The existing gate rule and the `finish_run` backstop then turn a later "safe" into "not sure".
+   - Test: "helper then safe is never safe".
+- Test count: 94 (up from 88). `python3 tests.py --break-gate`: **23 of 94 fail** with the broken gate.
+
 ## What came from the course and what is new
 
 | From the course (Agent Airways, bare-bones notebook, PR #31, Harness assignment, robust browser agent note, Nov 4 notes) | New in ScamShield |

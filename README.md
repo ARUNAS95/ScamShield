@@ -35,7 +35,7 @@ pip3 install -r requirements.txt   # just: requests
 **3. Run the offline tests** (no Ollama needed):
 
 ```bash
-python3 tests.py                   # 88 tests with a scripted model
+python3 tests.py                   # 94 tests with a scripted model
 ```
 
 **4. Run a demo case with the live model:**
@@ -107,7 +107,7 @@ Each step, `qwen3:8b` (via Ollama, `think=false`, `format=json`) replies with on
 | `extract_signals {}` | Regex scan: warning signs (strong/weak), links, phone numbers, claimed organization, text aimed at an AI. The text is NFKC-normalized and also scanned with disguises undone: `g1ft c@rd`, `g i f t`, and Cyrillic/Greek look-alike letters (`gіft cаrd` with Cyrillic і and а). Links are found after defanged forms are restored (`medicare[.]gov`, `(dot)`, `hxxps://`); a link that uses letters from another alphabet (`аmazon.com`) or hides its real address behind an `@` (`medicare.gov@evil-login.ru`, `http://user@203.0.113.9`) is a strong sign. "5 p.m.Love you" and "Oak St.Apt" are not links | First, and only once |
 | `check_link {"url"}` | Looks the link up: official, lookalike (e.g. `medicare-help.co`, `medlcare.gov`), known scam, number-only (IP) address, other alphabet, short link, unknown (any other ending, e.g. `.shop`). Anything before an `@` is dropped first, so the real address is classified. **Never opens it.** | Only links found in the message, while one is still unchecked |
 | `check_sender {"sender"}` | Is the sender a saved contact? | Only the real sender, once |
-| `lookup_official_contact {"org"}` | Real phone number from the trusted list | Only an organization the message claims to be, not yet looked up |
+| `lookup_official_contact {"org"}` | Real phone number from the trusted list, compared with every phone number in the message (no official number in the message = strong sign `unofficial_number`) | Only an organization the message claims to be, not yet looked up |
 | `search_scam_guide {"query", "filters"?}` | Metadata RAG over the scam-prevention guide (see below) | Up to 3 searches |
 | `ask_human_helper {"reason"}` | Simulated alert to a family member, only with consent. When the answer is "not sure" and the model never offered help, Python offers it at the end; that offer is post-checked the same way and saved as an extra trace step (`raw_reply` null, `state_update` "offered by Python") | Only after `check_sender`, once; the reason must cite an evidence id |
 | `done {"label","evidence","explanation"}` | Not a tool: an allowed `done` goes to the verdict gate | After `extract_signals`. It goes through the same availability check as the tools, so a `done` before `extract_signals` is an ordinary rejected proposal (it counts toward `no_progress`) |
@@ -149,12 +149,14 @@ routing at work (for example `ask_human_helper` appears only after `check_sender
     Apple Pay or Western Union, "I need you to wire 2000", a request for a code, password, PIN, sign-in
     code, online banking login, bank routing or account details, Medicare number or a photo of your bank
     card, a lookalike, known scam, look-alike-letter or hidden-address link, a link made only of numbers,
-    text trying to trick an AI) or at least 2 weak ones (urgency, threat, money request, prize, new
+    text trying to trick an AI, or a phone number that is not the official number of the organization
+    the message claims to be, found by `lookup_official_contact`: `unofficial_number`) or at least 2 weak ones (urgency, threat, money request, prize, new
     number, secrecy, short link). A gift card mentioned as a present, "I'll pay you back on Venmo",
     "Venmo me back", "a photo of the card I made for you" and "the wifi password is ..." are not
     warning signs: only a request counts;
   - **likely_safe:** a saved contact, no strong signs, at most 1 weak sign, every link checked and
-    official, and no tool failure;
+    official, the official number looked up whenever the message gives a phone number for an
+    organization it claims, and no tool failure;
   - **uncertain:** anything else.
 
   The model's label must match. Choosing "uncertain" over "scam" is allowed only when the evidence is
@@ -165,12 +167,14 @@ routing at work (for example `ask_human_helper` appears only after `check_sender
   is expected and what was found. After 2 rejections Python uses the supported label (`gate_downgrade`).
 - **The model's concern can only make the answer more careful.** Python can block a label the evidence
   does not support, but it never turns the model's worry into "safe":
-  - once the model has proposed `likely_scam` or `uncertain` in a run, a later `likely_safe` is rejected
+  - once the model has proposed `likely_scam` or `uncertain`, or has called `ask_human_helper` itself
+    (`helper_offered_by` is `model` or `model_after_gate_hint`; Python's own offer does not count),
+    a later `likely_safe` is rejected
     by the gate (rule "likely_safe is not allowed after you raised a concern": "you raised a concern
     earlier; answer uncertain and use ask_human_helper"), and the rejection feedback no longer says
     "Python can support: likely_safe";
   - if the gate gives up or the run ends while the evidence supports "safe" and the model said "scam"
-    or "not sure" at any point, the answer is **not sure** with human help offered;
+    or "not sure" or asked for human help at any point, the answer is **not sure** with human help offered;
   - `finish_run` applies the same rule again as a backstop: an accepted "safe" after an earlier concern
     also becomes **not sure** with help.
 
@@ -178,7 +182,19 @@ routing at work (for example `ask_human_helper` appears only after `check_sender
   something looked wrong but the checks could not confirm it. When the gate rejects a "scam" answer
   because no warning sign was recorded, its feedback invites the model to answer "uncertain" and use
   `ask_human_helper` instead of repeating itself. Tests: "scam then safe is never safe", "uncertain then
-  safe is never safe", "model concern never becomes safe", and the `model_catches_miss` demo case.
+  safe is never safe", "helper then safe is never safe", "model concern never becomes safe", and a
+  scripted run of the `model_catches_miss` demo case (live, that case still ended "safe" in 2 of 6 runs
+  when the model was not worried; see Known limitations).
+- **Phone numbers are checked against the official number.** `lookup_official_contact` compares every
+  phone number in the message with the official number from the trusted list (digits only, a leading
+  country code 1 removed, last 10 digits compared). If no number in the message is official, the
+  strong sign `unofficial_number` is added ("asks you to call a number that is not the official First
+  City Bank number"); if one is, the fact "the number in the message is the official ... number" is
+  recorded. A number that is the official number of another organization the message names is not
+  flagged. "Safe" waits for this lookup: a gate rejection says "the message gives a phone number for
+  First City Bank; check the official number first (use lookup_official_contact)". Tests: "unofficial
+  number is a strong sign after lookup", "phone number not looked up -> not safe", "official number in
+  the message stays safe", "message without a phone number needs no lookup".
 - **Who offered human help** (`helper_offered_by` in every trace): `model` = the model called
   `ask_human_helper` on its own; `model_after_gate_hint` = it did so after a gate rejection told it
   to; `python` = Python offered help because the result was "not sure". Both evaluation and harness
@@ -208,7 +224,7 @@ offer of human help.
 | Context and memory | `messages` list (system prompt, marked message, replies, tool results, trimmed to the last 10) plus a never-trimmed evidence ledger; the `context` dictionary holds state; checkpoint after every step with `--resume` | No memory across messages; each check starts fresh |
 | Tools and execution flow | 6 tools + `done`, chosen by the model; conditional routing (`ROUTING` preconditions); post-check after every tool; model-call retries; 10-step budget | No parallel tool calls |
 | Runtime, security and privacy | Arguments must come from the message; links are never opened; message text is labeled data; consent before any (simulated) alert; everything runs locally | Regex warning signs and a small website list can be fooled by new tricks |
-| Evaluation | Deterministic gate; 88 offline tests; labeled evaluation set; two held-out sets; rules-only check; repeated live runs | No LLM-as-judge; small fictional data set |
+| Evaluation | Deterministic gate; 94 offline tests; labeled evaluation set; two held-out sets; rules-only check; repeated live runs | No LLM-as-judge; small fictional data set |
 
 ### Metadata RAG (the innovation)
 
@@ -226,10 +242,11 @@ friend) are not shown for a message that claims to be an organization.
 
 ## Testing and evidence
 
-- **`python3 tests.py`:** 88 offline tests with a scripted model, including deliberately wrong model
+- **`python3 tests.py`:** 94 offline tests with a scripted model, including deliberately wrong model
   answers: parsing, argument grounding, routing preconditions, fabricated evidence, "safe" forced on a
   scam, "uncertain" on a strong sign, the model's concern never ending in "safe" (including "scam then
-  safe" and "uncertain then safe"), injection, trusted contact with a bad link, gate false-alarm checks
+  safe", "uncertain then safe" and "helper then safe"), phone numbers checked against the official
+  number, injection, trusted contact with a bad link, gate false-alarm checks
   on normal messages, link detection and disguised words, a false-alarm regression list (17 ordinary
   texts that must stay safe), a false-safe regression list (15 critic probes that must be scams), a
   rule-coverage regression list from review round 3 (16 scams and 6 harmless look-alikes), consent
@@ -238,10 +255,11 @@ friend) are not shown for a message that claims to be an organization.
   precedence, readability, RAG ranking, fallback and tip relevance, checkpoint resume (including
   refusing to re-run a finished checkpoint) and a `SCAMSHIELD_MODEL` override in a subprocess.
 - **`python3 tests.py --break-gate`:** the "break the gate" experiment. It replaces
-  `supported_label()` with one that always says "likely_safe" and runs every test: **21 of 88 tests
+  `supported_label()` with one that always says "likely_safe" and runs every test: **23 of 94 tests
   fail** (`evidence/eval/break_gate_tests.txt`), so the tests notice when the gate stops checking evidence.
 - **`python3 eval.py --rules --set eval|holdout|holdout2`:** instant, no model and no embeddings. Runs
-  `extract_signals`, `check_link` on every link and `check_sender` directly and compares the label the
+  `extract_signals`, `check_link` on every link, `check_sender` and `lookup_official_contact` for every
+  claimed organization directly and compares the label the
   evidence supports with the expected label. This measures the warning-sign rules on their own.
 - **`python3 eval.py --retrieval` / `--model-queries` / `--agent --mode rag|keyword` (add `--set holdout`
   or `--set holdout2` for a held-out set):** `--set eval` (default) is 25 labeled fictional messages separate from the demo
@@ -379,7 +397,7 @@ kind of step-by-step record that a tracing tool such as LangSmith would.)
 ```
 scamshield_agent.py   agent loop, tools, validation, verdict gate, readability, traces, CLI
 rag.py                metadata RAG search over the guide (+ --build for embeddings)
-tests.py              88 offline tests (scripted model); --break-gate experiment
+tests.py              94 offline tests (scripted model); --break-gate experiment
 eval.py               rules-only check, retrieval comparison and live evaluation (eval or held-out sets)
 harness_runs.py       repeated live runs of the demo cases
 data/                 fictional messages, contacts, organizations, websites, guide, eval set,
@@ -434,12 +452,8 @@ python3 docs/build_docs.py    # writes docs/ScamShield_Project_Document.pdf and 
 - `model_catches_miss` shows the limit of the rules: a cash-courier text from a saved contact has no
   warning sign the rules know. The best the system can then do is "not sure" when the model is worried;
   when the model was not worried either, the answer was "safe" (2 of 6 saved runs, keyword mode).
-- Found in the final review and **not fixed** (fixing them changes the agent code, so all live evidence
-  would have to be regenerated): (1) a phone number in the message that differs from the claimed
-  organization's official number is not used as evidence, so a "your account is locked, call this
-  number" text from a saved bank contact was called "safe" in a live check; (2) if the model offers
-  human help and then proposes "safe", the gate accepts "safe" (only earlier scam/uncertain labels
-  count as a concern).
+- A phone number is only compared with the official number of an organization the message names. A
+  saved family contact asking you to call a stranger's number is not flagged by this rule.
 - The evaluation set is small and written by the same person as the rules.
 
 ## Credits

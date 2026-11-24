@@ -35,7 +35,7 @@ a particular message is suspicious, so the next message with a slightly differen
 <p><b>ScamShield</b> checks one text message and answers in short, kind, everyday words:</p>
 <div class="verdicts">
   <div style="background:#C62828"><b>Likely scam</b>at least one strong warning sign, or two weak ones</div>
-  <div style="background:#2E7D5B"><b>Likely safe</b>a saved contact, no strong signs, at most 1 weak sign, every link checked and official, no tool failure</div>
+  <div style="background:#2E7D5B"><b>Likely safe</b>a saved contact, no strong signs, at most 1 weak sign, every link checked and official, the official number looked up whenever the message gives a phone number for an organization it claims, no tool failure</div>
   <div style="background:#B45309"><b>Not sure, ask someone you trust</b>the evidence cannot settle it</div>
 </div>
 <p>Why this is useful:</p>
@@ -142,7 +142,7 @@ and the guide tip are always added by Python.</p>
     <tr><td><code>extract_signals {}</code></td><td>Scans the text for warning signs (strong and weak), links, phone numbers, the organization it claims to be, and text aimed at an AI. Disguised words such as "g1ft c@rd" or spaced letters are undone first.</td><td>First, before anything else; only once</td></tr>
     <tr><td><code>check_link {"url"}</code></td><td>Looks the link up in a list: official, look-alike, known scam, number-only address, short link or unknown. Never opens it.</td><td>A link found in the message is still unchecked</td></tr>
     <tr><td><code>check_sender {"sender"}</code></td><td>Is the sender a saved contact? (Not being saved is a note, not a warning sign.)</td><td>Only the real sender; only once</td></tr>
-    <tr><td><code>lookup_official_contact {"org"}</code></td><td>The organization's real phone number from a trusted list</td><td>An organization the message claims to be, not looked up yet</td></tr>
+    <tr><td><code>lookup_official_contact {"org"}</code></td><td>The organization's real phone number from a trusted list; a phone number in the message that is not official is a strong warning sign</td><td>An organization the message claims to be, not looked up yet</td></tr>
     <tr><td><code>search_scam_guide {"query", "filters"?}</code></td><td>Metadata RAG over a small scam-prevention guide: half meaning similarity (local embeddings), half keyword overlap, plus a boost for entries whose red flags match the warning signs found</td><td>Up to 3 searches</td></tr>
     <tr><td><code>ask_human_helper {"reason"}</code></td><td>Asks for consent, then writes a simulated alert for a family member to a log file</td><td>After <code>check_sender</code>; once; the reason must cite an evidence id</td></tr>
     <tr><td><code>done {"label", "evidence", "explanation"}</code></td><td>Not a tool: sent to the verdict gate</td><td>After <code>extract_signals</code></td></tr>
@@ -169,15 +169,16 @@ and the guide tip are always added by Python.</p>
   <li><b>likely_scam</b> needs at least 1 strong warning sign (a request to buy, send or read out a gift or store
   card, crypto or a wire transfer, a request to pay with a money app, a request for a code, password, PIN or a photo
   of a bank card, a look-alike, known scam, look-alike-letter or hidden-address link, a number-only link, text trying
-  to trick an AI) or at least 2 weak ones (urgency, threat, money request, prize, new number, secrecy, short link).
+  to trick an AI, or a phone number that is not the official number of the organization the message claims to be,
+  found by <code>lookup_official_contact</code>) or at least 2 weak ones (urgency, threat, money request, prize, new number, secrecy, short link).
   Only a request counts: a gift card given as a present or "I'll pay you back on Venmo" is not a warning sign.</li>
   <li><b>likely_safe</b> needs a saved contact, no strong signs, at most 1 weak sign, every link checked and official,
-  and no tool failure.</li>
+  the official number looked up whenever the message gives a phone number for an organization it claims, and no tool failure.</li>
   <li><b>uncertain</b> is anything else. It is rejected when a strong warning sign was found ("not sure" would hide a
   clear danger), and help must be offered before uncertain.</li>
   <li>Cited evidence ids must exist, and the explanation must mention every strong warning sign.</li>
   <li><b>The model's concern can only make the answer more careful.</b> Python can block a label the evidence does not
-  support, but it never turns the model's worry into "safe". Once the model has proposed "scam" or "not sure", a later
+  support, but it never turns the model's worry into "safe". Once the model has proposed "scam" or "not sure", or has asked for human help itself, a later
   "safe" is rejected by the gate ("you raised a concern earlier; answer uncertain and use ask_human_helper"), and
   if the gate gives up or the run ends while the evidence supports "safe", the answer is "not sure" with human help
   offered. <code>finish_run</code> applies the same rule again as a backstop.</li>
@@ -227,7 +228,7 @@ expected label.</p>
 including deliberately wrong answers: bad JSON, invented arguments, fabricated evidence ids, "safe" forced on a scam,
 "uncertain" on a strong sign, injection, consent yes/no, a missing guide, Ollama down, a single failed model call,
 failed post-checks, the step limit, no progress, readability, RAG ranking and fallback, checkpoint resume, "scam
-then safe" and "not sure then safe" (never safe), a false-alarm regression list (ordinary texts that must stay safe),
+then safe", "not sure then safe" and "human help then safe" (never safe), phone numbers checked against the official number, a false-alarm regression list (ordinary texts that must stay safe),
 a false-safe regression list (critic probes that must be scams) and a rule-coverage list from review round 3. <code>python3 tests.py --break-gate</code> replaces the gate's <code>supported_label</code> with
 "always likely_safe": <b>{{BREAK_GATE}}</b> tests then fail (<code>evidence/eval/break_gate_tests.txt</code>), so
 the tests notice a broken gate.</p>
