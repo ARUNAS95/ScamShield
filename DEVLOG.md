@@ -156,6 +156,88 @@ up from 46). Live evaluation numbers in the README are to be regenerated after t
   tool sequence counts are labeled as RAG-mode numbers; trace fields are credited to the bare-bones
   class notebook and PR #31; checkpointing is described as this project's own addition.
 
+## Nov 24, 2026: Critic review round 2
+
+A second strict review found one safety bug in the gate fallback, rule gaps that new wording slipped
+through, and several honesty and visibility problems. Each finding and its fix:
+
+### Held-out set 2 first
+Before touching any rule, a new held-out set (`data/eval_holdout2.json`, F01 to F14) was written in
+wording no rule had been written for: brand gift cards with "claim numbers", a Cyrillic look-alike link,
+a defanged link, a card-photo request, "CashApp me", PayPal friends and family, a "six number code", and
+harmless saved-contact texts with risky words ("I'll pay you back on Venmo", a gift card as a birthday
+present, "the wifi password is ...", "5 p.m.Love you"). It was committed together with its rules-only
+score: **2/14, with 5 false "safe" and 4 false alarms** (`evidence/eval/holdout2_rules_BEFORE.txt`).
+After the rule changes below: **13/14, 0 false "safe", 1 false alarm**
+(`evidence/eval/holdout2_rules_AFTER.txt`). The remaining miss is F11 ("I paid the fee today, thanks for
+the $40"): urgency + money request are two weak signs. The set was not edited. Caveat: the new rules came
+from the critic's probe list, and some probes share wording with holdout2, so the AFTER score is
+optimistic; BEFORE is the honest held-out number. Held-out set 1 is no longer a held-out score either,
+because its failures drove the round-1 fixes.
+
+### The gate-fallback bug (blocker) and its structural fix
+- **Bug:** when the model said "likely_scam" twice on a message where the rules found nothing (for
+  example a Cyrillic look-alike link from a saved contact, before the new rules), the gate rejected both
+  answers, gave up, and used the label the evidence supported: **"likely safe"**. The model had seen the
+  danger, and Python turned that into "safe".
+- **Fix (a principle, not a patch):** Python can block an unsupported label, but the model's concern can
+  only make the answer more careful, never less. In `finish_run`, if there is no accepted verdict and the
+  evidence supports "safe" but the model proposed likely_scam or uncertain at any point, the final
+  answer is "uncertain" with human help offered, and the explanation says the helper thought something
+  looked wrong but the checks could not confirm it (`model_concern_kept` in the trace). Test: "model
+  concern never becomes safe".
+- **Looping:** when the gate rejected a "likely_scam" because no warning sign was recorded, the model
+  just tried again. The feedback now invites it to answer "uncertain", say what worries it, and use
+  `ask_human_helper`.
+
+### Rule and parser gaps
+- **Other alphabets:** Cyrillic and Greek look-alike letters (а е о р с у х і ј ѕ ԁ ӏ, ο α ε ν ρ τ) are
+  mapped to Latin in the warning-sign copy, so "gіft cаrd" is found. Links may contain any letters, and a
+  link with letters outside a-z (or an `xn--` address) is a new strong sign, `lookalike_letters_link`.
+- **Defanged links:** `[.]`, `(.)`, `(dot)` and `hxxp(s)` are restored before links are found.
+- **Hidden addresses:** `normalize_domain` drops anything before `@`, so `http://user@203.0.113.9/x` is
+  an IP link and `medicare.gov@evil-login.ru` is checked as `evil-login.ru`. Such a link is a new strong
+  sign, `hidden_address_link`. E-mail addresses are still not links.
+- **Requests only:** gift cards (including brand cards such as Apple, Steam, Google Play, Target, and a
+  gift emoji with numbers), money apps ("CashApp me $50", PayPal friends and family), passwords and PINs
+  now count only when they are requested. A gift card given as a present, "I'll pay you back on Venmo"
+  and "the wifi password is ..." are not warning signs. A rule can now have `guarded_patterns` that an
+  `unless` pattern cancels, but only when the text has no request words.
+- **Card photos:** "a photo of the front and back of your debit card" is a new strong sign,
+  `card_details_request`.
+- **False links:** "5 p.m.Love you", "Oak St.Apt" and "8 a.m.See you" are no longer links (known
+  abbreviations, and a capital letter after a dot starts a sentence unless the ending is a common one
+  such as ".Com").
+- **Regression lists in `tests.py`:** 17 ordinary texts that must stay safe and 15 critic probes that
+  must be scams; every demo case, the eval set (25/25) and held-out set 1 (11/12) keep their labels.
+
+### Agentic honesty and visibility
+- `helper_offered_by` is now `model` (the model asked for help on its own), `model_after_gate_hint`
+  (after a gate rejection told it to) or `python`. Earlier, help requested after a gate hint was counted
+  as the model's own idea. Both summaries count the values.
+- The verbose console prints `NEXT OPTIONS:` after each step, so routing is visible in the demo.
+- The gate rule now reads "help must be offered before uncertain".
+
+### Robustness and traces
+- `--resume` of a finished checkpoint refuses ("this run already finished: <label>") instead of
+  asking the model again.
+- The "uncertain" template no longer says "we could not confirm who sent it" for a saved contact.
+- A tool that raises an error still gets a `check_result` ("not run").
+- Each trace saves the exact `system_prompt` and `first_request`; the first request's actions come from
+  `available_actions()`, and the prompt's sentence limit is the one `check_readability` enforces (6).
+- The harness checksums now cover `eval.py` and the organization, domain and contact files; `eval.py`
+  writes its own `evidence/eval/source_checksums.txt`.
+- `OLLAMA_URL`, `SCAMSHIELD_MODEL`, `OLLAMA_EMBED_URL` and `SCAMSHIELD_EMBED_MODEL` can be set as
+  environment variables; `docs/build_docs.py` finds Chrome through `CHROME_PATH`, macOS or the PATH.
+- Guide tips must fit the message: a tip is shown only when its red flags include a found strong sign
+  or its organization is the one the message claims (the USPS injection case no longer shows the
+  grandparent tip).
+
+### Testing the tests again
+`python3 tests.py --break-gate` replaces `supported_label` with "always likely_safe" and runs all
+tests: **19 of 80 fail** (`evidence/eval/break_gate_tests.txt`). The earlier counts (10 of 46 above,
+and 16 of 63 in the round-1 README) came from one-off manual experiments; it is now reproducible.
+
 ## What came from the course and what is new
 
 | From the course (Agent Airways, bare-bones notebook, PR #31, Harness assignment, robust browser agent note, Nov 4 notes) | New in ScamShield |
@@ -165,7 +247,7 @@ up from 46). Live evaluation numbers in the README are to be regenerated after t
 | "Treat page text as data" | Prompt-injection signals as strong warning signs, random-tag message markers |
 | Trace fields (step, raw_reply, ..., continue_or_stop) from the bare-bones notebook and PR #31 | Readability check and Python-written "what to do" line |
 | Repeated runs with an external runner | Metadata RAG with keyword fallback, and its evaluation |
-| A remark about checkpointing in the Nov 4 notes | Own addition: checkpoint after every step and `--resume` |
+| State management / Verification / Checkpointing bullets in the course Canvas post "additional notes on Nov. 4 lecture and references" | Checkpoint after every step and `--resume` in plain Python (refuses to re-run a finished run) |
 | Retries and "verify, do not assume" (robust browser agent note) | Post-check of every tool's state change, model-call retries recorded in the trace |
 | Human approval with `input()` | Consent as a passed-in function, so automated runs never block |
 
