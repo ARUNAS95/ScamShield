@@ -30,8 +30,9 @@ HERE = Path(__file__).resolve().parent
 OUT_DIR = HERE / 'evidence' / 'harness'
 DEFAULT_CASES = ['scam', 'ordinary', 'ordinary_urgent', 'uncertain', 'injection', 'trusted_bad_link',
                  'guide_missing', 'empty']
-SOURCE_FILES = ['scamshield_agent.py', 'rag.py', 'harness_runs.py', 'data/scam_guide.json',
-                'data/messages.json']
+SOURCE_FILES = ['scamshield_agent.py', 'rag.py', 'harness_runs.py', 'eval.py', 'data/scam_guide.json',
+                'data/messages.json', 'data/organizations.json', 'data/domains.json',
+                'data/trusted_contacts.json']
 
 
 def checksum(path):
@@ -87,6 +88,7 @@ def summarize(rows, cases):
         steps = 0
         sequences = []
         stop_reasons = {}
+        helper_offered_by = {}
         for row in runs:
             correct += 1 if row['correct'] else 0
             overrides += 1 if row['gate_overrode_model'] else 0
@@ -97,10 +99,14 @@ def summarize(rows, cases):
             if sequence not in sequences:
                 sequences.append(sequence)
             stop_reasons[row['stop_reason']] = stop_reasons.get(row['stop_reason'], 0) + 1
+            # model / model_after_gate_hint / python / None (no help offered)
+            who = str(row['helper_offered_by'])
+            helper_offered_by[who] = helper_offered_by.get(who, 0) + 1
         summary[case_name] = {
             'runs': len(runs), 'correct': correct, 'gate_overrides': overrides,
             'rejected_proposals': rejected, 'gate_rejections': gate,
             'average_steps': round(steps / len(runs), 1), 'stop_reasons': stop_reasons,
+            'helper_offered_by': helper_offered_by,
             'distinct_tool_sequences': len(sequences), 'tool_sequences': sequences,
         }
     return summary
@@ -144,14 +150,16 @@ def main():
     total = 0
     total_correct = 0
     print('\nSUMMARY (%s search, %d runs per case)' % (args.mode, args.runs))
-    print('%-17s %-8s %-10s %-9s %-9s %s' % ('case', 'correct', 'overrides', 'avg steps', 'paths', 'stop reasons'))
+    print('%-17s %-8s %-10s %-9s %-9s %s' % ('case', 'correct', 'overrides', 'avg steps', 'paths',
+                                             'stop reasons / help offered by'))
     for case_name in summary:
         s = summary[case_name]
         total += s['runs']
         total_correct += s['correct']
-        print('%-17s %d/%-6d %-10d %-9s %-9d %s' % (case_name, s['correct'], s['runs'], s['gate_overrides'],
-                                                   s['average_steps'], s['distinct_tool_sequences'],
-                                                   json.dumps(s['stop_reasons'])))
+        print('%-17s %d/%-6d %-10d %-9s %-9d %s  help: %s' % (case_name, s['correct'], s['runs'], s['gate_overrides'],
+                                                             s['average_steps'], s['distinct_tool_sequences'],
+                                                             json.dumps(s['stop_reasons']),
+                                                             json.dumps(s['helper_offered_by'])))
     print('TOTAL: %d/%d runs ended with the expected label.' % (total_correct, total))
     print('Saved: ' + str((out_dir / 'results.json').relative_to(HERE)))
 
