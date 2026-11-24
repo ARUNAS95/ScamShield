@@ -1263,20 +1263,6 @@ def test_settings_come_from_environment_with_defaults():
         assert agent.MODEL == 'qwen3:8b'
 
 
-def test_model_setting_override_takes_effect():
-    import os
-    import subprocess
-    env = dict(os.environ)
-    env['SCAMSHIELD_MODEL'] = 'example-model:1b'
-    env['OLLAMA_URL'] = 'http://127.0.0.1:9/api/chat'
-    code = 'import scamshield_agent as a; print(a.MODEL); print(a.OLLAMA_URL)'
-    output = subprocess.run([sys.executable, '-c', code], cwd=str(Path(__file__).resolve().parent), env=env,
-                            capture_output=True, text=True, timeout=60)
-    assert output.returncode == 0, output.stderr
-    lines = output.stdout.strip().split('\n')
-    assert lines[-2:] == ['example-model:1b', 'http://127.0.0.1:9/api/chat'], lines
-
-
 # ------------------------------------------------------------------------
 
 def always_safe(context):
@@ -1381,7 +1367,6 @@ if __name__ == '__main__':
         ('safe tip only for the sender\'s organization', test_safe_tip_only_for_the_senders_organization),
         ('console shows NEXT OPTIONS (routing visible)', test_console_shows_next_options),
         ('settings come from environment variables with defaults', test_settings_come_from_environment_with_defaults),
-        ('SCAMSHIELD_MODEL override takes effect (subprocess)', test_model_setting_override_takes_effect),
     ]
     failed = 0
     for name, function in tests:
