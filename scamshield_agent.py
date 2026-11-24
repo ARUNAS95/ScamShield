@@ -768,6 +768,9 @@ def ask_model(messages):
         'stream': False,
         'think': False,
         'format': 'json',
+        # Measured: the longest real run uses about 2,300 tokens. 8192 leaves
+        # a safety margin so Ollama never silently drops the oldest text.
+        'options': {'num_ctx': 8192},
     }, timeout=180)
     response.raise_for_status()
     return response.json()['message']['content']
