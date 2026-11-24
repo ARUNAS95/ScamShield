@@ -65,8 +65,7 @@ def done(label, evidence, explanation):
     return action('done', label=label, evidence=evidence, explanation=explanation)
 
 
-def run(name_or_message, replies, consent_fn=agent.consent_no, guide_path=rag.GUIDE_FILE,
-        search_mode='keyword', **extra):
+def run(name_or_message, replies, consent_fn=agent.consent_no, guide_path=rag.GUIDE_FILE, **extra):
     if type(name_or_message) == str:
         message = case_message(name_or_message)
         label = name_or_message
@@ -74,13 +73,13 @@ def run(name_or_message, replies, consent_fn=agent.consent_no, guide_path=rag.GU
         message = name_or_message
         label = 'custom'
     return agent.run_agent(message, ask_model_fn=scripted_model(replies), consent_fn=consent_fn,
-                           guide_path=guide_path, search_mode=search_mode, verbose=False,
+                           guide_path=guide_path, verbose=False,
                            case_name='test_' + label, trace_path=TEMP / (label + '_trace.json'),
                            alert_log=TEMP / 'alerts.log', model_retry_wait=0, **extra)
 
 
 def fresh_context(case_name):
-    context = agent.new_context(case_message(case_name), rag.GUIDE_FILE, 'keyword')
+    context = agent.new_context(case_message(case_name), rag.GUIDE_FILE)
     runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
     return context, runtime
 
@@ -214,7 +213,7 @@ def test_ordinary_message_has_no_warning_signs():
 def signals_for(text, sender='+1-555-0100'):
     """Run extract_signals on any text and return the context."""
     message = {'sender': sender, 'text': text}
-    context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
+    context = agent.new_context(message, rag.GUIDE_FILE)
     runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
     agent.run_requested_tool('extract_signals', {}, context, runtime)
     return context
@@ -270,7 +269,7 @@ def rules_label(text, sender):
     """The label the evidence supports when every lookup tool runs (no model),
     like eval.py --rules. Returns (label, warning sign names, links)."""
     message = {'sender': sender, 'text': text}
-    context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
+    context = agent.new_context(message, rag.GUIDE_FILE)
     runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
     agent.run_requested_tool('extract_signals', {}, context, runtime)
     for link in list(context['links']):
@@ -649,7 +648,7 @@ BANK_LOCK_MESSAGE = {'sender': '+1-555-0131',
 def evidence_context(message, lookup):
     """Run extract_signals and check_sender (and lookup_official_contact for
     every claimed organization when lookup is True) without a model."""
-    context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
+    context = agent.new_context(message, rag.GUIDE_FILE)
     runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
     agent.run_requested_tool('extract_signals', {}, context, runtime)
     agent.run_requested_tool('check_sender', {'sender': message['sender']}, context, runtime)
@@ -722,7 +721,7 @@ def test_message_without_number_needs_no_lookup():
 
 
 def test_uncertain_template_for_saved_contact():
-    context = agent.new_context(CONCERN_MESSAGE, rag.GUIDE_FILE, 'keyword')
+    context = agent.new_context(CONCERN_MESSAGE, rag.GUIDE_FILE)
     context['sender_checked'] = True
     context['sender_trusted'] = True
     context['sender_name'] = 'Emma (granddaughter)'
@@ -1097,7 +1096,7 @@ def test_unfinished_run_never_says_safe():
 
 
 def test_stop_reason_precedence():
-    context = agent.new_context(case_message('scam'), rag.GUIDE_FILE, 'keyword')
+    context = agent.new_context(case_message('scam'), rag.GUIDE_FILE)
     assert agent.choose_stop_reason(context, 'verdict') == 'success'
     assert agent.choose_stop_reason(context, 'step_limit') == 'step_limit'
     context['gate_downgraded'] = True
@@ -1144,31 +1143,32 @@ def test_hard_wording_gets_one_rewrite_then_template():
 
 
 # ------------------------------------------------------------------------
-# 9. Metadata RAG
+# 9. Metadata search over the scam guide
 # ------------------------------------------------------------------------
 
 def test_red_flag_boost_ranks_right_entry_first():
     entries = rag.load_guide()
-    found = rag.search('message from a family member', entries, mode='rag', found_flags=['lookalike_link'],
-                       vectors=fake_vectors(entries), embed_fn=fake_embed)
-    assert found['matches'][0]['id'] == 'G09'
+    matches = rag.search('message from a family member', entries, found_flags=['lookalike_link'])
+    assert matches[0]['id'] == 'G09'
 
 
 def test_other_org_entries_ranked_lower():
     entries = rag.load_guide()
-    found = rag.search('threat suspended pay now', entries, mode='rag', claimed_orgs=['Medicare'],
-                       vectors=fake_vectors(entries), embed_fn=fake_embed)
-    for match in found['matches']:
-        assert match['orgs'] == [] or 'Medicare' in match['orgs']
+    # Without a claimed organization the IRS entry G11 is the best word match.
+    assert rag.search('threat suspended pay now', entries)[0]['id'] == 'G11'
+    # The message claims Medicare: G11 is about another organization, so its
+    # score is halved and the general entry G20 now ranks first.
+    matches = rag.search('threat suspended pay now', entries, claimed_orgs=['Medicare'])
+    assert matches[0]['id'] == 'G20'
+    assert matches[1]['id'] == 'G11' and 'about a different organization' in matches[1]['why']
 
 
-def test_embedding_down_falls_back_to_keyword():
+def test_org_filter_keeps_that_organization():
     entries = rag.load_guide()
-
-    def broken_embed(texts, prefix):
-        raise ConnectionError('embedding model not running')
-    found = rag.search('gift card', entries, mode='rag', vectors=fake_vectors(entries), embed_fn=broken_embed)
-    assert found['retrieval_mode'] == 'keyword_fallback' and found['matches']
+    matches = rag.search('gift card pay now', entries, filters={'org': 'Medicare'})
+    assert matches
+    for match in matches:
+        assert match['orgs'] == [] or 'Medicare' in match['orgs']
 
 
 def test_legit_pattern_match_alone_cannot_make_safe():
@@ -1247,20 +1247,6 @@ def test_safe_tip_only_for_the_senders_organization():
     assert 'G16' in agent.guide_tip('likely_safe', context)
 
 
-def fake_embed(texts, prefix):
-    vectors = []
-    for text in texts:
-        vectors.append([1.0, float(len(text) % 7), 0.5])
-    return vectors
-
-
-def fake_vectors(entries):
-    vectors = {}
-    for entry in entries:
-        vectors[entry['id']] = [1.0, float(len(entry['text']) % 7), 0.5]
-    return vectors
-
-
 # ------------------------------------------------------------------------
 # 10. Checkpointing (Nov 4 lecture: save state to a file and resume)
 # ------------------------------------------------------------------------
@@ -1309,7 +1295,7 @@ def test_console_shows_next_options():
             action('check_sender', sender='+1-555-0163'),
             action('ask_human_helper', reason='E2 shows the number is not saved.'),
             done('uncertain', ['E1', 'E2', 'E3'], 'We are not sure about this message.'),
-        ]), verbose=True, trace_path=TEMP / 'next.json', alert_log=TEMP / 'alerts.log', search_mode='keyword')
+        ]), verbose=True, trace_path=TEMP / 'next.json', alert_log=TEMP / 'alerts.log')
     lines = []
     for line in output.getvalue().split('\n'):
         if line.startswith('NEXT OPTIONS'):
@@ -1324,8 +1310,6 @@ def test_settings_come_from_environment_with_defaults():
         assert agent.OLLAMA_URL == 'http://127.0.0.1:11434/api/chat'
     if 'SCAMSHIELD_MODEL' not in os.environ:
         assert agent.MODEL == 'qwen3:8b'
-    if 'SCAMSHIELD_EMBED_MODEL' not in os.environ:
-        assert rag.EMBED_MODEL == 'nomic-embed-text'
 
 
 def test_model_setting_override_takes_effect():
@@ -1438,10 +1422,10 @@ if __name__ == '__main__':
         ('readability rules', test_readability_rules),
         ('template explanation passes its own checks', test_template_explanation_passes_its_own_checks),
         ('hard wording: one rewrite, then template', test_hard_wording_gets_one_rewrite_then_template),
-        ('RAG: red-flag boost ranks right entry first', test_red_flag_boost_ranks_right_entry_first),
-        ('RAG: other-organization entries ranked lower', test_other_org_entries_ranked_lower),
-        ('RAG: embedding down -> keyword fallback', test_embedding_down_falls_back_to_keyword),
-        ('RAG: legit pattern alone cannot make safe', test_legit_pattern_match_alone_cannot_make_safe),
+        ('guide search: red-flag boost ranks right entry first', test_red_flag_boost_ranks_right_entry_first),
+        ('guide search: other-organization entries ranked lower', test_other_org_entries_ranked_lower),
+        ('guide search: org filter keeps that organization', test_org_filter_keeps_that_organization),
+        ('guide search: legit pattern alone cannot make safe', test_legit_pattern_match_alone_cannot_make_safe),
         ('guide tip must fit the message (no G05 on the USPS case)', test_guide_tip_must_fit_the_message),
         ('tip relevance: organization and main red flag (no G05/G09 on USPS)', test_tip_relevance_by_organization_and_main_flag),
         ('safe tip only for the sender\'s organization', test_safe_tip_only_for_the_senders_organization),

@@ -603,8 +603,8 @@ def flag_names(context):
 # ------------------------------------------------------------------------
 # 6. The tools. Each has validate(argument, context, runtime) -> (ok, note)
 #    and run(argument, context, runtime) -> result(ok, message, data).
-#    context = what this run has learned (saved in checkpoints)
-#    runtime = data files and functions (not saved)
+#    context = what this run has learned (saved in the trace)
+#    runtime = data files and functions
 # ------------------------------------------------------------------------
 
 # ---- 6.1 extract_signals -------------------------------------------------
@@ -829,7 +829,7 @@ def run_lookup_official_contact(argument, context, runtime):
                    'facts': facts})
 
 
-# ---- 6.5 search_scam_guide (metadata RAG, see rag.py) --------------------
+# ---- 6.5 search_scam_guide (metadata search over the guide, see rag.py) --
 
 def validate_search_scam_guide(argument, context, runtime):
     query = argument.get('query')
@@ -866,24 +866,20 @@ def run_search_scam_guide(argument, context, runtime):
     if given.get('scam_type'):
         filters['scam_type'] = given['scam_type']
 
-    found = rag.search(argument['query'], entries, mode=context['search_mode'], filters=filters,
-                       found_flags=flag_names(context), claimed_orgs=context['claimed_orgs'],
-                       embed_fn=runtime.get('embed_fn'), vectors=runtime.get('vectors'))
+    matches = rag.search(argument['query'], entries, filters=filters,
+                         found_flags=flag_names(context), claimed_orgs=context['claimed_orgs'])
     context['searches'] += 1
-    context['retrieval_modes'].append(found['retrieval_mode'])
+    context['search_queries'].append(argument['query'])
     facts = []
-    for match in found['matches']:
+    for match in matches:
         context['guide_matches'].append(match)
         facts.append('guide ' + match['id'] + ': ' + match['title'])
-    if found['matches']:
-        message = ('Found ' + str(len(found['matches'])) + ' guide entries (' + found['retrieval_mode'] + '): '
+    if matches:
+        message = ('Found ' + str(len(matches)) + ' guide entries: '
                    + '; '.join(facts).replace('guide ', '') + '.')
     else:
         message = 'No guide entries matched. Try other words, or use other evidence.'
-    if found['note']:
-        message += ' Note: ' + found['note']
-    return result(True, message, {'retrieval_mode': found['retrieval_mode'], 'filters_used': filters,
-                                  'matches': found['matches'], 'facts': facts})
+    return result(True, message, {'filters_used': filters, 'matches': matches, 'facts': facts})
 
 
 # ---- 6.6 ask_human_helper (simulated family alert) -----------------------
@@ -1083,8 +1079,9 @@ def post_check(name, argument, context, runtime):
         ok = org is not None and org['name'] in context['official_contacts']
         return ok, str(argument['org']) + ' recorded in official_contacts'
     if name == 'search_scam_guide':
-        ok = len(context['retrieval_modes']) == context['searches'] and context['searches'] > 0
-        return ok, 'retrieval mode recorded for search %d' % context['searches']
+        ok = (context['searches'] > 0 and len(context['search_queries']) == context['searches']
+              and context['search_queries'][-1] == argument['query'])
+        return ok, 'query recorded for search %d' % context['searches']
     if name == 'ask_human_helper':
         if context['helper_offered'] is not True:
             return False, 'helper_offered was not set'
@@ -1597,15 +1594,14 @@ def guide_tip(label, context):
 # 12. The agent loop
 # ------------------------------------------------------------------------
 
-def new_context(message, guide_path, search_mode):
+def new_context(message, guide_path):
     return {
         'message': message,
         'guide_path': str(guide_path),
-        'search_mode': search_mode,
         'signals_extracted': False,
         'links': [], 'phones': [], 'claimed_orgs': [], 'flags': [],
         'link_results': {}, 'sender_checked': False, 'sender_trusted': None, 'sender_name': None,
-        'official_contacts': {}, 'guide_matches': [], 'searches': 0, 'retrieval_modes': [],
+        'official_contacts': {}, 'guide_matches': [], 'searches': 0, 'search_queries': [],
         'helper_offered': False, 'helper_consent': None, 'helper_offered_by': None, 'helper_alert': None,
         'evidence': [], 'current_evidence_id': None, 'calls_made': {},
         'tool_sequence': [], 'tool_failures': [], 'broken_tools': [], 'post_checks': [],
@@ -1645,15 +1641,15 @@ def save_checkpoint(path, state):
 
 
 def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mode='no',
-              guide_path=rag.GUIDE_FILE, search_mode='rag', max_steps=MAX_STEPS, verbose=True,
+              guide_path=rag.GUIDE_FILE, max_steps=MAX_STEPS, verbose=True,
               case_name='custom', trace_path=None, checkpoint_path=None, resume_from=None,
-              stop_after=None, embed_fn=None, vectors=None, alert_log=None, data=None,
+              stop_after=None, alert_log=None, data=None,
               model_retry_wait=MODEL_RETRY_WAIT):
     """Check one message. Returns the full record (also saved as a JSON trace)."""
     if data is None:
         data = load_data()
     runtime = {
-        'data': data, 'consent_fn': consent_fn, 'embed_fn': embed_fn, 'vectors': vectors,
+        'data': data, 'consent_fn': consent_fn,
         'alert_log': alert_log or (EVIDENCE_DIR / 'family_alerts.log'),
     }
     EVIDENCE_DIR.mkdir(exist_ok=True)
@@ -1679,7 +1675,7 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
         message = context['message']
         show(verbose, 'RESUMING ' + case_name + ' from checkpoint after step ' + str(saved['step']))
     else:
-        context = new_context(message, guide_path, search_mode)
+        context = new_context(message, guide_path)
         messages = None
         trace = []
         first_step = 1
@@ -2010,7 +2006,6 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         'first_request': messages[1]['content'] if messages else None,
         'case': case_name,
         'message': context['message'],
-        'search_mode': context['search_mode'],
         'consent_mode': consent_mode,
         'stop_reason': stop_reason,
         'final_label': label,
@@ -2028,7 +2023,7 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         'rejected_proposals': context['rejected_proposals'],
         'gate_rejections': context['gate_rejections'],
         'readability_rewrites': context['readability_rewrites'],
-        'retrieval_modes': context['retrieval_modes'],
+        'search_queries': context['search_queries'],
         'tool_failures': context['tool_failures'],
         'helper_offered': context['helper_offered'],
         'helper_offered_by': context['helper_offered_by'],
@@ -2089,7 +2084,6 @@ def main():
     parser.add_argument('--sender', default='+1-555-0100', help='sender number for --message')
     parser.add_argument('--consent', choices=['prompt', 'yes', 'no'], default='prompt',
                         help='how the simulated family alert gets consent (default: ask in the terminal)')
-    parser.add_argument('--search-mode', choices=rag.SEARCH_MODES, default='rag')
     parser.add_argument('--max-steps', type=int, default=MAX_STEPS)
     parser.add_argument('--quiet', action='store_true', help='only print the final result')
     parser.add_argument('--resume', help='continue a run from a checkpoint file')
@@ -2129,7 +2123,7 @@ def main():
     print('SENDER : ' + message['sender'])
     print('MESSAGE: ' + message['text'])
     run_agent(message, consent_fn=consent_fn, consent_mode=args.consent, guide_path=guide_path,
-              search_mode=args.search_mode, max_steps=args.max_steps, verbose=not args.quiet,
+              max_steps=args.max_steps, verbose=not args.quiet,
               case_name=case_name, checkpoint_path=EVIDENCE_DIR / (case_name + '_checkpoint.json'),
               stop_after=args.stop_after)
 

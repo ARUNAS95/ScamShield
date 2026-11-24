@@ -6,8 +6,10 @@ One run proves little with a language model, because its answers can vary.
 Repeating each case shows how reliable the agent really is.
 
     python harness_runs.py --runs 3
-    python harness_runs.py --runs 3 --mode keyword
     python harness_runs.py --runs 5 --cases scam uncertain
+
+Results go to evidence/harness/ (one trace and console file per run, plus
+results.json with the summary).
 
 Consent for the simulated family alert is scripted ("yes"), so runs never
 wait for typing. The agent code, prompts and tools are not changed by this
@@ -39,19 +41,19 @@ def checksum(path):
     return hashlib.sha256((HERE / path).read_bytes()).hexdigest()
 
 
-def run_once(case_name, case, run_number, mode, out_dir):
+def run_once(case_name, case, run_number, out_dir):
     message = {'sender': case['sender'], 'text': case['text']}
     guide_path = agent.MISSING_GUIDE_FILE if case_name == 'guide_missing' else rag.GUIDE_FILE
     stem = 'run_%s_%d' % (case_name, run_number)
     console = io.StringIO()
     started = time.time()
     with contextlib.redirect_stdout(console):
-        print('CASE %s  RUN %d  MODE %s' % (case_name, run_number, mode))
+        print('CASE %s  RUN %d' % (case_name, run_number))
         print('SENDER : ' + message['sender'])
         print('MESSAGE: ' + message['text'])
         try:
             record = agent.run_agent(message, consent_fn=agent.consent_yes, consent_mode='yes',
-                                     guide_path=guide_path, search_mode=mode, verbose=True,
+                                     guide_path=guide_path, verbose=True,
                                      case_name=case_name, trace_path=out_dir / (stem + '_trace.json'),
                                      alert_log=out_dir / 'family_alerts.log')
         except Exception as error:
@@ -99,7 +101,7 @@ def summarize(rows, cases):
             if sequence not in sequences:
                 sequences.append(sequence)
             stop_reasons[row['stop_reason']] = stop_reasons.get(row['stop_reason'], 0) + 1
-            # model / model_after_gate_hint / python / None (no help offered)
+            # model / python / None (no help offered)
             who = str(row['helper_offered_by'])
             helper_offered_by[who] = helper_offered_by.get(who, 0) + 1
         summary[case_name] = {
@@ -115,12 +117,11 @@ def summarize(rows, cases):
 def main():
     parser = argparse.ArgumentParser(description='Run ScamShield demo cases repeatedly with the live model.')
     parser.add_argument('--runs', type=int, default=3)
-    parser.add_argument('--mode', choices=rag.SEARCH_MODES, default='rag')
     parser.add_argument('--cases', nargs='*', default=DEFAULT_CASES)
     args = parser.parse_args()
 
     all_cases = agent.load_cases()
-    out_dir = OUT_DIR / args.mode
+    out_dir = OUT_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     log = out_dir / 'family_alerts.log'
     if log.exists():
@@ -134,7 +135,7 @@ def main():
     rows = []
     for case_name in args.cases:
         for run_number in range(1, args.runs + 1):
-            row = run_once(case_name, all_cases[case_name], run_number, args.mode, out_dir)
+            row = run_once(case_name, all_cases[case_name], run_number, out_dir)
             rows.append(row)
             if row.get('error'):
                 print('%-17s run %d: HARNESS ERROR (see console file)' % (case_name, run_number), flush=True)
@@ -142,14 +143,14 @@ def main():
                 print('%-17s run %d: %-12s %-5s %-15s steps=%-2d gate_rej=%d  %s' % (
                     case_name, run_number, row['final_label'], 'OK' if row['correct'] else 'WRONG',
                     row['stop_reason'], row['steps'], row['gate_rejections'], ' > '.join(row['tools'])), flush=True)
-            agent.save_json(out_dir / 'results.json', {'model': agent.MODEL, 'search_mode': args.mode,
+            agent.save_json(out_dir / 'results.json', {'model': agent.MODEL,
                                                        'runs_per_case': args.runs, 'rows': rows,
                                                        'summary': summarize(rows, args.cases)})
 
     summary = summarize(rows, args.cases)
     total = 0
     total_correct = 0
-    print('\nSUMMARY (%s search, %d runs per case)' % (args.mode, args.runs))
+    print('\nSUMMARY (%d runs per case)' % args.runs)
     print('%-17s %-8s %-10s %-9s %-9s %s' % ('case', 'correct', 'overrides', 'avg steps', 'paths',
                                              'stop reasons / help offered by'))
     for case_name in summary:

@@ -1,39 +1,29 @@
-"""ScamShield evaluation: is the agent right, and does metadata RAG help?
+"""ScamShield evaluation: is the agent right on labeled messages?
 
-Two parts:
-
-1. Retrieval comparison (fast, no language model; uses local embeddings)
-       python eval.py --retrieval
-   For each labeled message, search the guide with the message text and
-   check whether a correct guide entry is in the top 2 ("hit@2").
-   Compares the three search modes: keyword, rag_no_metadata, rag.
-
-2. Live agent comparison (slow, uses Ollama qwen3:8b)
-       python eval.py --agent --mode rag
-       python eval.py --agent --mode keyword
-   Runs the full agent on every labeled message and compares its final
-   label with OUR label (not with what the model claims). Reports
-   accuracy, false "safe" answers, false alarms, steps, gate rejections.
-
-3. Rules-only check (instant, no language model, no embeddings)
+1. Rules-only check (instant, no language model)
        python eval.py --rules --set eval
-       python eval.py --rules --set holdout
-   Runs extract_signals, check_link on every link and check_sender
-   directly (no model) and compares the label the evidence supports
-   with OUR label. This tests the warning-sign rules by themselves.
+   Runs extract_signals, check_link on every link, check_sender and
+   lookup_official_contact directly (no model) and compares the label the
+   evidence supports with OUR label. This tests the warning-sign rules alone.
 
---set eval     the 25 labeled messages in data/eval_set.json (default)
---set holdout  12 held-out messages in data/eval_holdout.json, written
-               in different wording from the rules BEFORE the round-1
-               rule changes (paraphrases, look-alike letters, new web
-               address endings, payment apps). The rules were adjusted
-               after seeing its failures, so it is no longer a true
-               held-out score.
---set holdout2 14 messages in data/eval_holdout2.json, written BEFORE the
-               round-3 rule changes (brand gift cards, a Cyrillic
-               look-alike link, a defanged link, harmless risky words
-               from saved contacts). Its before/after scores are in
-               evidence/eval/holdout2_rules_BEFORE.txt and _AFTER.txt.
+2. Live agent run (slow, uses Ollama qwen3:8b)
+       python eval.py --agent --set eval
+   Runs the full agent on every labeled message and compares its final
+   label with OUR label (not with what the model claims). Reports accuracy
+   with a 95% confidence range, false "safe" answers, false alarms, steps
+   and gate rejections.
+
+--set eval      test set 1: 25 labeled messages (data/eval_set.json, default)
+--set holdout   test set 2: 12 messages (data/eval_holdout.json), written
+                before the round-1 rule fixes, then used to fix rules, so
+                it is no longer held out
+--set holdout2  test set 3: 14 messages (data/eval_holdout2.json), written
+                before the round-2 rule fixes, then used to fix rules, so
+                it is no longer held out (BEFORE/AFTER scores in
+                evidence/eval/holdout2_rules_BEFORE.txt and _AFTER.txt)
+--set large     large blind test set: 614 messages (data/eval_large.json),
+                written by a separate AI agent that never saw the rules;
+                frozen
 
 Results are saved in evidence/eval/.
 """
@@ -56,12 +46,12 @@ EVAL_FILES = {
     'eval': HERE / 'data' / 'eval_set.json',
     'holdout': HERE / 'data' / 'eval_holdout.json',
     'holdout2': HERE / 'data' / 'eval_holdout2.json',
-    'large': HERE / 'data' / 'eval_large.json',   # 614 messages written blind, frozen
+    'large': HERE / 'data' / 'eval_large.json',   # 614 messages written blind by an AI agent, frozen
 }
 OUT_DIR = HERE / 'evidence' / 'eval'
 SOURCE_FILES = ['scamshield_agent.py', 'rag.py', 'eval.py', 'data/scam_guide.json', 'data/organizations.json',
                 'data/domains.json', 'data/trusted_contacts.json', 'data/eval_set.json',
-                'data/eval_holdout.json', 'data/eval_holdout2.json']
+                'data/eval_holdout.json', 'data/eval_holdout2.json', 'data/eval_large.json']
 
 
 def write_source_checksums():
@@ -78,8 +68,8 @@ def load_eval_set(set_name='eval'):
 
 
 def run_prefix(set_name):
-    """File names for results: the main set keeps its old names, the
-    held-out set gets 'holdout_' in front so nothing is overwritten."""
+    """File names for results: the main set has no prefix, the other sets
+    get their name in front (holdout_, holdout2_, large_)."""
     if set_name == 'eval':
         return ''
     return set_name + '_'
@@ -90,7 +80,7 @@ def deterministic_context(item, data):
     agent would collect: warning signs, link results, the sender check and
     the official number of every organization the message claims."""
     message = {'sender': item['sender'], 'text': item['text']}
-    context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
+    context = agent.new_context(message, rag.GUIDE_FILE)
     runtime = {'data': data, 'consent_fn': agent.consent_no, 'alert_log': OUT_DIR / 'unused.log'}
     agent.run_requested_tool('extract_signals', {}, context, runtime)
     for link in list(context['links']):
@@ -102,132 +92,7 @@ def deterministic_context(item, data):
 
 
 # ------------------------------------------------------------------------
-# 1. Retrieval comparison
-# ------------------------------------------------------------------------
-
-def evaluate_retrieval(set_name='eval'):
-    data = agent.load_data()
-    entries = rag.load_guide()
-    items = load_eval_set(set_name)
-    rows = []
-    totals = {}
-    for mode in rag.SEARCH_MODES:
-        totals[mode] = {'hits': 0, 'scored': 0, 'fallbacks': 0}
-
-    for item in items:
-        if not item['expected_guide']:
-            continue   # nothing specific to find for this message
-        context = deterministic_context(item, data)
-        row = {'id': item['id'], 'category': item['category'], 'expected_guide': item['expected_guide']}
-        for mode in rag.SEARCH_MODES:
-            found = rag.search(item['text'], entries, mode=mode, found_flags=agent.flag_names(context),
-                               claimed_orgs=context['claimed_orgs'])
-            top = []
-            for match in found['matches']:
-                top.append(match['id'])
-            hit = False
-            for entry_id in top:
-                if entry_id in item['expected_guide']:
-                    hit = True
-            row[mode] = {'top2': top, 'hit': hit, 'retrieval_mode': found['retrieval_mode']}
-            totals[mode]['scored'] += 1
-            if hit:
-                totals[mode]['hits'] += 1
-            if found['retrieval_mode'] == 'keyword_fallback':
-                totals[mode]['fallbacks'] += 1
-        rows.append(row)
-
-    summary = {}
-    for mode in rag.SEARCH_MODES:
-        scored = totals[mode]['scored']
-        summary[mode] = {'hit_at_2': round(totals[mode]['hits'] / scored, 3) if scored else None,
-                         'hits': totals[mode]['hits'], 'messages': scored,
-                         'keyword_fallbacks': totals[mode]['fallbacks']}
-
-    print('\nRETRIEVAL: is a correct guide entry in the top 2? (%d messages with a known answer)' % len(rows))
-    print('%-6s %-12s %-22s %-22s %-22s' % ('id', 'expected', 'keyword', 'rag_no_metadata', 'rag'))
-    for row in rows:
-        cells = []
-        for mode in rag.SEARCH_MODES:
-            mark = 'HIT ' if row[mode]['hit'] else 'miss'
-            cells.append(mark + ' ' + ','.join(row[mode]['top2']))
-        print('%-6s %-12s %-22s %-22s %-22s' % (row['id'], ','.join(row['expected_guide']), cells[0], cells[1], cells[2]))
-    print()
-    for mode in rag.SEARCH_MODES:
-        s = summary[mode]
-        note = '  (WARNING: %d keyword fallbacks)' % s['keyword_fallbacks'] if s['keyword_fallbacks'] else ''
-        print('%-16s hit@2 = %d/%d = %.0f%%%s' % (mode, s['hits'], s['messages'], 100 * s['hit_at_2'], note))
-
-    out_file = OUT_DIR / (run_prefix(set_name) + 'retrieval_results.json')
-    agent.save_json(out_file, {'summary': summary, 'rows': rows})
-    print('Saved:', out_file.relative_to(HERE))
-    return summary
-
-
-def evaluate_model_queries(trace_mode='rag'):
-    """A fairer retrieval test: replay the SHORT queries the model actually
-    wrote during a live agent run (e.g. "gift card") through all three
-    search modes. Needs a finished `python eval.py --agent` run first."""
-    data = agent.load_data()
-    entries = rag.load_guide()
-    run_dir = OUT_DIR / ('agent_' + trace_mode)
-    rows = []
-    totals = {}
-    for mode in rag.SEARCH_MODES:
-        totals[mode] = 0
-    for item in load_eval_set():
-        if not item['expected_guide']:
-            continue
-        trace_file = run_dir / (item['id'] + '_trace.json')
-        if not trace_file.exists():
-            continue
-        record = agent.load_json(trace_file)
-        context = deterministic_context(item, data)
-        for step in record['trace']:
-            if step['action'] != 'search_scam_guide' or not step['validation_ok']:
-                continue
-            query = step['argument'].get('query', '')
-            filters = step['argument'].get('filters') or {}
-            clean_filters = {}
-            if filters.get('org'):
-                org = agent.find_organization(filters['org'], data)
-                if org:
-                    clean_filters['org'] = org['name']
-            if filters.get('scam_type'):
-                clean_filters['scam_type'] = filters['scam_type']
-            row = {'id': item['id'], 'query': query, 'filters': clean_filters, 'expected_guide': item['expected_guide']}
-            for mode in rag.SEARCH_MODES:
-                found = rag.search(query, entries, mode=mode, filters=clean_filters,
-                                   found_flags=agent.flag_names(context), claimed_orgs=context['claimed_orgs'])
-                top = []
-                hit = False
-                for match in found['matches']:
-                    top.append(match['id'])
-                    if match['id'] in item['expected_guide']:
-                        hit = True
-                row[mode] = {'top2': top, 'hit': hit}
-                if hit:
-                    totals[mode] += 1
-            rows.append(row)
-    if not rows:
-        print('No model queries found. Run: python eval.py --agent --mode ' + trace_mode)
-        return None
-    print('\nRETRIEVAL WITH THE MODEL\'S OWN QUERIES (%d searches from the %s agent run)' % (len(rows), trace_mode))
-    for row in rows:
-        marks = []
-        for mode in rag.SEARCH_MODES:
-            marks.append(mode + '=' + ('HIT' if row[mode]['hit'] else 'miss'))
-        print('  %-4s "%s" %s  %s' % (row['id'], row['query'][:40], json.dumps(row['filters']) if row['filters'] else '', ' '.join(marks)))
-    summary = {}
-    for mode in rag.SEARCH_MODES:
-        summary[mode] = {'hits': totals[mode], 'searches': len(rows), 'hit_at_2': round(totals[mode] / len(rows), 3)}
-        print('%-16s hit@2 = %d/%d = %.0f%%' % (mode, totals[mode], len(rows), 100 * totals[mode] / len(rows)))
-    agent.save_json(OUT_DIR / 'model_query_retrieval_results.json', {'summary': summary, 'rows': rows})
-    return summary
-
-
-# ------------------------------------------------------------------------
-# 2. Rules-only check: the warning-sign rules without any model
+# 1. Rules-only check: the warning-sign rules without any model
 # ------------------------------------------------------------------------
 
 def evaluate_rules(set_name='eval'):
@@ -268,7 +133,7 @@ def evaluate_rules(set_name='eval'):
 
 
 # ------------------------------------------------------------------------
-# 3. Live agent comparison
+# 2. Live agent run
 # ------------------------------------------------------------------------
 
 def guide_ids_used(record):
@@ -280,7 +145,7 @@ def guide_ids_used(record):
     return ids
 
 
-def evaluate_agent(mode, limit=None, ids=None, set_name='eval'):
+def evaluate_agent(limit=None, ids=None, set_name='eval'):
     items = load_eval_set(set_name)
     if ids:
         chosen = []
@@ -291,7 +156,7 @@ def evaluate_agent(mode, limit=None, ids=None, set_name='eval'):
     if limit:
         items = items[:limit]
     data = agent.load_data()
-    run_dir = OUT_DIR / (run_prefix(set_name) + 'agent_' + mode)
+    run_dir = OUT_DIR / (run_prefix(set_name) + 'agent')
     rows = []
 
     for item in items:
@@ -299,7 +164,7 @@ def evaluate_agent(mode, limit=None, ids=None, set_name='eval'):
         started = time.time()
         with contextlib.redirect_stdout(io.StringIO()):
             record = agent.run_agent(message, consent_fn=agent.consent_yes, consent_mode='yes',
-                                     search_mode=mode, verbose=False, case_name='eval_' + item['id'],
+                                     verbose=False, case_name='eval_' + item['id'],
                                      trace_path=run_dir / (item['id'] + '_trace.json'),
                                      alert_log=run_dir / 'family_alerts.log', data=data)
         used = guide_ids_used(record)
@@ -324,8 +189,8 @@ def evaluate_agent(mode, limit=None, ids=None, set_name='eval'):
             row['id'], row['expected'], row['final_label'], 'OK' if row['correct'] else 'WRONG',
             row['stop_reason'], row['steps'], row['gate_rejections'], ' > '.join(row['tools'])), flush=True)
 
-    summary = summarize_agent(rows, mode)
-    out_file = OUT_DIR / (run_prefix(set_name) + 'agent_' + mode + '_results.json')
+    summary = summarize_agent(rows)
+    out_file = OUT_DIR / (run_prefix(set_name) + 'agent_results.json')
     agent.save_json(out_file, {'summary': summary, 'rows': rows})
     print_agent_summary(summary)
     print('Saved:', out_file.relative_to(HERE))
@@ -344,7 +209,7 @@ def wilson(hits, total):
     return [round(max(0.0, centre - half), 3), round(min(1.0, centre + half), 3)]
 
 
-def summarize_agent(rows, mode):
+def summarize_agent(rows):
     count = len(rows)
     correct = 0
     false_safe = 0
@@ -394,11 +259,11 @@ def summarize_agent(rows, mode):
         sequence = ' > '.join(row['tools'])
         if sequence not in sequences:
             sequences.append(sequence)
-        # model / model_after_gate_hint / python / None (no help offered)
+        # model / python / None (no help offered)
         who = str(row['helper_offered_by'])
         helper_by[who] = helper_by.get(who, 0) + 1
     return {
-        'search_mode': mode, 'messages': count,
+        'messages': count,
         'accuracy': round(correct / count, 3) if count else None, 'correct': correct,
         'accuracy_ci95': wilson(correct, count),
         'false_safe_rate_ci95': wilson(false_safe, not_safe_total),
@@ -417,7 +282,7 @@ def summarize_agent(rows, mode):
 
 
 def print_agent_summary(s):
-    print('\nAGENT (%s search): %d/%d correct = %.0f%%' % (s['search_mode'], s['correct'], s['messages'], 100 * s['accuracy']))
+    print('\nAGENT: %d/%d correct = %.0f%%' % (s['correct'], s['messages'], 100 * s['accuracy']))
     if s.get('accuracy_ci95'):
         print('  95%% confidence range for accuracy: %.1f%% to %.1f%%' % (100 * s['accuracy_ci95'][0], 100 * s['accuracy_ci95'][1]))
     print('  false "safe" answers : %d of %d messages that are not safe' % (s['false_safe'], s['not_safe_messages']))
@@ -436,28 +301,20 @@ def print_agent_summary(s):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Evaluate ScamShield on the labeled message set.')
-    parser.add_argument('--retrieval', action='store_true', help='compare search modes (fast, no LLM)')
-    parser.add_argument('--model-queries', action='store_true',
-                        help='replay the queries the model wrote in the live rag run through all search modes')
     parser.add_argument('--agent', action='store_true', help='run the live agent on every message')
-    parser.add_argument('--mode', choices=rag.SEARCH_MODES, default='rag', help='search mode for --agent')
     parser.add_argument('--limit', type=int, help='only the first N messages')
     parser.add_argument('--ids', nargs='*', help='only these message ids, e.g. S01 U02')
     parser.add_argument('--rules', action='store_true',
-                        help='check the warning-sign rules alone (instant, no model, no embeddings)')
+                        help='check the warning-sign rules alone (instant, no model)')
     parser.add_argument('--set', choices=list(EVAL_FILES), default='eval',
-                        help='which labeled set: eval (25 messages), holdout (12), holdout2 (14, written before the '
-                             'round-2 fixes) or large (614, written blind without seeing the rules)')
+                        help='which labeled set: eval (25 messages), holdout (test set 2, 12), holdout2 (test set 3, '
+                             '14) or large (614, written blind by a separate AI agent)')
     args = parser.parse_args()
-    if not args.retrieval and not args.agent and not args.model_queries and not args.rules:
+    if not args.agent and not args.rules:
         parser.print_help()
     else:
         write_source_checksums()
     if args.rules:
         evaluate_rules(args.set)
-    if args.retrieval:
-        evaluate_retrieval(args.set)
-    if args.model_queries:
-        evaluate_model_queries()
     if args.agent:
-        evaluate_agent(args.mode, args.limit, args.ids, args.set)
+        evaluate_agent(args.limit, args.ids, args.set)
