@@ -1458,33 +1458,52 @@ def what_to_do(label, context, runtime):
     return line
 
 
+# Guide entries about messages from family or friends ("grandchild in
+# trouble", "hacked account of a friend"). They do not fit a message that
+# claims to be from an organization.
+PERSONAL_SCAM_TYPES = ['grandparent', 'hacked_contact']
+
+
 def tip_is_relevant(match, label, context):
-    """A guide tip is shown only when it fits THIS message, so the scam
-    demo never shows "call your grandchild" for a fake USPS text.
+    """A guide tip is shown only when it fits THIS message, so the USPS
+    injection case never shows "call your grandchild".
       safe:      a real-pattern entry for the sender's or claimed organization.
-      otherwise: a scam entry for a claimed organization, or one whose red
-                 flags include a strong sign we found (when no strong sign
-                 was found, any shared sign or note is enough)."""
+      otherwise: a scam entry for the claimed organization, or a general
+                 entry whose MAIN red flag (its first one) is a strong or
+                 weak sign we found. Entries about an organization the
+                 message does not claim are never shown, and when the
+                 message claims an organization, entries about family or
+                 friends are not shown either. When no strong or weak sign
+                 was found, a shared note is enough."""
     is_legit = match['scam_type'] == 'legit_pattern'
+    orgs = match.get('orgs', [])
+    claimed = context['claimed_orgs']
     if label == 'likely_safe':
         if not is_legit:
             return False
-        for org in match.get('orgs', []):
-            if org == context['sender_name'] or org in context['claimed_orgs']:
+        for org in orgs:
+            if org == context['sender_name'] or org in claimed:
                 return True
         return False
     if is_legit:
         return False
-    for org in match.get('orgs', []):
-        if org in context['claimed_orgs']:
+    for org in orgs:
+        if org in claimed:
             return True
-    strong = []
-    for flag in flags_with_strength(context, 'strong'):
-        strong.append(flag['name'])
-    for flag_name in match.get('red_flags', []):
-        if flag_name in strong:
-            return True
-        if not strong and flag_name in flag_names(context):
+    if orgs:
+        return False   # about an organization this message does not claim
+    if claimed and match['scam_type'] in PERSONAL_SCAM_TYPES:
+        return False
+    red_flags = match.get('red_flags', [])
+    if not red_flags:
+        return False
+    counted = []
+    for flag in flags_with_strength(context, 'strong') + flags_with_strength(context, 'weak'):
+        counted.append(flag['name'])
+    if counted:
+        return red_flags[0] in counted
+    for flag_name in red_flags:
+        if flag_name in flag_names(context):
             return True
     return False
 
