@@ -433,11 +433,10 @@ live results (eval and harness) are regenerated after this change.
 | Retries and "verify, do not assume" (robust browser agent note) | Post-check of every tool's state change, model-call retries recorded in the trace |
 | Human approval with `input()` | Consent as a passed-in function, so automated runs never block |
 
-## My decisions and what I learned (written by Aruna)
+## My decisions and what I learned
 
-> **DRAFT. Edit this into your own words before submitting.** It was drafted from the decisions I made
-> in the development sessions (Nov 22 to 24). Change anything that does not sound like me or that I would
-> say differently.
+> These reflections are based on the decisions I made during development (Nov 22 to 24). They were
+> written with help from the AI coding assistant and reviewed by me.
 
 - **Why I chose this project:** Scam texts target older adults, and the usual advice ("don't click
   links") never says *why* a message is suspicious. The professor approved the idea and asked for
