@@ -1,0 +1,14 @@
+{
+  "_note": "Fictional demo data. ScamShield never opens these links; it only looks them up here.",
+  "known_bad": [
+    "prize-claim-now.co",
+    "secure-verify-account.net",
+    "free-gift-rewards.info"
+  ],
+  "shorteners": [
+    "bit.ly",
+    "tinyurl.com",
+    "t.co",
+    "goo.gl"
+  ]
+}
