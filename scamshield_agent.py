@@ -98,20 +98,30 @@ def result(ok, message, data=None):
 # 4. Small helpers for links, phone numbers and organizations
 # ------------------------------------------------------------------------
 
-# A link is any of these three shapes (the text is lower-cased first):
+# A link is any of these three shapes (upper or lower case):
 #   1. anything that starts with http:// or https://
 #   2. a number address like 192.168.10.45 (with an optional /path)
 #   3. a web address: name.name with a 2 to 24 letter ending (.com, .shop,
 #      .online, ...), with an optional /path. Any ending counts, so a new
 #      ending is never missed; check_link marks endings it does not know as
-#      'unknown', which already blocks likely_safe.
-# The "not after a letter, digit, dot, @ or -" rule and the 2-letter minimum
-# keep ordinary text out: "Dr. Lee", "Oak St. store", "$45.20", "8 pm.",
-# "e.g." and e-mail addresses are not links.
+#      'unknown', which already blocks likely_safe. Letters from ANY
+#      alphabet count ([^\W_] = a letter or digit), so a link written with
+#      Cyrillic look-alike letters ("аmazon.com") is still found.
+#      An optional "name.com@" in front is kept, because
+#      "medicare.gov@evil-login.ru" really goes to evil-login.ru.
+# The "not after a letter, digit, dot, @ or -" rule, the "not before @" rule
+# and the 2-letter minimum keep ordinary text out: "Dr. Lee",
+# "Oak St. store", "$45.20", "8 pm.", "e.g." and e-mail addresses are not
+# links. find_links() below also drops "p.m.Love" and "St.Apt".
+WEB_LABEL = r'[^\W_](?:[\w-]*[^\W_])?'
+COMMON_ENDINGS = ['com', 'net', 'org', 'gov', 'edu', 'co', 'us', 'info', 'biz', 'io', 'app', 'shop',
+                  'online', 'site', 'xyz', 'top', 'click', 'link', 'live', 'ru', 'cn']
 LINK_PATTERN = re.compile(
     r'https?://[^\s<>"\']+'
     r'|(?<![\w.@-])(?:\d{1,3}\.){3}\d{1,3}\b(?::\d+)?(?:/[^\s]*)?'
-    r'|(?<![\w.@-])(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,24}\b(?:/[^\s]*)?')
+    r'|(?<![\w.@-])(?:(?:' + WEB_LABEL + r'\.)+(?:' + '|'.join(COMMON_ENDINGS) + r')@)?'
+    r'(?:' + WEB_LABEL + r'\.)+[^\W\d_]{2,24}\b(?!@)(?:/[^\s]*)?',
+    re.IGNORECASE)
 IP_ADDRESS_PATTERN = re.compile(r'(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})')
 PHONE_PATTERN = re.compile(r'(?<!\d)(?:\+?1[-.\s])?(?:\(?\d{3}\)?[-.\s])?\d{3}[-.\s]\d{4}(?!\d)')
 
@@ -124,11 +134,119 @@ LOOKALIKE_PATTERN = re.compile(r'(?<=[a-z])[01345@$]|[01345@$](?=[a-z])')
 SPACED_LETTERS_PATTERN = re.compile(r'\b(?:[a-z] ){2,}[a-z]\b')
 
 
+# Letters from other alphabets that look like Latin letters: Cyrillic
+# а е о р с у х і ј ѕ ԁ ӏ and Greek ο α ε ν ρ τ. Scammers mix them in so
+# "gіft cаrd" (Cyrillic і and а) dodges a word filter. They are changed to
+# Latin ONLY in the copy used for warning-sign matching; links keep their
+# real letters, and a link with letters from another alphabet is a strong
+# warning sign (lookalike_letters_link).
+CONFUSABLES = {
+    'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p', 'с': 'c', 'у': 'y', 'х': 'x', 'і': 'i', 'ј': 'j',
+    'ѕ': 's', 'ԁ': 'd', 'ӏ': 'l', 'ο': 'o', 'α': 'a', 'ε': 'e', 'ν': 'v', 'ρ': 'p', 'τ': 't',
+}
+
+# "Defanged" links are written so they cannot be tapped: medicare[.]gov,
+# hxxps://... They are turned back into normal links before links are
+# found, so they are still checked.
+DEFANGED_DOT_PATTERN = re.compile(r'\[\.\]|\(\.\)|\{\.\}|\[dot\]|\(dot\)', re.IGNORECASE)
+DEFANGED_SCHEME_PATTERN = re.compile(r'\bhxxp(s?)(://|\[:\]//)', re.IGNORECASE)
+
+# Words with a dot that are not links: "5 p.m.Love you", "Oak St.Apt 4".
+ABBREVIATIONS = ['st', 'apt', 'dr', 'mr', 'mrs', 'ms', 'jr', 'sr', 'no', 'vs', 'etc', 'ave', 'rd']
+
+
 def normalize_text(text):
     """Unicode NFKC turns fullwidth and other fancy letters into plain ones:
-    'ＧＩＦＴ' -> 'GIFT', '－' -> '-'. (Look-alike letters from other
-    alphabets, such as Cyrillic, are NOT changed; a known limit.)"""
+    'ＧＩＦＴ' -> 'GIFT', '－' -> '-'. Look-alike letters from other
+    alphabets (Cyrillic, Greek) are handled by undo_disguises."""
     return unicodedata.normalize('NFKC', text)
+
+
+def undo_defanging(text):
+    """'medicare[.]gov' -> 'medicare.gov', 'hxxps://' -> 'https://'"""
+    text = DEFANGED_DOT_PATTERN.sub('.', text)
+    return DEFANGED_SCHEME_PATTERN.sub(r'http\1://', text)
+
+
+def has_scheme(text):
+    lower = text.lower()
+    return lower.startswith('http://') or lower.startswith('https://') or lower.startswith('www.')
+
+
+def clean_link(raw):
+    """Return the link text, or None when the match is ordinary text such as
+    'p.m.Love' or 'St.Apt'."""
+    if has_scheme(raw) or IP_ADDRESS_PATTERN.match(raw):
+        return raw
+    host = raw.split('/')[0]
+    if '@' in host:
+        return raw   # "medicare.gov@evil-login.ru": always kept (hidden address)
+    labels = host.split('.')
+    # Skip leading abbreviations: "p.m.love" -> "love", "st.apt" -> "apt".
+    if len(labels) >= 2 and labels[0].lower() in ('a', 'p') and labels[1].lower() == 'm':
+        labels = labels[2:]
+    while len(labels) > 1 and labels[0].lower() in ABBREVIATIONS:
+        labels = labels[1:]
+    # A capital letter right after a dot (no http:// or www.) starts a new
+    # sentence: "dinner at 5 p.m.Love you". A common ending such as ".Com"
+    # still counts as a link, so "Medicare-Renew.Com" is not missed.
+    index = 1
+    while index < len(labels):
+        label = labels[index]
+        if label[:1].isupper() and label.lower() not in COMMON_ENDINGS:
+            labels = labels[:index]
+            break
+        index += 1
+    if len(labels) < 2:
+        return None
+    if '.'.join(labels) == host:
+        return raw
+    return '.'.join(labels)
+
+
+def link_hides_address(raw):
+    """True when the link has 'something@' before the real address, e.g.
+    'http://user@203.0.113.9/x' or 'medicare.gov@evil-login.ru'."""
+    text = raw.lower()
+    for prefix in ['https://', 'http://']:
+        if text.startswith(prefix):
+            text = text[len(prefix):]
+    for mark in ['/', '?', '#']:
+        text = text.split(mark)[0]
+    return '@' in text
+
+
+def uses_other_alphabet(domain):
+    """True when a web address has letters outside plain a-z (for example
+    Cyrillic 'а' in 'аmazon.com'), or is written in the 'xn--' form."""
+    for character in domain:
+        if ord(character) > 127:
+            return True
+    for label in domain.split('.'):
+        if label.startswith('xn--'):
+            return True
+    return False
+
+
+def find_links(text):
+    """All links in the text, as normalized addresses, plus the raw links
+    that hide their real address behind an @ sign."""
+    links = []
+    hidden = []
+    for match in LINK_PATTERN.finditer(undo_defanging(text)):
+        raw = clean_link(match.group(0))
+        if raw is None:
+            continue
+        domain = normalize_domain(raw)
+        if domain and domain not in links:
+            links.append(domain)
+        if domain and link_hides_address(raw) and domain not in hidden:
+            hidden.append(domain)
+    return links, hidden
+
+
+def to_latin(character):
+    return CONFUSABLES.get(character, character)
 
 
 def undo_one_lookalike(match):
@@ -144,7 +262,10 @@ def undo_disguises(lower_text):
     """A second copy of the (lower-case, NFKC) text used ONLY for warning-sign
     matching: 'g1ft c@rds' -> 'gift cards', 'g i f t' -> 'gift'.
     Links are always taken from the undisguised text."""
-    text = LOOKALIKE_PATTERN.sub(undo_one_lookalike, lower_text)
+    latin = ''
+    for character in lower_text:
+        latin += to_latin(character)
+    text = LOOKALIKE_PATTERN.sub(undo_one_lookalike, latin)
     return SPACED_LETTERS_PATTERN.sub(join_spaced_letters, text)
 
 
@@ -159,15 +280,21 @@ def is_ip_address(domain):
 
 
 def normalize_domain(url):
-    """'https://www.Medicare-Help.co/renew' -> 'medicare-help.co'"""
-    text = url.strip().lower()
+    """'https://www.Medicare-Help.co/renew' -> 'medicare-help.co'
+    'medicare[.]gov' -> 'medicare.gov' (defanged), and anything before an
+    @ sign is dropped: 'http://user@203.0.113.9/x' -> '203.0.113.9',
+    'medicare.gov@evil-login.ru' -> 'evil-login.ru' (the real address)."""
+    text = undo_defanging(normalize_text(url.strip())).lower()
     for prefix in ['https://', 'http://']:
         if text.startswith(prefix):
             text = text[len(prefix):]
+    for mark in ['/', '?', '#']:
+        text = text.split(mark)[0]
+    if '@' in text:
+        text = text.rsplit('@', 1)[1]
+    text = text.split(':')[0]
     if text.startswith('www.'):
         text = text[4:]
-    for mark in ['/', '?', '#', ':']:
-        text = text.split(mark)[0]
     return text.strip('.,;:)(')
 
 
@@ -190,9 +317,19 @@ def edit_distance(a, b):
 
 def classify_domain(domain, data):
     """Return (status, organization). status is official, known_bad,
-    ip_address, shortened, lookalike or unknown. Nothing is ever opened."""
+    ip_address, other_alphabet, shortened, lookalike or unknown.
+    Nothing is ever opened."""
     if is_ip_address(domain):
         return 'ip_address', None
+    if uses_other_alphabet(domain):
+        # 'аmazon.com' with a Cyrillic 'а' looks exactly like amazon.com.
+        latin = ''
+        for character in domain:
+            latin += to_latin(character)
+        org = None
+        if not uses_other_alphabet(latin):
+            status, org = classify_domain(latin, data)
+        return 'other_alphabet', org
     if domain in data['domains']['known_bad']:
         return 'known_bad', None
     for org in data['organizations']:
@@ -241,37 +378,80 @@ def find_organization(name, data):
 #    fact     = plain words Python uses when it writes explanations.
 #    keywords = at least one must appear in the model's explanation
 #               for every strong sign (checked by the verdict gate).
+#    patterns         = any match counts.
+#    guarded_patterns = a match counts UNLESS one of the 'unless' patterns
+#                       also matches and the text has no request words
+#                       (REQUEST_WORDS). This is how "I'll send you a gift
+#                       card for your birthday" stays harmless while
+#                       "can you send me a gift card" does not.
 # ------------------------------------------------------------------------
 
+# Any kind of store or gift card, including brand cards ("Apple cards",
+# "Steam cards", "Google Play cards", "Target gift card").
+CARD_WORDS = (r'(?:gift\s*-?\s*cards?|prepaid (?:visa |debit )?cards?'
+              r'|(?:apple|steam|google play|itunes|target|walmart|amazon|ebay|visa|store|razer gold|sephora'
+              r'|best buy|vanilla)\s+(?:gift\s+)?cards?)')
+REQUEST_WORDS = [r'\bcan you\b', r'\bcould you\b', r'\bwould you\b', r'\bplease\b', r'\bi need\b',
+                 r'\bneed you to\b', r'\bgo (buy|get)\b']
+
 SIGNAL_RULES = [
+    # Only a REQUEST to buy, send or read out a card counts. A gift card
+    # mentioned as a present ("I put a gift card in your birthday card")
+    # is not a warning sign.
     {'name': 'gift_card', 'strength': 'strong',
-     'patterns': [r'\bgift\s*-?\s*cards?\b', r'\bprepaid cards?\b', r'\bitunes cards?\b',
-                  r'\bgoogle play cards?\b',
-                  # "pick up some store cards ... read me the numbers"
-                  r'\bstore cards?\b.{0,80}\bnumbers?\b'],
+     'patterns': [
+         # "... cards ... send me the claim numbers", "read me the numbers on the back"
+         r'\b' + CARD_WORDS + r'.{0,100}\b(numbers?|codes?|claim|pins?|back of|scratch)',
+         r'\b(numbers?|codes?|pins?)\b.{0,40}\b(on|from|off|of) (the |your |those |these )?' + CARD_WORDS,
+         # a gift emoji with numbers or codes
+         r'\U0001F381.{0,80}\b(numbers?|codes?)\b', r'\b(numbers?|codes?)\b.{0,80}\U0001F381'],
+     'guarded_patterns': [
+         r'\b(buy|get|grab|pick up|purchase|send|pay|load)\b.{0,60}\b' + CARD_WORDS],
+     'unless': [r"\bi('ll| will| am going to|'m going to) (send|get|buy|mail|give|bring) you\b",
+                r'\bi (just )?(sent|got|bought|put|mailed|left|gave) you\b',
+                r'\bfor your (birthday|anniversary|christmas)\b', r'\bin your (mailbox|birthday card)\b'],
      'fact': 'asks you to pay with a gift card',
-     'keywords': ['gift card', 'prepaid card', 'store card', 'itunes', 'google play']},
+     'keywords': ['gift card', 'prepaid card', 'store card', 'itunes', 'google play', 'apple card', 'steam',
+                  'card number', 'claim number', 'gift']},
     {'name': 'crypto', 'strength': 'strong',
      'patterns': [r'\bbitcoin\b', r'\bcrypto', r'\bwire transfer\b', r'\bwestern union\b'],
      'fact': 'asks for payment by cryptocurrency or wire transfer',
      'keywords': ['bitcoin', 'crypto', 'wire']},
     # Money apps and transfer services: money sent this way is very hard to
     # get back. Only a REQUEST to send or pay with one counts, so "I sent
-    # you $20 on Venmo" from family is not a warning sign.
+    # you $20 on Venmo" and "I'll pay you back on Venmo" from family are
+    # not warning signs.
     {'name': 'payment_app', 'strength': 'strong',
-     'patterns': [r'\b(send|pay|transfer|wire)\b.{0,60}\b(zelle|venmo|cash ?app|moneygram)\b',
+     'patterns': [r'\b(zelle|venmo|cash ?app|paypal|moneygram)\s+me\b',
+                  r'\bpaypal\b.{0,30}\bfriends (and|&) family\b',
+                  r'\bfriends (and|&) family\b.{0,30}\bpaypal\b',
                   r'\bwire (me |us )?(the )?(money|funds|payment|cash)\b'],
+     'guarded_patterns': [r'\b(send|pay|transfer|wire)\b.{0,60}\b(zelle|venmo|cash ?app|moneygram|paypal)\b'],
+     'unless': [r'\bpay (you|u) back\b', r"\b(i|we)('ll| will)? (pay|send) (it )?(to )?you\b",
+                r'\b(i|we) (just |already )?(sent|paid)\b'],
      'fact': 'asks you to send money through a money app or transfer service, which is very hard to get back',
      'keywords': ['zelle', 'venmo', 'cash app', 'moneygram', 'wire', 'money app', 'payment app', 'transfer']},
     {'name': 'code_request', 'strength': 'strong',
-     'patterns': [r'\b(verification|security|one[- ]time|login) (pass)?code\b', r'\botp\b', r'\bpin\b',
-                  r'\bpassword', r'\bsocial security number\b', r'\bssn\b', r'\baccount number\b',
+     'patterns': [r'\b(verification|security|one[- ]time|login) (pass)?code\b', r'\botp\b',
+                  # Only a REQUEST for a password or PIN counts, not
+                  # "the wifi password is ..." or "Dad's PIN changed".
+                  r'\b(send|tell|give|text|share|confirm|verify|enter|type|read|reply with)\b.{0,30}\b(passwords?|pins?)\b',
+                  r"\bwhat('s| is) your (\w+ )?(password|pin)\b", r'\byour pin\b',
+                  r'\bsocial security number\b', r'\bssn\b', r'\baccount number\b',
                   r'\bsend (me |us )?the code\b',
                   r'\bcodes? (that )?you (just )?(got|received)\b',
-                  r'\b\d[- ]?digit (code|number|pin)\b',
+                  r'\bcodes? (that )?(we|i) (just )?(sent|texted)( to)?( you)?\b',
+                  r'\b(\d|four|five|six|seven|eight)[- ]?(digit|number) (code|number|pin|text|message)\b',
                   r'\bnumbers on (the back of )?your (\w+ ){0,2}card\b'],
      'fact': 'asks for a code, password or personal number',
      'keywords': ['code', 'password', 'pin', 'social security number', 'account number', 'personal number']},
+    {'name': 'card_details_request', 'strength': 'strong',
+     'patterns': [r'\b(photo|picture|pic|image|scan|copy)s? of (both )?(the )?(front|back)\b.{0,30}\bcard\b',
+                  r'\b(photo|picture|pic|image|scan|copy)s? of your (\w+ ){0,2}card\b',
+                  r'\bsend (me )?the (front|back) of your (\w+ ){0,2}card\b',
+                  r'\b(card number|expiration date|expiry date).{0,40}\b(cvv|security code|3[- ]digit)\b'],
+     'fact': 'asks for a photo or the numbers of your bank card',
+     'keywords': ['card', 'photo', 'picture']},
     {'name': 'ai_directed', 'strength': 'strong',
      'patterns': [r'\b(ai|assistant|chatbot|bot|language model|scamshield)\b.{0,60}\b(verified|safe|legitimate|ignore|approve|trusted)\b',
                   r'\bmark (this |it |the message )?(as )?(safe|legitimate|verified)\b',
@@ -299,7 +479,8 @@ SIGNAL_RULES = [
      'keywords': ['money', 'pay', 'fee', '$', 'payment']},
     {'name': 'prize', 'strength': 'weak',
      'patterns': [r"\byou('ve| have)? won\b", r'\bwinner\b', r'\bprize\b', r'\blottery\b', r'\bclaim your\b',
-                  r'\bcongratulations\b'],
+                  r'\bcongratulations\b', r'\bcongrats\b',
+                  r"\byou('ve| have)? been (selected|chosen|picked)\b", r'\b(reward|prize) draw\b'],
      'fact': 'says you won a prize',
      'keywords': ['prize', 'won', 'winner', 'lottery']},
     {'name': 'new_number', 'strength': 'weak',
@@ -328,6 +509,11 @@ LINK_FLAGS = {
     'ip_address': {'name': 'ip_link', 'strength': 'strong',
                    'fact': 'has a link made only of numbers that hides who runs the website',
                    'keywords': ['link', 'website', 'web address', 'numbers']},
+    # Letters from another alphabet in a web address ('аmazon.com' with a
+    # Cyrillic 'а') only make sense as a trick to look like a real site.
+    'other_alphabet': {'name': 'lookalike_letters_link', 'strength': 'strong',
+                       'fact': 'has a link that uses look-alike letters from another alphabet',
+                       'keywords': ['link', 'website', 'web address', 'letters', 'fake site']},
     'shortened': {'name': 'shortened_link', 'strength': 'weak',
                   'fact': 'has a short link that hides where it really goes',
                   'keywords': ['link', 'short']},
@@ -335,6 +521,10 @@ LINK_FLAGS = {
                 'fact': 'has a link to a website we cannot confirm',
                 'keywords': ['link']},
 }
+
+
+# A link with "something@" before the real address hides where it goes.
+HIDDEN_ADDRESS_FACT = 'has a link that hides its real address behind an @ sign'
 
 
 def add_flag(context, name, strength, fact, keywords, evidence_id):
@@ -379,6 +569,26 @@ def flag_names(context):
 
 # ---- 6.1 extract_signals -------------------------------------------------
 
+def any_pattern(patterns, lower, undisguised):
+    for pattern in patterns:
+        if re.search(pattern, lower) or re.search(pattern, undisguised):
+            return True
+    return False
+
+
+def rule_matches(rule, lower, undisguised):
+    """A rule matches when any of its patterns matches, or when a guarded
+    pattern matches and it is not cancelled by an 'unless' pattern (an
+    'unless' pattern only cancels when the text has no request words)."""
+    if any_pattern(rule['patterns'], lower, undisguised):
+        return True
+    if not any_pattern(rule.get('guarded_patterns', []), lower, undisguised):
+        return False
+    if not any_pattern(rule.get('unless', []), lower, undisguised):
+        return True
+    return any_pattern(REQUEST_WORDS, lower, undisguised)
+
+
 def validate_extract_signals(argument, context, runtime):
     return True, ''
 
@@ -392,21 +602,22 @@ def run_extract_signals(argument, context, runtime):
     undisguised = undo_disguises(lower)
     evidence_id = context['current_evidence_id']
 
-    links = []
-    for match in LINK_PATTERN.finditer(lower):
-        domain = normalize_domain(match.group(0))
-        if domain and domain not in links:
-            links.append(domain)
+    links, hidden = find_links(text)
+    for domain in hidden:
+        add_flag(context, 'hidden_address_link', 'strong', HIDDEN_ADDRESS_FACT,
+                 LINK_FLAGS['other_alphabet']['keywords'], evidence_id)
+    for domain in links:
+        if uses_other_alphabet(domain):
+            add_flag(context, 'lookalike_letters_link', 'strong', LINK_FLAGS['other_alphabet']['fact'],
+                     LINK_FLAGS['other_alphabet']['keywords'], evidence_id)
     phones = []
     for match in PHONE_PATTERN.finditer(text):
         if match.group(0) not in phones:
             phones.append(match.group(0))
 
     for rule in SIGNAL_RULES:
-        for pattern in rule['patterns']:
-            if re.search(pattern, lower) or re.search(pattern, undisguised):
-                add_flag(context, rule['name'], rule['strength'], rule['fact'], rule['keywords'], evidence_id)
-                break
+        if rule_matches(rule, lower, undisguised):
+            add_flag(context, rule['name'], rule['strength'], rule['fact'], rule['keywords'], evidence_id)
 
     claimed = []
     for org in runtime['data']['organizations']:
@@ -1122,7 +1333,7 @@ def check_readability(text, label):
     for word in JARGON:
         if re.search(r'\b' + word, lower):
             problems.append('avoid the technical word "' + word + '"')
-    if LINK_PATTERN.search(lower):
+    if find_links(text)[0]:
         problems.append('do not write links; say "the link in the message"')
     if PHONE_PATTERN.search(text) or re.search(r'\d{4,}', text):
         problems.append('do not write phone numbers or long numbers')
