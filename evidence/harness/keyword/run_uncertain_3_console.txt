@@ -22,42 +22,30 @@ TOOL RESULT E3 : Found 2 guide entries (keyword): G15: Unknown callers asking yo
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
-MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3"], "explanation": "We are not sure
-                 about this message. It asks you to call back and comes from a number you don't have saved.
-                 The guide says unknown callers asking you to call back can be a sign of a scam, but there's
-                 no strong warning sign. You should call the office using a number you already have or ask a
-                 family member for help."}
-GATE           : REJECTED - help must be offered before uncertain -> use ask_human_helper first
-NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
-
-=== STEP 5 ===
-MODEL DECISION : ask_human_helper {"reason": "E3 shows guide G15: Unknown callers asking you to call back. We
-                 are not sure if this is a scam, so we suggest you ask a trusted family member for help."}
+MODEL DECISION : ask_human_helper {"reason": "E1 shows the message asks you to call back, which is a red flag.
+                 E3 shows this matches a known scam pattern."}
 VALIDATION     : ok
 TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
                  message was sent.
 NEXT OPTIONS   : search_scam_guide, done
 
-=== STEP 6 ===
-MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not
-                 sure about this message. It asks you to call back and comes from a number you don't have
-                 saved. The guide says unknown callers asking you to call back can be a sign of a scam, but
-                 there's no strong warning sign. You should call the office using a number you already have or
-                 ask a trusted family member for help."}
-GATE           : PASSED - evidence supports uncertain
-READABILITY    : needs simpler words - shorten this sentence to 22 words or fewer: "The guide says unknown
-                 callers asking you to call back can be a sign of a scam, but there's no strong warning sign."
+=== STEP 5 ===
+MODEL DECISION : done {"label": "likely_scam", "evidence": ["E1", "E3"], "explanation": "This looks like a
+                 scam. The message asks you to call back, which is a red flag. It matches a known scam
+                 pattern."}
+GATE           : REJECTED - evidence supports likely_scam -> likely_scam needs at least 1 strong or 2 weak
+                 warning signs; found 0 strong and 0 weak
 NEXT OPTIONS   : search_scam_guide, done
 
-=== STEP 7 ===
-MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not
-                 sure. The message asks you to call back and comes from a new number. Ask a family member for
-                 help."}
+=== STEP 6 ===
+MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2"], "explanation": "We are not sure about
+                 this message. It asks you to call back, and the number is not in your contacts. We suggested
+                 checking with a trusted helper, but no clear warning signs were found."}
 GATE           : PASSED - evidence supports uncertain
 
 ====================== SCAMSHIELD RESULT ======================
 VERDICT     : NOT SURE - ASK SOMEONE YOU TRUST
-STOP REASON : success   (steps: 7, rejected proposals: 0, gate rejections: 1)
+STOP REASON : success   (steps: 6, rejected proposals: 0, gate rejections: 1)
 TOOLS USED  : extract_signals -> check_sender -> search_scam_guide -> ask_human_helper
 EVIDENCE    :
   E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: no known organization
@@ -67,12 +55,12 @@ EVIDENCE    :
   E4 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
       real message was sent.
 EXPLANATION (model):
-  We are not sure. The message asks you to call back and comes from a new number. Ask a family member for
-  help.
+  We are not sure about this message. It asks you to call back, and the number is not in your contacts. We
+  suggested checking with a trusted helper, but no clear warning signs were found.
 WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
               we have let Priya (daughter) know so they can help.
 Tip from our guide (G15): Call the office using a number you already have, such as from an appointment card,
   or ask a family member.
-HUMAN HELP  : offered by model_after_gate_hint, consent = True (simulated)
+HUMAN HELP  : offered by model, consent = True (simulated)
 TRACE       : evidence/harness/keyword/run_uncertain_3_trace.json
 ===============================================================

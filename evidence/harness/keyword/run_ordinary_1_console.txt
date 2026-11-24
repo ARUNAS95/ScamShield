@@ -22,8 +22,8 @@ NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
 MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message
-                 looks safe. It comes from your saved contact, Main Street Pharmacy. The phone number matches
-                 the official contact for that pharmacy."}
+                 looks safe. It comes from your saved contact. The phone number matches the official contact
+                 for Main Street Pharmacy."}
 GATE           : PASSED - evidence supports likely_safe
 
 ====================== SCAMSHIELD RESULT ======================
@@ -35,8 +35,8 @@ EVIDENCE    :
   E2 check_sender: +1-555-0142 is a saved contact: Main Street Pharmacy.
   E3 lookup_official_contact: Official contact for Main Street Pharmacy (from our trusted list): 1-555-0142
 EXPLANATION (model):
-  This message looks safe. It comes from your saved contact, Main Street Pharmacy. The phone number matches
-  the official contact for that pharmacy.
+  This message looks safe. It comes from your saved contact. The phone number matches the official contact for
+  Main Street Pharmacy.
 WHAT TO DO  : You can reply as usual. If anything feels wrong, call Main Street Pharmacy on the number you
               saved.
 TRACE       : evidence/harness/keyword/run_ordinary_1_trace.json

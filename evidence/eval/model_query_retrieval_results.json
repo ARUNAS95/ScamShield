@@ -1,19 +1,19 @@
 {
   "summary": {
     "keyword": {
-      "hits": 15,
-      "searches": 16,
-      "hit_at_2": 0.938
+      "hits": 12,
+      "searches": 17,
+      "hit_at_2": 0.706
     },
     "rag_no_metadata": {
-      "hits": 15,
-      "searches": 16,
-      "hit_at_2": 0.938
+      "hits": 13,
+      "searches": 17,
+      "hit_at_2": 0.765
     },
     "rag": {
-      "hits": 15,
-      "searches": 16,
-      "hit_at_2": 0.938
+      "hits": 14,
+      "searches": 17,
+      "hit_at_2": 0.824
     }
   },
   "rows": [
@@ -49,7 +49,7 @@
     },
     {
       "id": "S02",
-      "query": "irs tax scam",
+      "query": "IRS back taxes arrest",
       "filters": {},
       "expected_guide": [
         "G11"
@@ -57,14 +57,14 @@
       "keyword": {
         "top2": [
           "G11",
-          "G01"
+          "G15"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
           "G11",
-          "G01"
+          "G15"
         ],
         "hit": true
       },
@@ -78,60 +78,60 @@
     },
     {
       "id": "S03",
-      "query": "social security number suspended",
+      "query": "ssn suspension scam",
       "filters": {},
       "expected_guide": [
         "G12"
       ],
       "keyword": {
         "top2": [
-          "G12",
-          "G01"
+          "G02",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       },
       "rag_no_metadata": {
         "top2": [
           "G12",
-          "G06"
+          "G02"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
           "G12",
-          "G01"
+          "G05"
         ],
         "hit": true
       }
     },
     {
       "id": "S04",
-      "query": "USPS parcel fee link",
+      "query": "money request from lookalike website",
       "filters": {},
       "expected_guide": [
         "G04"
       ],
       "keyword": {
         "top2": [
-          "G04",
-          "G07"
+          "G03",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       },
       "rag_no_metadata": {
         "top2": [
-          "G04",
-          "G07"
+          "G03",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       },
       "rag": {
         "top2": [
-          "G04",
-          "G09"
+          "G03",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       }
     },
     {
@@ -166,29 +166,29 @@
     },
     {
       "id": "S06",
-      "query": "account locked link",
+      "query": "threat and lookalike link",
       "filters": {},
       "expected_guide": [
         "G10"
       ],
       "keyword": {
         "top2": [
-          "G10",
-          "G09"
+          "G03",
+          "G11"
         ],
-        "hit": true
+        "hit": false
       },
       "rag_no_metadata": {
         "top2": [
-          "G10",
-          "G09"
+          "G03",
+          "G11"
         ],
-        "hit": true
+        "hit": false
       },
       "rag": {
         "top2": [
-          "G10",
-          "G09"
+          "G03",
+          "G10"
         ],
         "hit": true
       }
@@ -252,8 +252,37 @@
       }
     },
     {
+      "id": "S09",
+      "query": "crypto money request",
+      "filters": {},
+      "expected_guide": [
+        "G08"
+      ],
+      "keyword": {
+        "top2": [
+          "G08",
+          "G05"
+        ],
+        "hit": true
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G08",
+          "G05"
+        ],
+        "hit": true
+      },
+      "rag": {
+        "top2": [
+          "G08",
+          "G05"
+        ],
+        "hit": true
+      }
+    },
+    {
       "id": "S10",
-      "query": "urgent package delivery reschedule",
+      "query": "urgency short link",
       "filters": {},
       "expected_guide": [
         "G13",
@@ -261,21 +290,22 @@
       ],
       "keyword": {
         "top2": [
-          "G04"
+          "G13",
+          "G16"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G04",
+          "G13",
           "G16"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
-          "G04",
-          "G19"
+          "G13",
+          "G16"
         ],
         "hit": true
       }
@@ -373,7 +403,7 @@
     },
     {
       "id": "I02",
-      "query": "social security benefits stop unless you call",
+      "query": "call to stop benefits",
       "filters": {},
       "expected_guide": [
         "G14",
@@ -382,23 +412,23 @@
       "keyword": {
         "top2": [
           "G01",
-          "G12"
+          "G02"
         ],
-        "hit": true
+        "hit": false
       },
       "rag_no_metadata": {
         "top2": [
-          "G01",
-          "G12"
+          "G02",
+          "G01"
         ],
-        "hit": true
+        "hit": false
       },
       "rag": {
         "top2": [
-          "G01",
-          "G12"
+          "G15",
+          "G01"
         ],
-        "hit": true
+        "hit": false
       }
     },
     {
@@ -433,7 +463,7 @@
     },
     {
       "id": "U02",
-      "query": "calls from new phone",
+      "query": "calls from new numbers asking to call back",
       "filters": {},
       "expected_guide": [
         "G05",
@@ -441,22 +471,22 @@
       ],
       "keyword": {
         "top2": [
-          "G05",
-          "G12"
+          "G15",
+          "G05"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G05",
-          "G15"
+          "G15",
+          "G05"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
-          "G05",
-          "G15"
+          "G15",
+          "G05"
         ],
         "hit": true
       }

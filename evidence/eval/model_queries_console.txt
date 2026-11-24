@@ -1,21 +1,22 @@
 
-RETRIEVAL WITH THE MODEL'S OWN QUERIES (16 searches from the rag agent run)
+RETRIEVAL WITH THE MODEL'S OWN QUERIES (17 searches from the rag agent run)
   S01  "Medicare renewal scam"   keyword=HIT rag_no_metadata=HIT rag=HIT
-  S02  "irs tax scam"   keyword=HIT rag_no_metadata=HIT rag=HIT
-  S03  "social security number suspended"   keyword=HIT rag_no_metadata=HIT rag=HIT
-  S04  "USPS parcel fee link"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S02  "IRS back taxes arrest"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S03  "ssn suspension scam"   keyword=miss rag_no_metadata=HIT rag=HIT
+  S04  "money request from lookalike website"   keyword=miss rag_no_metadata=miss rag=miss
   S05  "code request and money request"   keyword=miss rag_no_metadata=miss rag=miss
-  S06  "account locked link"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S06  "threat and lookalike link"   keyword=miss rag_no_metadata=miss rag=HIT
   S07  "prize money scam"   keyword=HIT rag_no_metadata=HIT rag=HIT
   S08  "money request new number secrecy"   keyword=HIT rag_no_metadata=HIT rag=HIT
-  S10  "urgent package delivery reschedule"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S09  "crypto money request"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S10  "urgency short link"   keyword=HIT rag_no_metadata=HIT rag=HIT
   S11  "medicare lookalike link"   keyword=HIT rag_no_metadata=HIT rag=HIT
   S12  "gift card money request"   keyword=HIT rag_no_metadata=HIT rag=HIT
   I01  "ai directed link First City Bank"   keyword=HIT rag_no_metadata=HIT rag=HIT
-  I02  "social security benefits stop unless you"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  I02  "call to stop benefits"   keyword=miss rag_no_metadata=miss rag=miss
   U01  "call to confirm cleaning"   keyword=HIT rag_no_metadata=HIT rag=HIT
-  U02  "calls from new phone"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  U02  "calls from new numbers asking to call ba"   keyword=HIT rag_no_metadata=HIT rag=HIT
   U05  "asks you to call back"   keyword=HIT rag_no_metadata=HIT rag=HIT
-keyword          hit@2 = 15/16 = 94%
-rag_no_metadata  hit@2 = 15/16 = 94%
-rag              hit@2 = 15/16 = 94%
+keyword          hit@2 = 12/17 = 71%
+rag_no_metadata  hit@2 = 13/17 = 76%
+rag              hit@2 = 14/17 = 82%

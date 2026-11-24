@@ -30,9 +30,7 @@ NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 5 ===
 MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2", "E4"], "explanation": "This looks like a
-                 scam. The link pretends to be the real First City Bank website. Scammers often use lookalike
-                 links to trick you into giving away money or personal details. Don’t tap the link. Call the
-                 number on the back of your bank card instead."}
+                 scam. The link pretends to be First City Bank. Do not tap short links from unknown senders."}
 GATE           : PASSED - evidence supports likely_scam
 
 ====================== SCAMSHIELD RESULT ======================
@@ -47,11 +45,9 @@ EVIDENCE    :
   E4 search_scam_guide: Found 2 guide entries (keyword): G13: Shortened links hide where they go; G10: Fake
       bank fraud alerts.
 EXPLANATION (model):
-  This looks like a scam. The link pretends to be the real First City Bank website. Scammers often use
-  lookalike links to trick you into giving away money or personal details. Don’t tap the link. Call the number
-  on the back of your bank card instead.
+  This looks like a scam. The link pretends to be First City Bank. Do not tap short links from unknown
+  senders.
 WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. Call Emma (granddaughter) on
               the number you already have and ask if they really sent it.
-Tip from our guide (G10): Do not click. Call the number on the back of your bank card.
 TRACE       : evidence/harness/keyword/run_trusted_bad_link_1_trace.json
 ===============================================================

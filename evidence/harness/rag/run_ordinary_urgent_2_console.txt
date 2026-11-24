@@ -22,9 +22,8 @@ NEXT OPTIONS   : lookup_official_contact, search_scam_guide, ask_human_helper, d
 
 === STEP 4 ===
 MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message
-                 looks safe. It comes from your saved contact, Main Street Pharmacy. The link is the official
-                 website. The message pushes you to act fast, which is a weak warning sign, but it's not
-                 enough to make it a scam."}
+                 looks safe. It comes from a saved contact. The link is official. It asks you to act fast, but
+                 that’s not a strong warning sign."}
 GATE           : PASSED - evidence supports likely_safe
 
 ====================== SCAMSHIELD RESULT ======================
@@ -36,9 +35,8 @@ EVIDENCE    :
   E2 check_link: mainstreetpharmacy.example is the official website of Main Street Pharmacy.
   E3 check_sender: +1-555-0142 is a saved contact: Main Street Pharmacy.
 EXPLANATION (model):
-  This message looks safe. It comes from your saved contact, Main Street Pharmacy. The link is the official
-  website. The message pushes you to act fast, which is a weak warning sign, but it's not enough to make it a
-  scam.
+  This message looks safe. It comes from a saved contact. The link is official. It asks you to act fast, but
+  that’s not a strong warning sign.
 WHAT TO DO  : You can reply as usual. If anything feels wrong, call Main Street Pharmacy on the number you
               saved.
 TRACE       : evidence/harness/rag/run_ordinary_urgent_2_trace.json
