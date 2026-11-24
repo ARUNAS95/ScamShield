@@ -1,0 +1,47 @@
+CASE uncertain  RUN 2
+SENDER : +1-555-0163
+MESSAGE: Hi, this is Dr. Lee's office. Please call us back about your appointment.
+
+=== STEP 1 ===
+MODEL DECISION : extract_signals {}
+VALIDATION     : ok
+TOOL RESULT E1 : strong: none; weak: none; 0 link(s); claims to be: no known organization
+NEXT OPTIONS   : check_sender, search_scam_guide, done
+
+=== STEP 2 ===
+MODEL DECISION : check_sender {"sender": "+1-555-0163"}
+VALIDATION     : ok
+TOOL RESULT E2 : +1-555-0163 is NOT a saved contact (this alone is not a warning sign).
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
+
+=== STEP 3 ===
+MODEL DECISION : ask_human_helper {"reason": "E2 shows comes from a number that is not in your contacts. We
+                 recommend alerting a trusted family member to help confirm if this is safe."}
+VALIDATION     : ok
+TOOL RESULT E3 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
+                 message was sent.
+NEXT OPTIONS   : search_scam_guide, done
+
+=== STEP 4 ===
+MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2"], "explanation": "We are not sure about
+                 this message. It asks you to call back and comes from a number not in your contacts. A
+                 trusted helper was alerted to help confirm."}
+GATE           : PASSED - evidence supports uncertain
+
+====================== SCAMSHIELD RESULT ======================
+VERDICT     : NOT SURE - ASK SOMEONE YOU TRUST
+STOP REASON : success   (steps: 4, rejected proposals: 0, gate rejections: 0)
+TOOLS USED  : extract_signals -> check_sender -> ask_human_helper
+EVIDENCE    :
+  E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: no known organization
+  E2 check_sender: +1-555-0163 is NOT a saved contact (this alone is not a warning sign).
+  E3 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
+      real message was sent.
+EXPLANATION (model):
+  We are not sure about this message. It asks you to call back and comes from a number not in your contacts. A
+  trusted helper was alerted to help confirm.
+WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
+              we have let Priya (daughter) know so they can help.
+HUMAN HELP  : offered by model, consent = True (simulated)
+TRACE       : evidence/harness/run_uncertain_2_trace.json
+===============================================================
