@@ -324,7 +324,71 @@ def test_uncertain_needs_help_offered_first():
         done('uncertain', ['E1', 'E2', 'E3'], 'We are not sure about this message. The number is not saved.'),
     ])
     assert record['final_label'] == 'uncertain' and record['stop_reason'] == 'success'
-    assert record['gate_rejections'] == 1 and record['helper_offered_by'] == 'model'
+    # The gate's rejection told the model to use ask_human_helper first.
+    assert record['gate_rejections'] == 1 and record['helper_offered_by'] == 'model_after_gate_hint'
+
+
+CONCERN_MESSAGE = {'sender': '+1-555-0177', 'text': 'Hi Grandma, can you help me with something this weekend?'}
+
+
+def test_model_concern_never_becomes_safe():
+    # The rules find nothing (saved contact, no signs), but the model says
+    # likely_scam twice. The gate rejects both (no recorded strong sign),
+    # yet the final answer must NOT be "safe": it becomes uncertain + help.
+    record = run(CONCERN_MESSAGE, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0177'),
+        done('likely_scam', ['E1', 'E2'], 'This looks like a scam. It feels odd.'),
+        done('likely_scam', ['E1', 'E2'], 'This looks like a scam. It still feels odd.'),
+    ])
+    assert record['supported_label'] == 'likely_safe'
+    assert record['stop_reason'] == 'gate_downgrade'
+    assert record['final_label'] == 'uncertain', record['final_label']
+    assert record['helper_offered'] is True and record['helper_offered_by'] == 'python'
+    assert record['model_concern_kept'] is True
+    assert 'something looked wrong' in record['explanation']
+    # A saved contact: the template must not say we could not confirm the sender.
+    assert 'could not confirm who' not in record['explanation']
+
+
+def test_model_uncertain_then_gave_up_never_safe():
+    # The model said uncertain without offering help, twice: gate downgrade.
+    record = run(CONCERN_MESSAGE, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0177'),
+        done('uncertain', ['E1', 'E2'], 'We are not sure about this message.'),
+        done('uncertain', ['E1', 'E2'], 'We are not sure about this message.'),
+    ])
+    assert record['final_label'] == 'uncertain' and record['helper_offered'] is True
+
+
+def test_rejected_scam_feedback_invites_uncertain_and_helper():
+    record = run(CONCERN_MESSAGE, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0177'),
+        done('likely_scam', ['E1', 'E2'], 'This looks like a scam. It feels odd.'),
+        action('ask_human_helper', reason='E2 is a saved contact but the request feels odd.'),
+        done('uncertain', ['E1', 'E2', 'E3'], 'We are not sure about this message. Please check with family.'),
+    ])
+    message = record['trace'][2]['observation']['message']
+    assert 'answer uncertain' in message and 'ask_human_helper' in message
+    assert record['final_label'] == 'uncertain' and record['stop_reason'] == 'success'
+    assert record['helper_offered_by'] == 'model_after_gate_hint'
+
+
+def test_helper_offered_by_model_on_its_own():
+    record, log = helper_run(agent.consent_no)
+    assert record['helper_offered_by'] == 'model'
+
+
+def test_uncertain_template_for_saved_contact():
+    context = agent.new_context(CONCERN_MESSAGE, rag.GUIDE_FILE, 'keyword')
+    context['sender_checked'] = True
+    context['sender_trusted'] = True
+    context['sender_name'] = 'Emma (granddaughter)'
+    text = agent.template_explanation('uncertain', context)
+    assert 'could not confirm who' not in text and 'could not be finished' in text
+    assert agent.check_readability(text, 'uncertain') == []
 
 
 def test_helper_reason_must_cite_evidence():
@@ -795,6 +859,11 @@ if __name__ == '__main__':
         ('trusted contact with bad link is not safe', test_trusted_contact_with_bad_link_not_safe),
         ('scam must mention strong warning signs', test_scam_without_mentioning_strong_sign_rejected),
         ('uncertain needs help offered first', test_uncertain_needs_help_offered_first),
+        ('model concern never becomes safe (gate downgrade -> uncertain)', test_model_concern_never_becomes_safe),
+        ('model uncertain then gate gave up -> never safe', test_model_uncertain_then_gave_up_never_safe),
+        ('rejected scam feedback invites uncertain + helper', test_rejected_scam_feedback_invites_uncertain_and_helper),
+        ('helper_offered_by = model when unprompted', test_helper_offered_by_model_on_its_own),
+        ('uncertain template for a saved contact', test_uncertain_template_for_saved_contact),
         ('helper reason must cite evidence', test_helper_reason_must_cite_evidence),
         ('ask_human_helper only after check_sender', test_helper_only_after_check_sender),
         ('routing table covers every action', test_routing_table_covers_every_action),

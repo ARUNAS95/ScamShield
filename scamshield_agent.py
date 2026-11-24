@@ -861,6 +861,8 @@ def run_requested_tool(name, argument, context, runtime):
                                 'facts': outcome['data'].get('facts', [])})
     context['calls_made'][call_key] = evidence_id
     context['tool_sequence'].append(name)
+    if name == 'ask_human_helper':
+        context['helper_offered_by'] = model_helper_source(context)
     return outcome, 'ran'
 
 
@@ -1060,7 +1062,7 @@ def check_verdict(argument, context):
             # Weak signs only: being more careful than the evidence requires is allowed.
             checks.append({'rule': 'uncertain is allowed (more careful is fine)', 'ok': True,
                            'detail': 'evidence supports ' + supported})
-        checks.append({'rule': 'help was offered before uncertain', 'ok': context['helper_offered'],
+        checks.append({'rule': 'help must be offered before uncertain', 'ok': context['helper_offered'],
                        'detail': 'ok' if context['helper_offered'] else help_first_note(context)})
 
     unmentioned = []
@@ -1160,11 +1162,19 @@ def template_explanation(label, context):
         else:
             text += 'We found no warning signs. '
     else:
-        if context['sender_trusted'] is not True:
+        if context['sender_trusted'] is True:
+            text += 'It comes from the number you saved for ' + str(context['sender_name']) + '. '
+        elif context['sender_checked']:
             text += 'It comes from a number that is not in your contacts. '
+        if context['model_concern_kept']:
+            text += 'Our helper thought something looked wrong, but the checks could not confirm it. '
         if context['tool_failures']:
             text += 'Part of our check did not work, so we could not finish. '
-        text += 'We could not confirm who really sent it. '
+        if context['sender_trusted'] is True:
+            if not context['model_concern_kept'] and not context['tool_failures']:
+                text += 'The check could not be finished. '
+        else:
+            text += 'We could not confirm who really sent it. '
     return text.strip()
 
 
@@ -1221,6 +1231,7 @@ def new_context(message, guide_path, search_mode):
         'tool_sequence': [], 'tool_failures': [], 'broken_tools': [], 'post_checks': [],
         'gate_rejections': 0, 'readability_rewrites': 0, 'rejected_proposals': 0,
         'consecutive_rejections': 0, 'gate_downgraded': False, 'model_labels': [],
+        'helper_hint_given': False, 'model_concern_kept': False,
     }
 
 
@@ -1448,8 +1459,17 @@ def handle_done(argument, context, record, verbose):
         hint = 'With the evidence so far, Python can support: ' + supported
         if supported == 'uncertain' and not context['helper_offered']:
             hint += ' (' + help_first_note(context) + ')'
+        if argument.get('label') == 'likely_scam' and supported != 'likely_scam':
+            # The model sees danger that the rules did not record. Python
+            # cannot confirm a scam without a recorded warning sign, but the
+            # model may say so honestly with "uncertain" and a human helper,
+            # instead of repeating likely_scam until the gate gives up.
+            hint += ('. If you still think something is wrong, answer uncertain and say what worries you'
+                     + ('' if context['helper_offered'] else ' (' + help_first_note(context) + ')'))
         feedback = result(False, 'GATE REJECTED your answer: ' + ' | '.join(failed) + '. ' + hint
                           + '. Fix it, or gather more evidence first.')
+        if 'ask_human_helper' in feedback['message']:
+            context['helper_hint_given'] = True
         record['observation'] = feedback   # the exact feedback the model gets
         return feedback, None
 
@@ -1472,6 +1492,22 @@ def handle_done(argument, context, record, verbose):
     record['state_update'] = 'Wording still too hard; Python used its plain-language template.'
     record['observation'] = 'READABILITY: still too hard after one rewrite; Python used its template.'
     return None, (argument['label'], template_explanation(argument['label'], context), 'template')
+
+
+def model_was_concerned(context):
+    """True when the model proposed likely_scam or uncertain at any point."""
+    for label in context['model_labels']:
+        if label in ('likely_scam', 'uncertain'):
+            return True
+    return False
+
+
+def model_helper_source(context):
+    """'model' when the model asked for human help on its own, or
+    'model_after_gate_hint' when a gate rejection had told it to."""
+    if context['helper_hint_given']:
+        return 'model_after_gate_hint'
+    return 'model'
 
 
 def choose_stop_reason(context, ended_by):
@@ -1502,6 +1538,13 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         label = supported_label(context)
         if label == 'likely_safe' and not context['gate_downgraded']:
             label = 'uncertain'   # never call a message safe after an unfinished run
+        if label == 'likely_safe' and model_was_concerned(context):
+            # Python can block a label the evidence does not support, but the
+            # model's concern can only make the answer MORE careful, never
+            # less: if the model ever said likely_scam or uncertain, the
+            # final answer is never "safe" (it becomes uncertain + human help).
+            label = 'uncertain'
+            context['model_concern_kept'] = True
         explanation = template_explanation(label, context)
         source = 'template'
 
@@ -1512,7 +1555,7 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         context['helper_offered_by'] = 'python'
         show(verbose, '\nPYTHON         : offered human help because the result is uncertain.')
     elif context['helper_offered'] and context['helper_offered_by'] is None:
-        context['helper_offered_by'] = 'model'
+        context['helper_offered_by'] = model_helper_source(context)
 
     if stop_reason == 'invalid_input':
         action_line = 'If you are unsure about a message, ask someone you trust.'
@@ -1550,6 +1593,7 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         'helper_offered': context['helper_offered'],
         'helper_offered_by': context['helper_offered_by'],
         'helper_consent': context['helper_consent'],
+        'model_concern_kept': context['model_concern_kept'],
         'trace': trace,
     }
     if trace_path is None:
