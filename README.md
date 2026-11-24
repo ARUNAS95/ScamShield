@@ -107,9 +107,9 @@ Each step, `qwen3:8b` (via Ollama, `think=false`, `format=json`) replies with on
 | `done {"label","evidence","explanation"}` | Not a tool: an allowed `done` goes to the verdict gate | After `extract_signals`. It goes through the same availability check as the tools, so a `done` before `extract_signals` is an ordinary rejected proposal (it counts toward `no_progress`) |
 
 There is no fixed order beyond `extract_signals` first. The model decides what to check and when it
-has enough evidence. In the live evaluation with metadata RAG it used **14 different tool sequences on
-25 messages**, from 2 to 5 tools (keyword mode: 15 sequences, 1 to 5 tools); for example, a crypto-ATM
-text needed only `extract_signals > search_scam_guide`, while a Medicare lookalike text used five tools.
+has enough evidence. In the live evaluation it used **12 different tool sequences on 25 messages** in each
+search mode, from 1 to 5 tools. For example, a crypto-ATM text needed only `extract_signals` (keyword
+run) or `extract_signals > search_scam_guide` (RAG run), while a Medicare lookalike text used five tools.
 
 **Routing is conditional, not a fixed graph.** `ROUTING` in `scamshield_agent.py` is a small table
 with one plain precondition per action (the right-hand column above), and `precondition_met()` checks
@@ -211,52 +211,62 @@ keyword search and records `keyword_fallback` in the trace.
   "not sure", not "scam". Not safe, but weaker than a careful human.
 - **`python3 harness_runs.py --runs 3 [--mode keyword]`:** every demo case repeated with the live model.
 
-### Results (live `qwen3:8b`)
+### Results (live `qwen3:8b`, regenerated after the round-1 fixes)
 
-Numbers below will be regenerated after the round-1 fixes.
+Labeled evaluation set and held-out set, one run per message (`evidence/eval/`):
 
-Labeled evaluation set, one run per message (`evidence/eval/`):
+| | Eval set, RAG | Eval set, keyword | Held-out, RAG | Held-out, keyword |
+|---|---|---|---|---|
+| Final label correct | **25/25** | **25/25** | **11/12** | **11/12** |
+| False "safe" answers | 0 of 19 | 0 of 19 | 0 of 9 | 0 of 9 |
+| False alarms | 0 of 6 | 0 of 6 | 0 of 3 | 0 of 3 |
+| Model's own last label correct | 96% | 96% | 92% | 83% |
+| Gate overrode the model | 1 | 1 | 2 | 3 |
+| Gate rejections (total) | 5 | 6 | 5 | 6 |
+| Average steps | 4.9 | 5.0 | 5.1 | 4.8 |
+| Distinct tool sequences | 12 | 12 | 7 | 10 |
 
-| | Metadata RAG | Keyword only |
-|---|---|---|
-| Final label correct | **25/25** | **25/25** |
-| False "safe" answers | 0 of 19 | 0 of 19 |
-| False alarms | 0 of 6 | 0 of 6 |
-| Model's own last label correct | 24/25 (96%) | 21/25 (84%) |
-| Gate overrode the model | 1 | 4 |
-| Average steps | 4.6 | 4.7 |
+The held-out miss in both modes is **H03** (a USPS text with `.shop`/`.online` links): the links are only
+"unknown", so the evidence supports "not sure" rather than "scam". It is not called safe.
 
-Guide retrieval, correct entry in the top 2: full message text 21/21 (metadata RAG) vs. 20/21
-(keyword, embeddings without metadata); the model's own queries 13/13 in every mode.
+Guide retrieval, correct entry in the top 2 (`evidence/eval/retrieval_results.json`,
+`model_query_retrieval_results.json`):
+
+| Query | Keyword | Embeddings, no metadata | Metadata RAG |
+|---|---|---|---|
+| Full message text (21 messages) | 20/21 | 20/21 | **21/21** |
+| The model's own search queries (16 searches) | 12/16 | 14/16 | **14/16** |
 
 Demo cases repeated 3 times in each search mode (`evidence/harness/`, 48 live runs):
 
-| Case | Expected | RAG runs correct | Keyword runs correct | Stop reasons | Tools the model chose |
+| Case | Expected | RAG correct | Keyword correct | Stop reasons | Tools the model chose (most common) |
 |---|---|---|---|---|---|
 | scam | likely scam | 3/3 | 3/3 | success | extract > check_link > lookup_official_contact > check_sender > search_guide |
-| ordinary | likely safe | 3/3 | 3/3 | success | extract > check_sender + lookup_official_contact (either order) |
+| ordinary | likely safe | 3/3 | 3/3 | success | extract > check_sender > lookup_official_contact |
 | ordinary_urgent | likely safe | 3/3 | 3/3 | success | extract > check_link > check_sender |
 | uncertain | not sure | 3/3 | 3/3 | success | extract > check_sender > search_guide > ask_human_helper |
-| injection ⚠️ | likely scam | 3/3 | 3/3 | 5 success, 1 gate_downgrade | extract > check_link > lookup_official_contact > check_sender > search_guide |
-| trusted_bad_link ⚠️ | likely scam | 3/3 | 3/3 | success | extract > check_link |
-| guide_missing ⚠️ | not sure | 3/3 | 3/3 | tool_failure | extract > check_sender > search_guide (FAILED) > ask_human_helper |
+| injection ⚠️ | likely scam | 3/3 | 3/3 | success | extract > check_link > lookup_official_contact > check_sender > search_guide |
+| trusted_bad_link ⚠️ | likely scam | 3/3 | 3/3 | success | extract > check_link > check_sender > search_guide |
+| guide_missing ⚠️ | not sure | 3/3 | 3/3 | 5 tool_failure, 1 success | extract > check_sender > search_guide (FAILED) > ask_human_helper |
 | empty ⚠️ | not sure | 3/3 | 3/3 | invalid_input | none |
 
-**48/48 runs ended with the expected label.** The model picks different tools for different
-messages (2 tools for the bad family link, 4 for the doctor's office, 5 for the Medicare scam) and is
-consistent across repeats of the same message. On the demo cases the two search modes behave the
-same, so these runs do not confirm the small RAG advantage seen on the evaluation set.
+**48/48 runs ended with the expected label.** In one RAG `guide_missing` run the model did not search
+the guide at all (extract > check_sender > ask_human_helper), so the tool failure did not happen in that
+run; the answer was still "not sure". The scam, injection and uncertain cases each used two different
+tool orders across repeats.
 
 ### What the results show (and do not show)
 
 - **Final answers are right because Python checks them.** On unknown-sender messages with no warning
-  signs, the model proposed "likely safe" in 5 of 10 evaluation runs; the gate rejected every one.
-- **The RAG gain is small and not proven.** Metadata helped on the hidden-injection message, and the
-  model's own answers were better with RAG (96% vs. 84%), but the difference is a few uncertain
-  messages and the data is small. The guide and test messages share vocabulary, so embeddings show
-  no measurable gain here.
-- **Limits of the evaluation:** the same person wrote the warning-sign rules, the guide and the test
-  messages, so the rules fit the data well. Real scam texts are more varied.
+  signs the model still sometimes proposes "likely safe" first (3 of 10 evaluation runs on the uncertain
+  messages); the gate rejected every one, and there were 0 false "safe" answers in all 122 live runs above.
+- **The rule fixes generalize only partly.** On the held-out set, written before the fixes and in different
+  wording, the rules alone went from 6/12 to 11/12; one scam (H03) is still only "not sure".
+- **The RAG gain is small.** With the model's own short queries, embeddings found the right guide entry
+  more often (14/16 vs. 12/16); with full message text the difference is one message. The final labels do
+  not depend on the search mode, because the guide never decides the verdict.
+- **Limits of the evaluation:** the same person wrote the warning-sign rules, the guide and both test sets.
+  Real scam texts are more varied.
 
 Development findings (what broke and what changed) are in [DEVLOG.md](DEVLOG.md).
 
