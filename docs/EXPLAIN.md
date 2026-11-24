@@ -141,19 +141,20 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
 12. **Why are all the commits on Nov 24?**
     Facts: `git log` shows every commit dated Nov 24 (the first at 09:17); `DEVLOG.md` has entries for
     Nov 22 (planning), Nov 23 (building) and Nov 24 (evaluation and review rounds).
-    *Draft answer, put it in your own words:* "I planned the project on Nov 22 and built the first version
+    *Answer:* "I planned the project on Nov 22 and built the first version
     locally on Nov 23 with the coding assistant. I created the GitHub repository on the morning of Nov 24
     and committed the existing work in logical pieces, then every review-and-fix round that day was
     committed as it happened. The commits were made by the coding assistant on my machine under my own git
     account, at my request, which is also why several have the same timestamp."
 
 13. **Which AI tools did you use?**
-    *Draft answer, put it in your own words:* "I used Claude Code. I chose the project, the scope and the
+    *Answer:* "I used Claude Code. I chose the project, the scope and the
     design (the plain-Python loop from class, the verdict gate, a metadata search over the scam guide) and made
     the key calls during the work: no LangGraph, a held-out test written before rule changes, honest
     reporting of failures, and a 614-message test written by a separate agent that never saw the rules.
     The assistant wrote most of the code, tests and documentation. I set up a loop where critic agents
-    graded the project against the rubric and a work agent fixed what they found, over five rounds. I
+    graded the project against the rubric and a work agent fixed what they found, over five rounds, and
+    when a review showed the project was getting over-complicated, I decided to cut the extras. I
     checked the results by running the tests and the live Ollama evaluations, and every number in the
     report is generated from saved evidence files."
 
