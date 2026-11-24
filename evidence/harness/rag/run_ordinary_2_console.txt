@@ -1,0 +1,36 @@
+CASE ordinary  RUN 2  MODE rag
+SENDER : +1-555-0142
+MESSAGE: Main Street Pharmacy: Your prescription refill is ready for pickup at our Elm Street store. Questions? Call us at 1-555-0142.
+
+=== STEP 1 ===
+MODEL DECISION : extract_signals {}
+VALIDATION     : ok
+TOOL RESULT E1 : 0 strong, 0 weak warning signs; 0 link(s); claims to be: Main Street Pharmacy
+
+=== STEP 2 ===
+MODEL DECISION : lookup_official_contact {"org": "Main Street Pharmacy"}
+VALIDATION     : ok
+TOOL RESULT E2 : Official contact for Main Street Pharmacy (from our trusted list): 1-555-0142
+
+=== STEP 3 ===
+MODEL DECISION : check_sender {"sender": "1-555-0142"}
+VALIDATION     : ok
+TOOL RESULT E3 : +1-555-0142 is a saved contact: Main Street Pharmacy.
+
+=== STEP 4 ===
+MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message looks safe. It comes from a saved contact. The phone number matches the of...
+GATE           : PASSED - evidence supports likely_safe
+
+====================== SCAMSHIELD RESULT ======================
+VERDICT     : LIKELY SAFE
+STOP REASON : success   (steps: 4, rejected proposals: 0, gate rejections: 0)
+TOOLS USED  : extract_signals -> lookup_official_contact -> check_sender
+EVIDENCE    :
+  E1 extract_signals: 0 strong, 0 weak warning signs; 0 link(s); claims to be: Main Street Pharmacy
+  E2 lookup_official_contact: Official contact for Main Street Pharmacy (from our trusted list): 1-555-0142
+  E3 check_sender: +1-555-0142 is a saved contact: Main Street Pharmacy.
+EXPLANATION (model):
+  This message looks safe. It comes from a saved contact. The phone number matches the official contact for Main Street Pharmacy. There are no warning signs.
+WHAT TO DO  : You can reply as usual. If anything feels wrong, call Main Street Pharmacy on the number you saved.
+TRACE       : evidence/harness/rag/run_ordinary_2_trace.json
+===============================================================
