@@ -293,6 +293,16 @@ def parse_rules(text):
             'false_alarm': int(flags.group(2)) if flags else None, 'wrong': wrong}
 
 
+def parse_break_gate(text):
+    """'BREAK-GATE EXPERIMENT: 19 of 80 tests failed ...' -> {'failed': 19, 'total': 80}"""
+    if text is None:
+        return None
+    found = re.search(r'(\d+) of (\d+) tests failed with the broken gate', text)
+    if not found:
+        return None
+    return {'failed': int(found.group(1)), 'total': int(found.group(2))}
+
+
 # ------------------------------------------------------------------------
 # Repeated live runs of the demo cases (harness)
 # ------------------------------------------------------------------------
@@ -721,6 +731,9 @@ def main():
     model_queries = read_json(EVAL_DIR + 'model_query_retrieval_results.json')
     rules_before = parse_rules(read_text(EVAL_DIR + 'holdout_rules_BEFORE.txt'))
     rules_after = parse_rules(read_text(EVAL_DIR + 'holdout_rules_AFTER.txt'))
+    holdout2_before = parse_rules(read_text(EVAL_DIR + 'holdout2_rules_BEFORE.txt'))
+    holdout2_after = parse_rules(read_text(EVAL_DIR + 'holdout2_rules_AFTER.txt'))
+    break_gate = parse_break_gate(read_text(EVAL_DIR + 'break_gate_tests.txt'))
     rag_runs = harness_numbers(read_json(HARNESS_DIR + 'rag/results.json'))
     kw_runs = harness_numbers(read_json(HARNESS_DIR + 'keyword/results.json'))
 
@@ -758,6 +771,26 @@ def main():
         for key in ['RULES_BEFORE', 'RULES_AFTER', 'RULES_BEFORE_FALSE_SAFE', 'RULES_AFTER_FALSE_SAFE']:
             fill(values, key, PENDING)
         fill(values, 'RULES_AFTER_WRONG', '<li>' + PENDING + '</li>')
+
+    # rules-only held-out set 2 (written before the round-3 rule changes)
+    if holdout2_before and holdout2_after:
+        fill(values, 'HOLDOUT2_BEFORE', e(slash(holdout2_before['correct'], holdout2_before['total'])))
+        fill(values, 'HOLDOUT2_AFTER', e(slash(holdout2_after['correct'], holdout2_after['total'])))
+        fill(values, 'HOLDOUT2_BEFORE_FALSE_SAFE', e(holdout2_before['false_safe']))
+        fill(values, 'HOLDOUT2_AFTER_FALSE_SAFE', e(holdout2_after['false_safe']))
+        wrong = ''
+        for item in holdout2_after['wrong']:
+            wrong += ('<li><b>' + e(item['id']) + '</b>: expected ' + e(item['expected']) + ', the evidence supports '
+                      + e(item['supported']) + ' (' + e(item['evidence']) + ')</li>')
+        fill(values, 'HOLDOUT2_AFTER_WRONG', wrong or '<li>none</li>')
+    else:
+        for key in ['HOLDOUT2_BEFORE', 'HOLDOUT2_AFTER', 'HOLDOUT2_BEFORE_FALSE_SAFE', 'HOLDOUT2_AFTER_FALSE_SAFE']:
+            fill(values, key, PENDING)
+        fill(values, 'HOLDOUT2_AFTER_WRONG', '<li>' + PENDING + '</li>')
+    if break_gate:
+        fill(values, 'BREAK_GATE', e('%d of %d' % (break_gate['failed'], break_gate['total'])))
+    else:
+        fill(values, 'BREAK_GATE', PENDING)
 
     # retrieval
     rows = []
@@ -849,6 +882,10 @@ def main():
         'rules_before': slash(rules_before['correct'], rules_before['total']) if rules_before else PENDING,
         'rules_after': slash(rules_after['correct'], rules_after['total']) if rules_after else PENDING,
         'rules_after_wrong': rules_after['wrong'] if rules_after else [],
+        'holdout2_before': slash(holdout2_before['correct'], holdout2_before['total']) if holdout2_before else PENDING,
+        'holdout2_after': slash(holdout2_after['correct'], holdout2_after['total']) if holdout2_after else PENDING,
+        'holdout2_after_wrong': holdout2_after['wrong'] if holdout2_after else [],
+        'break_gate': ('%d of %d' % (break_gate['failed'], break_gate['total'])) if break_gate else PENDING,
         'harness_total': slash(total_correct, total_runs) if total_runs else PENDING,
         'harness_false_safe': (rag_runs['false_safe'] + kw_runs['false_safe']) if total_runs else PENDING,
         'injection_runs': injection_runs, 'injection_fooled': rag_runs['model_fooled_injection'] + kw_runs['model_fooled_injection'],
