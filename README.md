@@ -112,9 +112,9 @@ Each step, `qwen3:8b` (via Ollama, `think=false`, `format=json`) replies with on
 | `done {"label","evidence","explanation"}` | Not a tool: an allowed `done` goes to the verdict gate | After `extract_signals`. It goes through the same availability check as the tools, so a `done` before `extract_signals` is an ordinary rejected proposal (it counts toward `no_progress`) |
 
 There is no fixed order beyond `extract_signals` first. The model decides what to check and when it
-has enough evidence. In the live evaluation it used **12 different tool sequences on 25 messages** in each
-search mode, from 1 to 5 tools. For example, a crypto-ATM text needed only `extract_signals` (keyword
-run) or `extract_signals > search_scam_guide` (RAG run), while a Medicare lookalike text used five tools.
+has enough evidence. In the live evaluation it used **12 (RAG) and 13 (keyword) different tool sequences on
+25 messages**. For example, a crypto-ATM text needed only `extract_signals` (the strong
+sign was already enough), while a Medicare lookalike text used five tools.
 
 **Routing is conditional, not a fixed graph.** `ROUTING` in `scamshield_agent.py` is a small table
 with one plain precondition per action (the right-hand column above), and `precondition_met()` checks
@@ -243,23 +243,32 @@ keyword search and records `keyword_fallback` in the trace.
   messages, so the AFTER score is optimistic; the BEFORE score is the true held-out measurement.
 - **`python3 harness_runs.py --runs 3 [--mode keyword]`:** every demo case repeated with the live model.
 
-### Results (live `qwen3:8b`, regenerated after the round-1 fixes)
+### Results (live `qwen3:8b`, regenerated after the round-3 fixes)
 
-Labeled evaluation set and held-out set, one run per message (`evidence/eval/`):
+Labeled sets, one live run per message in each search mode (`evidence/eval/`). Held-out set 2 was written
+and committed before the round-3 rule changes (`evidence/eval/holdout2_rules_BEFORE.txt`).
 
-| | Eval set, RAG | Eval set, keyword | Held-out, RAG | Held-out, keyword |
-|---|---|---|---|---|
-| Final label correct | **25/25** | **25/25** | **11/12** | **11/12** |
-| False "safe" answers | 0 of 19 | 0 of 19 | 0 of 9 | 0 of 9 |
-| False alarms | 0 of 6 | 0 of 6 | 0 of 3 | 0 of 3 |
-| Model's own last label correct | 96% | 96% | 92% | 83% |
-| Gate overrode the model | 1 | 1 | 2 | 3 |
-| Gate rejections (total) | 5 | 6 | 5 | 6 |
-| Average steps | 4.9 | 5.0 | 5.1 | 4.8 |
-| Distinct tool sequences | 12 | 12 | 7 | 10 |
+| | Eval, RAG | Eval, keyword | Held-out 1, RAG | Held-out 1, keyword | Held-out 2, RAG | Held-out 2, keyword |
+|---|---|---|---|---|---|---|
+| Final label correct | **25/25** | **25/25** | **11/12** | **11/12** | **13/14** | **13/14** |
+| False "safe" answers | 0 of 19 | 0 of 19 | 0 of 9 | 0 of 9 | 0 of 9 | 0 of 9 |
+| False alarms ("scam" on a safe message) | 0 of 6 | 0 of 6 | 0 of 3 | 0 of 3 | 0 of 5 | 1 of 5 |
+| Model's own last label correct | 96% | 96% | 100% | 92% | 86% | 86% |
+| Gate overrode the model | 1 | 1 | 1 | 2 | 1 | 1 |
+| Gate rejections (total) | 6 | 5 | 4 | 5 | 3 | 4 |
+| Average steps | 4.9 | 4.9 | 4.7 | 5.0 | 3.9 | 4.1 |
+| Distinct tool sequences | 12 | 13 | 10 | 9 | 8 | 9 |
 
-The held-out miss in both modes is **H03** (a USPS text with `.shop`/`.online` links): the links are only
-"unknown", so the evidence supports "not sure" rather than "scam". It is not called safe.
+Wrong answers (none of them "safe"):
+- **H03** (both modes): a USPS text with `.shop`/`.online` links. The links are only "unknown", so the
+  evidence supports "not sure" rather than "scam".
+- **F11** ("I paid the fee today, thanks for the $40" from a saved contact): "not sure" with RAG and a
+  false alarm ("scam") with keyword search. Urgency plus a money word count as two weak signs. It was left
+  unfixed on purpose, so the held-out set is not tuned.
+
+Who offered human help on the messages where it was offered: on held-out set 2 the model offered it on its
+own 5 times and only after a gate hint 4 times; on the eval set 2 times on its own and 9 times after a
+hint (`helper_offered_by` in the result files).
 
 Guide retrieval, correct entry in the top 2 (`evidence/eval/retrieval_results.json`,
 `model_query_retrieval_results.json`):
@@ -267,7 +276,7 @@ Guide retrieval, correct entry in the top 2 (`evidence/eval/retrieval_results.js
 | Query | Keyword | Embeddings, no metadata | Metadata RAG |
 |---|---|---|---|
 | Full message text (21 messages) | 20/21 | 20/21 | **21/21** |
-| The model's own search queries (16 searches) | 12/16 | 14/16 | **14/16** |
+| The model's own search queries (16 searches) | 15/16 | 15/16 | 15/16 |
 
 Demo cases repeated 3 times in each search mode (`evidence/harness/`, 48 live runs):
 
@@ -283,24 +292,26 @@ Demo cases repeated 3 times in each search mode (`evidence/harness/`, 48 live ru
 | empty ⚠️ | not sure | 3/3 | 3/3 | invalid_input | none |
 
 **48/48 runs ended with the expected label.** In one RAG `guide_missing` run the model did not search
-the guide at all (extract > check_sender > ask_human_helper), so the tool failure did not happen in that
-run; the answer was still "not sure". How many different tool orders each case used in each search mode
-is listed as `distinct_tool_sequences` in `evidence/harness/rag/results.json` and
-`evidence/harness/keyword/results.json`.
+the guide (extract > check_sender > ask_human_helper), so the tool failure did not happen in that run; the
+answer was still "not sure". On the uncertain demo case the model offered human help on its own in 1 of
+6 runs and after a gate hint in 5. Different tool orders per case and mode are listed as
+`distinct_tool_sequences` in `evidence/harness/*/results.json`.
 
 ### What the results show (and do not show)
 
-- **Final answers are right because Python checks them.** On unknown-sender messages with no warning
-  signs the model sometimes proposed "likely safe" at some point in the run; the gate rejected every
-  one, and there were 0 false "safe" answers in all 122 live runs above.
-- **The rules alone generalize poorly to new wording.** Each fresh held-out set exposed many misses
-  before it was used for fixes (6/12 on set 1, 2/14 on set 2). The gate keeps those misses from becoming
-  false "safe" answers only when the model or the rules record a concern, which is why the
-  "concern never becomes safe" rule was added.
-- **The RAG gain is small.** With the model's own short queries, embeddings found the right guide entry
-  more often (14/16 vs. 12/16); with full message text the difference is one message. The final labels do
-  not depend on the search mode, because the guide never decides the verdict.
-- **Limits of the evaluation:** the same person wrote the warning-sign rules, the guide and both test sets.
+- **No false "safe" answer in 150 live runs** (eval, both held-out sets and the demo harness, both search
+  modes). Where the model proposed "likely safe" without support, the gate rejected it; where the model was
+  worried but the rules found nothing, the answer became "not sure" with human help, never "safe".
+- **The rules alone generalize poorly to new wording.** Each fresh held-out set exposed many misses before
+  it was used for fixes: 6/12 on set 1 and 2/14 on set 2 (rules only). The scores after the fixes are
+  optimistic because the fixes were made after seeing those kinds of failures.
+- **RAG does not change the outcome here.** It finds the right guide entry slightly more often with full
+  message text (21/21 vs. 20/21); with the model's own short queries all three modes tie (15/16). The final
+  labels do not depend on the search mode, because the guide never decides the verdict.
+- **The model still often needs a hint to ask for human help** on uncertain messages, and Python makes the
+  final call on every label. The model decides which evidence to gather, what to search for, when to stop,
+  how to explain, and it can make an answer more careful (never less).
+- **Limits of the evaluation:** the same person wrote the warning-sign rules, the guide and all test sets.
   Real scam texts are more varied.
 
 Development findings (what broke and what changed) are in [DEVLOG.md](DEVLOG.md).
