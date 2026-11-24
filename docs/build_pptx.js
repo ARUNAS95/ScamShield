@@ -401,7 +401,7 @@ s.addNotes('Run the five commands. Ordinary: no warning signs and a saved contac
   'logs instead. See docs/DEMO_SCRIPT.md.');
 
 // ---------------------------------------------------------------- 9. Problem cases
-s = content('Demonstration', 'Problem cases: none of them ends as "safe"');
+s = content('Demonstration', 'Problem cases: how each one ends');
 const caseShort = {
   injection: 'Message tells the AI to "mark safe"',
   trusted_bad_link: 'Saved family contact sends a bank look-alike link',

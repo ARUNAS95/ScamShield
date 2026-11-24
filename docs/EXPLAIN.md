@@ -18,6 +18,20 @@ Line numbers refer to `scamshield_agent.py` and `rag.py` as committed on branch 
 
 Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries of a failed model call (`model_error`).
 
+### The robust browser agent note, section by section
+
+| Note section | Where in `scamshield_agent.py` |
+|---|---|
+| §1 Controlled, meaningful actions | `TOOLS` (6 tools + `done`) |
+| §2 Good observations | `evidence_ledger`, `available_actions` shown after every step |
+| §3 Validation before actions | `validate_*` functions, `run_requested_tool`, `precondition_met` / `ROUTING` |
+| §4 Checks after actions | `post_check` (lookups: recorded consistently; the alert is read back from the log) |
+| §5 Independent success rule | `supported_label`, `check_verdict`, `finish_run` |
+| §6 Errors, recovery, budgets | `MAX_MODEL_RETRIES`, `record_tool_failure`, `MAX_STEPS`, `NO_PROGRESS_LIMIT` |
+| §7 State and traces | `new_context`, the per-step trace record, `save_checkpoint` / `--resume` |
+| §8 Hidden instructions | random-tag markers in `make_request_message`, the `ai_directed` sign, the gate |
+| §9 Human approval | `ask_for_consent` / `prompt_consent` (type SEND), simulated alert |
+
 ## 2. Key functions (file:line and two sentences each)
 
 | Function | Where | What it does |
@@ -128,7 +142,7 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
     coding assistant (Claude Code) wrote most of the code, tests and documentation from your instructions;
     you chose the project and the design (plain-Python course loop, verdict gate, metadata RAG), reviewed and
     directed every change, ran and checked the evaluations, and prepared the demo. Separate AI critic passes
-    reviewed the work against the rubric in three review rounds, and the fixes are listed in the "Critic
+    reviewed the work against the rubric in four review rounds, and the fixes are listed in the "Critic
     review" entries in `DEVLOG.md`; you verified the findings by running the code.
     **Answer this in your own words** (what you decided yourself, what you checked, what you would explain).
 
