@@ -5,7 +5,7 @@ MESSAGE: Main Street Pharmacy: Please confirm your refill by Friday. Reply YES o
 === STEP 1 ===
 MODEL DECISION : extract_signals {}
 VALIDATION     : ok
-TOOL RESULT E1 : 0 strong, 1 weak warning signs; 1 link(s); claims to be: Main Street Pharmacy
+TOOL RESULT E1 : strong: none; weak: urgency; 1 link(s); claims to be: Main Street Pharmacy
 
 === STEP 2 ===
 MODEL DECISION : check_link {"url": "mainstreetpharmacy.example"}
@@ -18,7 +18,9 @@ VALIDATION     : ok
 TOOL RESULT E3 : +1-555-0142 is a saved contact: Main Street Pharmacy.
 
 === STEP 4 ===
-MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message looks safe. It comes from a saved contact. The link is official. It only p...
+MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message
+                 looks safe. It comes from a saved contact. The link is official. It asks you to act fast, but
+                 that's not a strong warning sign."}
 GATE           : PASSED - evidence supports likely_safe
 
 ====================== SCAMSHIELD RESULT ======================
@@ -26,11 +28,13 @@ VERDICT     : LIKELY SAFE
 STOP REASON : success   (steps: 4, rejected proposals: 0, gate rejections: 0)
 TOOLS USED  : extract_signals -> check_link -> check_sender
 EVIDENCE    :
-  E1 extract_signals: 0 strong, 1 weak warning signs; 1 link(s); claims to be: Main Street Pharmacy
+  E1 extract_signals: strong: none; weak: urgency; 1 link(s); claims to be: Main Street Pharmacy
   E2 check_link: mainstreetpharmacy.example is the official website of Main Street Pharmacy.
   E3 check_sender: +1-555-0142 is a saved contact: Main Street Pharmacy.
 EXPLANATION (model):
-  This message looks safe. It comes from a saved contact. The link is official. It only pushes you to act fast, which is a weak warning sign.
-WHAT TO DO  : You can reply as usual. If anything feels wrong, call Main Street Pharmacy on the number you saved.
+  This message looks safe. It comes from a saved contact. The link is official. It asks you to act fast, but
+  that's not a strong warning sign.
+WHAT TO DO  : You can reply as usual. If anything feels wrong, call Main Street Pharmacy on the number you
+              saved.
 TRACE       : evidence/harness/rag/run_ordinary_urgent_3_trace.json
 ===============================================================

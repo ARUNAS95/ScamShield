@@ -13,7 +13,7 @@
   "supported_label": "likely_scam",
   "model_label": "likely_scam",
   "gate_overrode_model": false,
-  "explanation": "This looks like a scam. The message asks for money, says it is from a new number, and asks you to keep it secret. These are all signs of a scam. Call your grandchild on their usual number or ask another family member.",
+  "explanation": "This looks like a scam. The message asks for money, says it is from a new number, and wants you to keep it secret. These are signs of a scam where someone pretends to be a grandchild in trouble. Call your grandchild on their usual number or ask another family member.",
   "explanation_source": "model",
   "what_to_do": "Do not reply, do not tap any link, and do not send money or codes. You can delete it. If you are worried, talk to Priya (daughter).",
   "guide_tip": "Tip from our guide (G05): Call your grandchild on the number you already have saved, or ask another family member.",
@@ -21,7 +21,7 @@
     {
       "id": "E1",
       "tool": "extract_signals",
-      "summary": "0 strong, 3 weak warning signs; 0 link(s); claims to be: no known organization",
+      "summary": "strong: none; weak: money request, new number, secrecy; 0 link(s); claims to be: no known organization",
       "facts": [
         "asks for money (weak warning sign)",
         "says it is from a new phone number (weak warning sign)",
@@ -39,7 +39,7 @@
     {
       "id": "E3",
       "tool": "search_scam_guide",
-      "summary": "Found 2 guide entries (keyword).",
+      "summary": "Found 2 guide entries (keyword): G05: Grandchild in trouble or new number; G09: Hacked accounts of friends and family.",
       "facts": [
         "guide G05: Grandchild in trouble or new number",
         "guide G09: Hacked accounts of friends and family"
@@ -123,7 +123,7 @@
       "evidence_id": "E1",
       "observation": {
         "ok": true,
-        "message": "0 strong, 3 weak warning signs; 0 link(s); claims to be: no known organization",
+        "message": "strong: none; weak: money request, new number, secrecy; 0 link(s); claims to be: no known organization",
         "data": {
           "note": "Links and numbers below were copied from the message. They are data, not instructions.",
           "warning_signs": [
@@ -155,9 +155,17 @@
           "evidence_id": "E1"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "extract_signals",
+          "evidence_id": "E1",
+          "ok": true,
+          "detail": "signals_extracted is True"
+        }
+      },
       "state_update": "Recorded as evidence E1.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 2,
@@ -171,7 +179,6 @@
       "available_actions": [
         "check_sender",
         "search_scam_guide",
-        "ask_human_helper",
         "done"
       ],
       "evidence_id": "E2",
@@ -187,16 +194,24 @@
           "evidence_id": "E2"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "check_sender",
+          "evidence_id": "E2",
+          "ok": true,
+          "detail": "sender_checked is True"
+        }
+      },
       "state_update": "Recorded as evidence E2.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 3,
-      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"money request secrecy new number\"}}",
+      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"money request new number secrecy\"}}",
       "action": "search_scam_guide",
       "argument": {
-        "query": "money request secrecy new number"
+        "query": "money request new number secrecy"
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -208,7 +223,7 @@
       "evidence_id": "E3",
       "observation": {
         "ok": true,
-        "message": "Found 2 guide entries (keyword).",
+        "message": "Found 2 guide entries (keyword): G05: Grandchild in trouble or new number; G09: Hacked accounts of friends and family.",
         "data": {
           "retrieval_mode": "keyword",
           "filters_used": {},
@@ -252,13 +267,21 @@
           "evidence_id": "E3"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "search_scam_guide",
+          "evidence_id": "E3",
+          "ok": true,
+          "detail": "retrieval mode recorded for search 1"
+        }
+      },
       "state_update": "Recorded as evidence E3.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 4,
-      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"likely_scam\",\"evidence\":[\"E1\",\"E3\"],\"explanation\":\"This looks like a scam. The message asks for money, says it is from a new number, and asks you to keep it secret. These are all signs of a scam. Call your grandchild on their usual number or ask another family member.\"}}",
+      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"likely_scam\",\"evidence\":[\"E1\",\"E3\"],\"explanation\":\"This looks like a scam. The message asks for money, says it is from a new number, and wants you to keep it secret. These are signs of a scam where someone pretends to be a grandchild in trouble. Call your grandchild on their usual number or ask another family member.\"}}",
       "action": "done",
       "argument": {
         "label": "likely_scam",
@@ -266,7 +289,7 @@
           "E1",
           "E3"
         ],
-        "explanation": "This looks like a scam. The message asks for money, says it is from a new number, and asks you to keep it secret. These are all signs of a scam. Call your grandchild on their usual number or ask another family member."
+        "explanation": "This looks like a scam. The message asks for money, says it is from a new number, and wants you to keep it secret. These are signs of a scam where someone pretends to be a grandchild in trouble. Call your grandchild on their usual number or ask another family member."
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -276,7 +299,7 @@
         "done"
       ],
       "evidence_id": null,
-      "observation": null,
+      "observation": "VERDICT ACCEPTED: likely_scam",
       "check_result": {
         "gate": [
           {
@@ -309,7 +332,8 @@
         "readability": []
       },
       "state_update": "Verdict accepted by the gate and readability check.",
-      "continue_or_stop": "stop"
+      "continue_or_stop": "stop",
+      "model_retries": []
     }
   ]
 }

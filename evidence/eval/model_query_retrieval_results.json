@@ -1,19 +1,19 @@
 {
   "summary": {
     "keyword": {
-      "hits": 13,
-      "searches": 13,
-      "hit_at_2": 1.0
+      "hits": 12,
+      "searches": 16,
+      "hit_at_2": 0.75
     },
     "rag_no_metadata": {
-      "hits": 13,
-      "searches": 13,
-      "hit_at_2": 1.0
+      "hits": 14,
+      "searches": 16,
+      "hit_at_2": 0.875
     },
     "rag": {
-      "hits": 13,
-      "searches": 13,
-      "hit_at_2": 1.0
+      "hits": 14,
+      "searches": 16,
+      "hit_at_2": 0.875
     }
   },
   "rows": [
@@ -49,94 +49,94 @@
     },
     {
       "id": "S02",
-      "query": "irs tax scam",
+      "query": "IRS final notice pay taxes or be arrested",
       "filters": {},
       "expected_guide": [
         "G11"
       ],
       "keyword": {
         "top2": [
-          "G11",
+          "G20",
           "G01"
         ],
-        "hit": true
+        "hit": false
       },
       "rag_no_metadata": {
         "top2": [
-          "G11",
-          "G01"
+          "G20",
+          "G11"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
-          "G11",
-          "G01"
+          "G20",
+          "G11"
         ],
         "hit": true
       }
     },
     {
       "id": "S03",
-      "query": "Social Security number suspended",
+      "query": "ssn suspension scam",
       "filters": {},
       "expected_guide": [
         "G12"
       ],
       "keyword": {
         "top2": [
-          "G12",
-          "G01"
+          "G02",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       },
       "rag_no_metadata": {
         "top2": [
           "G12",
-          "G06"
+          "G02"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
           "G12",
-          "G01"
+          "G05"
         ],
         "hit": true
       }
     },
     {
       "id": "S04",
-      "query": "USPS parcel fee link",
+      "query": "money request from lookalike website",
       "filters": {},
       "expected_guide": [
         "G04"
       ],
       "keyword": {
         "top2": [
-          "G04",
-          "G07"
+          "G03",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       },
       "rag_no_metadata": {
         "top2": [
-          "G04",
-          "G07"
+          "G03",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       },
       "rag": {
         "top2": [
-          "G04",
-          "G09"
+          "G03",
+          "G05"
         ],
-        "hit": true
+        "hit": false
       }
     },
     {
       "id": "S05",
-      "query": "asks for verification code and money",
+      "query": "code request and money request",
       "filters": {},
       "expected_guide": [
         "G19",
@@ -144,22 +144,80 @@
       ],
       "keyword": {
         "top2": [
-          "G06",
-          "G01"
+          "G05",
+          "G09"
+        ],
+        "hit": false
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G05",
+          "G09"
+        ],
+        "hit": false
+      },
+      "rag": {
+        "top2": [
+          "G05",
+          "G09"
+        ],
+        "hit": false
+      }
+    },
+    {
+      "id": "S06",
+      "query": "bank account locked link",
+      "filters": {},
+      "expected_guide": [
+        "G10"
+      ],
+      "keyword": {
+        "top2": [
+          "G10",
+          "G06"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G06",
-          "G01"
+          "G10",
+          "G06"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
-          "G06",
+          "G10",
           "G09"
+        ],
+        "hit": true
+      }
+    },
+    {
+      "id": "S07",
+      "query": "prize money scams",
+      "filters": {},
+      "expected_guide": [
+        "G07"
+      ],
+      "keyword": {
+        "top2": [
+          "G07",
+          "G05"
+        ],
+        "hit": true
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G07",
+          "G05"
+        ],
+        "hit": true
+      },
+      "rag": {
+        "top2": [
+          "G07",
+          "G05"
         ],
         "hit": true
       }
@@ -224,7 +282,7 @@
     },
     {
       "id": "S10",
-      "query": "urgent package delivery reschedule",
+      "query": "urgent package delivery link",
       "filters": {},
       "expected_guide": [
         "G13",
@@ -232,7 +290,8 @@
       ],
       "keyword": {
         "top2": [
-          "G04"
+          "G04",
+          "G02"
         ],
         "hit": true
       },
@@ -246,14 +305,14 @@
       "rag": {
         "top2": [
           "G04",
-          "G19"
+          "G13"
         ],
         "hit": true
       }
     },
     {
       "id": "S11",
-      "query": "medicare lookalike link",
+      "query": "medicare scam link",
       "filters": {},
       "expected_guide": [
         "G02",
@@ -262,21 +321,21 @@
       "keyword": {
         "top2": [
           "G02",
-          "G03"
+          "G01"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
           "G02",
-          "G03"
+          "G01"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
           "G02",
-          "G03"
+          "G09"
         ],
         "hit": true
       }
@@ -313,8 +372,38 @@
       }
     },
     {
+      "id": "I01",
+      "query": "First City Bank link scam",
+      "filters": {},
+      "expected_guide": [
+        "G14",
+        "G10"
+      ],
+      "keyword": {
+        "top2": [
+          "G10",
+          "G18"
+        ],
+        "hit": true
+      },
+      "rag_no_metadata": {
+        "top2": [
+          "G10",
+          "G18"
+        ],
+        "hit": true
+      },
+      "rag": {
+        "top2": [
+          "G10",
+          "G18"
+        ],
+        "hit": true
+      }
+    },
+    {
       "id": "I02",
-      "query": "Social Security calls about benefits stopping",
+      "query": "Social Security benefits stop unless you call",
       "filters": {},
       "expected_guide": [
         "G14",
@@ -344,7 +433,7 @@
     },
     {
       "id": "U01",
-      "query": "dental office calls asking to confirm appointments",
+      "query": "dental office calls to confirm appointment",
       "filters": {},
       "expected_guide": [
         "G17",
@@ -366,15 +455,15 @@
       },
       "rag": {
         "top2": [
-          "G15",
-          "G17"
+          "G17",
+          "G15"
         ],
         "hit": true
       }
     },
     {
       "id": "U05",
-      "query": "asks to call back",
+      "query": "asks you to call back",
       "filters": {},
       "expected_guide": [
         "G15",

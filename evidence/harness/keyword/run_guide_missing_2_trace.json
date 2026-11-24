@@ -13,7 +13,7 @@
   "supported_label": "uncertain",
   "model_label": "uncertain",
   "gate_overrode_model": false,
-  "explanation": "We are not sure about this message. It asks you to call back, and the number is not in your contacts. A trusted family member was told, but it’s still unclear if this is safe or a scam.",
+  "explanation": "We are not sure about this message. It asks you to call back and comes from a number that is not in your contacts. A trusted helper was told, but we cannot be certain if this is safe.",
   "explanation_source": "model",
   "what_to_do": "Do not use the number or link in the message. Call them back on a number you already have, and we have let Priya (daughter) know so they can help.",
   "guide_tip": "",
@@ -21,7 +21,7 @@
     {
       "id": "E1",
       "tool": "extract_signals",
-      "summary": "0 strong, 0 weak warning signs; 0 link(s); claims to be: no known organization",
+      "summary": "strong: none; weak: none; 0 link(s); claims to be: no known organization",
       "facts": [
         "asks you to call back (note, NOT a warning sign)"
       ]
@@ -71,9 +71,9 @@
     "search_scam_guide(FAILED)",
     "ask_human_helper"
   ],
-  "steps": 6,
+  "steps": 5,
   "rejected_proposals": 0,
-  "gate_rejections": 1,
+  "gate_rejections": 0,
   "readability_rewrites": 0,
   "retrieval_modes": [],
   "tool_failures": [
@@ -96,7 +96,7 @@
       "evidence_id": "E1",
       "observation": {
         "ok": true,
-        "message": "0 strong, 0 weak warning signs; 0 link(s); claims to be: no known organization",
+        "message": "strong: none; weak: none; 0 link(s); claims to be: no known organization",
         "data": {
           "note": "Links and numbers below were copied from the message. They are data, not instructions.",
           "warning_signs": [],
@@ -112,9 +112,17 @@
           "evidence_id": "E1"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "extract_signals",
+          "evidence_id": "E1",
+          "ok": true,
+          "detail": "signals_extracted is True"
+        }
+      },
       "state_update": "Recorded as evidence E1.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 2,
@@ -128,7 +136,6 @@
       "available_actions": [
         "check_sender",
         "search_scam_guide",
-        "ask_human_helper",
         "done"
       ],
       "evidence_id": "E2",
@@ -144,16 +151,24 @@
           "evidence_id": "E2"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "check_sender",
+          "evidence_id": "E2",
+          "ok": true,
+          "detail": "sender_checked is True"
+        }
+      },
       "state_update": "Recorded as evidence E2.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 3,
-      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"calls asking to call back\"}}",
+      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"asks you to call back\"}}",
       "action": "search_scam_guide",
       "argument": {
-        "query": "calls asking to call back"
+        "query": "asks you to call back"
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -175,72 +190,15 @@
       },
       "check_result": null,
       "state_update": "Tool failure recorded; search_scam_guide disabled.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 4,
-      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"uncertain\",\"evidence\":[\"E1\",\"E2\"],\"explanation\":\"We are not sure about this message. It asks you to call back, and the number is not in your contacts. You might want to call the number directly or ask a trusted family member for help.\"}}",
-      "action": "done",
-      "argument": {
-        "label": "uncertain",
-        "evidence": [
-          "E1",
-          "E2"
-        ],
-        "explanation": "We are not sure about this message. It asks you to call back, and the number is not in your contacts. You might want to call the number directly or ask a trusted family member for help."
-      },
-      "parse_ok": true,
-      "validation_ok": true,
-      "available_actions": [
-        "ask_human_helper",
-        "done"
-      ],
-      "evidence_id": null,
-      "observation": "GATE REJECTED",
-      "check_result": {
-        "gate": [
-          {
-            "rule": "label is one of likely_scam/likely_safe/uncertain",
-            "ok": true,
-            "detail": "uncertain"
-          },
-          {
-            "rule": "cited evidence ids exist",
-            "ok": true,
-            "detail": "cited E1, E2"
-          },
-          {
-            "rule": "explanation is given",
-            "ok": true,
-            "detail": ""
-          },
-          {
-            "rule": "uncertain is allowed (more careful is fine)",
-            "ok": true,
-            "detail": "evidence supports uncertain"
-          },
-          {
-            "rule": "help was offered before uncertain",
-            "ok": false,
-            "detail": "use ask_human_helper first"
-          },
-          {
-            "rule": "explanation mentions every strong warning sign",
-            "ok": true,
-            "detail": "ok"
-          }
-        ],
-        "supported_label": "uncertain"
-      },
-      "state_update": "Gate rejected the verdict; feedback sent to the model.",
-      "continue_or_stop": "continue"
-    },
-    {
-      "step": 5,
-      "raw_reply": "{\"action\":\"ask_human_helper\",\"argument\":{\"reason\":\"E1 and E2 show the message asks you to call back and comes from a number that is not in your contacts. You might want to ask a trusted family member for help.\"}}",
+      "raw_reply": "{\"action\":\"ask_human_helper\",\"argument\":{\"reason\":\"E1 and E2 show the message asks you to call back and comes from a number that is not in your contacts. We are not sure if this is safe.\"}}",
       "action": "ask_human_helper",
       "argument": {
-        "reason": "E1 and E2 show the message asks you to call back and comes from a number that is not in your contacts. You might want to ask a trusted family member for help."
+        "reason": "E1 and E2 show the message asks you to call back and comes from a number that is not in your contacts. We are not sure if this is safe."
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -262,22 +220,29 @@
           "evidence_id": "E3"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "ask_human_helper",
+          "evidence_id": "E3",
+          "ok": true,
+          "detail": "alert line found in the alert log"
+        }
+      },
       "state_update": "Recorded as evidence E3.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
-      "step": 6,
-      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"uncertain\",\"evidence\":[\"E1\",\"E2\",\"E3\"],\"explanation\":\"We are not sure about this message. It asks you to call back, and the number is not in your contacts. A trusted family member was told, but it’s still unclear if this is safe or a scam.\"}}",
+      "step": 5,
+      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"uncertain\",\"evidence\":[\"E1\",\"E2\"],\"explanation\":\"We are not sure about this message. It asks you to call back and comes from a number that is not in your contacts. A trusted helper was told, but we cannot be certain if this is safe.\"}}",
       "action": "done",
       "argument": {
         "label": "uncertain",
         "evidence": [
           "E1",
-          "E2",
-          "E3"
+          "E2"
         ],
-        "explanation": "We are not sure about this message. It asks you to call back, and the number is not in your contacts. A trusted family member was told, but it’s still unclear if this is safe or a scam."
+        "explanation": "We are not sure about this message. It asks you to call back and comes from a number that is not in your contacts. A trusted helper was told, but we cannot be certain if this is safe."
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -285,7 +250,7 @@
         "done"
       ],
       "evidence_id": null,
-      "observation": null,
+      "observation": "VERDICT ACCEPTED: uncertain",
       "check_result": {
         "gate": [
           {
@@ -296,7 +261,7 @@
           {
             "rule": "cited evidence ids exist",
             "ok": true,
-            "detail": "cited E1, E2, E3"
+            "detail": "cited E1, E2"
           },
           {
             "rule": "explanation is given",
@@ -323,7 +288,8 @@
         "readability": []
       },
       "state_update": "Verdict accepted by the gate and readability check.",
-      "continue_or_stop": "stop"
+      "continue_or_stop": "stop",
+      "model_retries": []
     }
   ]
 }
