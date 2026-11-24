@@ -6,12 +6,16 @@ deliberately WRONG answers, so we can prove that Python's checks hold
 no matter what the model says.
 
 Run:  python tests.py
+      python tests.py --break-gate   (experiment: replace the gate's
+          supported_label with "always likely_safe" and count how many
+          tests notice; saved in evidence/eval/break_gate_tests.txt)
 """
 
 import contextlib
 import io
 import json
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
@@ -1050,7 +1054,16 @@ def test_settings_come_from_environment_with_defaults():
 
 # ------------------------------------------------------------------------
 
+def always_safe(context):
+    """A deliberately broken gate for the --break-gate experiment."""
+    return 'likely_safe'
+
+
 if __name__ == '__main__':
+    break_gate = '--break-gate' in sys.argv
+    if break_gate:
+        agent.supported_label = always_safe
+        print('BREAK-GATE EXPERIMENT: supported_label() now always returns likely_safe.\n')
     tests = [
         ('valid JSON', test_good_json),
         ('bad JSON', test_bad_json),
@@ -1145,5 +1158,9 @@ if __name__ == '__main__':
             print('ERROR:', name, type(error).__name__, error)
     shutil.rmtree(TEMP, ignore_errors=True)
     print('\n%d of %d tests passed.' % (len(tests) - failed, len(tests)))
+    if break_gate:
+        print('BREAK-GATE EXPERIMENT: %d of %d tests failed with the broken gate '
+              '(the tests notice when the gate stops checking evidence).' % (failed, len(tests)))
+        raise SystemExit(0 if failed else 1)
     if failed:
         raise SystemExit(1)
