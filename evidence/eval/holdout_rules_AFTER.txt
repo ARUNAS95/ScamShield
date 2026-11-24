@@ -1,0 +1,17 @@
+RULES ONLY (no model), set = holdout, 12 messages
+id   category   expected     supported          evidence
+H01  scam       likely_scam  likely_scam  OK    signs: gift_card(strong), secrecy(weak) | links: none | saved contact: False
+H02  scam       likely_scam  likely_scam  OK    signs: gift_card(strong), money_request(weak) | links: none | saved contact: False
+H03  scam       likely_scam  uncertain    WRONG signs: none | links: parcel-tracking-center.shop=unknown, redelivery-desk.online=unknown | saved contact: False
+H04  scam       likely_scam  likely_scam  OK    signs: ip_link(strong) | links: 192.168.10.45=ip_address | saved contact: False
+H05  scam       likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak), prize(weak) | links: none | saved contact: False
+H06  scam       likely_scam  likely_scam  OK    signs: code_request(strong) | links: none | saved contact: False
+H07  scam       likely_scam  likely_scam  OK    signs: payment_app(strong), money_request(weak) | links: none | saved contact: True
+H08  legit      likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+H09  legit      likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+H10  legit      likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+H11  uncertain  uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+H12  uncertain  uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+
+RULES ONLY (holdout): 11/12 supported labels match the expected label
+  false "safe": 0   false alarms (scam on a safe message): 0
