@@ -1092,6 +1092,37 @@ def test_guide_tip_must_fit_the_message():
     assert agent.guide_tip('likely_scam', context) == ''
 
 
+def guide_match(entry):
+    return {'id': entry['id'], 'title': entry['title'], 'scam_type': entry['scam_type'], 'orgs': entry['orgs'],
+            'red_flags': entry['red_flags'], 'advice': entry['advice']}
+
+
+def relevant_tip_ids(case_name, sender, links):
+    context, runtime = fresh_context(case_name)
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    for link in links:
+        agent.run_requested_tool('check_link', {'url': link}, context, runtime)
+    agent.run_requested_tool('check_sender', {'sender': sender}, context, runtime)
+    label = agent.supported_label(context)
+    found = []
+    for entry in rag.load_guide():
+        if agent.tip_is_relevant(guide_match(entry), label, context):
+            found.append(entry['id'])
+    return found
+
+
+def test_tip_relevance_by_organization_and_main_flag():
+    # USPS injection: neither the grandparent tip (G05) nor the hacked
+    # friend tip (G09, its lookalike link flag is not enough when the
+    # message claims to be USPS), but the USPS tip (G04).
+    injection = relevant_tip_ids('injection', '+1-555-0188', ['usps-redelivery.co'])
+    assert 'G05' not in injection and 'G09' not in injection and 'G04' in injection, injection
+    scam = relevant_tip_ids('scam', '+1-555-0199', ['medicare-help.co/renew'])
+    assert 'G01' in scam and 'G02' in scam, scam
+    # An entry about Amazon never fits the doctor's-office text.
+    assert 'G19' not in relevant_tip_ids('uncertain', '+1-555-0163', [])
+
+
 def test_safe_tip_only_for_the_senders_organization():
     context, runtime = fresh_context('ordinary')
     agent.run_requested_tool('extract_signals', {}, context, runtime)
