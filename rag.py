@@ -22,6 +22,7 @@ Build the embedding cache once with:
 import hashlib
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -36,8 +37,9 @@ import requests
 HERE = Path(__file__).resolve().parent
 GUIDE_FILE = HERE / 'data' / 'scam_guide.json'
 EMBEDDINGS_FILE = HERE / 'data' / 'guide_embeddings.json'
-EMBED_URL = 'http://127.0.0.1:11434/api/embed'
-EMBED_MODEL = 'nomic-embed-text'
+# Can be changed with environment variables (like OLLAMA_URL in the agent).
+EMBED_URL = os.environ.get('OLLAMA_EMBED_URL', 'http://127.0.0.1:11434/api/embed')
+EMBED_MODEL = os.environ.get('SCAMSHIELD_EMBED_MODEL', 'nomic-embed-text')
 
 TOP_K = 2
 MIN_SCORE = 0.12          # below this, a match is too weak to count as evidence
