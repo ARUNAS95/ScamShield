@@ -326,8 +326,68 @@ def test_uncertain_needs_help_offered_first():
 def test_helper_reason_must_cite_evidence():
     context, runtime = fresh_context('uncertain')
     agent.run_requested_tool('extract_signals', {}, context, runtime)
+    agent.run_requested_tool('check_sender', {'sender': '+1-555-0163'}, context, runtime)
     outcome, status = agent.run_requested_tool('ask_human_helper', {'reason': 'I just feel unsure.'}, context, runtime)
-    assert status == 'rejected'
+    assert status == 'rejected' and 'evidence id' in outcome['message']
+
+
+def test_helper_only_after_check_sender():
+    context, runtime = fresh_context('uncertain')
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    assert 'ask_human_helper' not in agent.available_actions(context)
+    outcome, status = agent.run_requested_tool('ask_human_helper', {'reason': 'E1 shows nothing.'}, context, runtime)
+    assert status == 'rejected' and 'after check_sender' in outcome['message']
+    agent.run_requested_tool('check_sender', {'sender': '+1-555-0163'}, context, runtime)
+    assert 'ask_human_helper' in agent.available_actions(context)
+
+
+def test_routing_table_covers_every_action():
+    names = list(agent.TOOLS) + ['done']
+    assert sorted(agent.ROUTING) == sorted(names)
+    context, runtime = fresh_context('scam')
+    assert agent.available_actions(context) == ['extract_signals']
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    assert agent.available_actions(context) == ['check_link', 'check_sender', 'lookup_official_contact',
+                                                'search_scam_guide', 'done']
+
+
+def test_done_before_extract_signals_is_a_normal_rejection():
+    record = run('scam', [
+        done('likely_scam', ['E1'], 'This looks like a scam.'),
+        done('likely_scam', ['E1'], 'This looks like a scam.'),
+        done('likely_scam', ['E1'], 'This looks like a scam.'),
+    ])
+    assert record['stop_reason'] == 'no_progress' and record['gate_rejections'] == 0
+    assert record['rejected_proposals'] == 3
+    assert 'extract_signals first' in record['trace'][0]['observation']['message']
+
+
+def test_uncertain_rejected_when_strong_sign_found():
+    record = run('scam', [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0199'),
+        action('ask_human_helper', reason='E2 shows an unknown number.'),
+        done('uncertain', ['E1', 'E2', 'E3'], 'We are not sure about this message.'),
+        done('likely_scam', ['E1'], 'This looks like a scam. It asks for a gift card.'),
+    ])
+    assert record['gate_rejections'] == 1 and record['final_label'] == 'likely_scam'
+    gate = record['trace'][3]['check_result']['gate']
+    found = False
+    for check in gate:
+        if not check['ok'] and 'strong sign gift_card found' in check['detail']:
+            found = True
+    assert found
+
+
+def test_uncertain_allowed_with_weak_signs_only():
+    message = {'sender': '+1-555-0159', 'text': 'Hi, I have a new number. Please do not tell anyone yet.'}
+    record = run(message, [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0159'),
+        action('ask_human_helper', reason='E1 shows two weak signs and E2 an unknown number.'),
+        done('uncertain', ['E1', 'E2', 'E3'], 'We are not sure about this message. Please ask someone you trust.'),
+    ])
+    assert record['final_label'] == 'uncertain' and record['gate_rejections'] == 0
 
 
 # The PR #31 lesson: a checker can be too strict. These normal messages
@@ -374,9 +434,11 @@ def helper_run(consent_fn):
         log.unlink()
     record = run('uncertain', [
         action('extract_signals'),
-        action('ask_human_helper', reason='E1 shows no warning signs but an unknown number.'),
-        done('uncertain', ['E1', 'E2'], 'We are not sure about this message.'),
+        action('check_sender', sender='+1-555-0163'),
+        action('ask_human_helper', reason='E2 shows the number is not saved and E1 found no warning signs.'),
+        done('uncertain', ['E1', 'E2', 'E3'], 'We are not sure about this message.'),
     ], consent_fn=consent_fn)
+    assert record['helper_offered_by'] == 'model' and record['stop_reason'] == 'success'
     return record, log
 
 
@@ -625,6 +687,11 @@ if __name__ == '__main__':
         ('scam must mention strong warning signs', test_scam_without_mentioning_strong_sign_rejected),
         ('uncertain needs help offered first', test_uncertain_needs_help_offered_first),
         ('helper reason must cite evidence', test_helper_reason_must_cite_evidence),
+        ('ask_human_helper only after check_sender', test_helper_only_after_check_sender),
+        ('routing table covers every action', test_routing_table_covers_every_action),
+        ('done before extract_signals is a normal rejection', test_done_before_extract_signals_is_a_normal_rejection),
+        ('uncertain rejected when a strong sign was found', test_uncertain_rejected_when_strong_sign_found),
+        ('uncertain allowed with weak signs only', test_uncertain_allowed_with_weak_signs_only),
         ('gate accepts ordinary message (no false alarm)', test_gate_accepts_ordinary_message),
         ('gate accepts ordinary message with urgency word', test_gate_accepts_ordinary_message_with_urgency_word),
         ('safe needs every link checked', test_safe_needs_link_checked),

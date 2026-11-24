@@ -657,22 +657,22 @@ TOOL_GUIDE = {
     'check_sender': '{"sender":"+1-555-0100"} : check whether the sender is one of the saved contacts.',
     'lookup_official_contact': '{"org":"Medicare"} : get the real phone number of an organization the message claims to be.',
     'search_scam_guide': '{"query":"words to search"} : search the scam-prevention guide. Optional: add "filters":{"org":"Medicare"} ONLY when extract_signals found that organization.',
-    'ask_human_helper': '{"reason":"E1 shows ..."} : offer to alert a trusted family member. The reason must mention an evidence id like E1.',
+    'ask_human_helper': '{"reason":"E1 shows ..."} : offer to alert a trusted family member (after check_sender). The reason must mention an evidence id like E1.',
 }
 
-# The agent as a small graph: which action may follow which (the Nov 4
-# lecture idea of nodes and edges, without needing LangGraph). Python
-# enforces it, and availability rules below remove tools that make no sense.
-INVESTIGATE = ['check_link', 'check_sender', 'lookup_official_contact', 'search_scam_guide',
-               'ask_human_helper', 'done']
-ALLOWED_NEXT = {
-    'start': ['extract_signals'],
-    'extract_signals': INVESTIGATE,
-    'check_link': INVESTIGATE,
-    'check_sender': INVESTIGATE,
-    'lookup_official_contact': INVESTIGATE,
-    'search_scam_guide': INVESTIGATE,
-    'ask_human_helper': ['check_link', 'check_sender', 'lookup_official_contact', 'search_scam_guide', 'done'],
+# Conditional routing: what the model may do next depends on what Python
+# has already observed, not on a fixed order. Each action has one plain
+# precondition (checked in precondition_met below). Actions whose
+# precondition is not met are left out of AVAILABLE ACTIONS, and a proposal
+# for one is rejected with this text so the model knows why.
+ROUTING = {
+    'extract_signals': 'first, before any other action, and only once',
+    'check_link': 'after extract_signals, while a link from the message is still unchecked',
+    'check_sender': 'after extract_signals, and only once',
+    'lookup_official_contact': 'after extract_signals, for an organization the message claims to be that was not looked up yet',
+    'search_scam_guide': 'after extract_signals, at most %d times' % MAX_SEARCHES,
+    'ask_human_helper': 'after check_sender, and only once',
+    'done': 'after extract_signals',
 }
 
 
@@ -692,27 +692,42 @@ def unlooked_orgs(context):
     return waiting
 
 
-def available_actions(context):
-    """The actions that make sense right now, given what Python has observed."""
+def precondition_met(name, context):
+    """True when the ROUTING precondition for this action holds right now."""
+    if name == 'extract_signals':
+        return not context['signals_extracted']
     if not context['signals_extracted']:
-        return ['extract_signals']
-    last = context['last_action'] or 'start'
+        return False
+    if name in context['broken_tools']:
+        return False   # a tool that failed once is not offered again
+    if name == 'check_link':
+        return len(unchecked_links(context)) > 0
+    if name == 'check_sender':
+        return not context['sender_checked']
+    if name == 'lookup_official_contact':
+        return len(unlooked_orgs(context)) > 0
+    if name == 'search_scam_guide':
+        return context['searches'] < MAX_SEARCHES
+    if name == 'ask_human_helper':
+        return context['sender_checked'] and not context['helper_offered']
+    if name == 'done':
+        return True
+    return False
+
+
+def available_actions(context):
+    """The actions whose precondition holds, given what Python has observed."""
     allowed = []
-    for name in ALLOWED_NEXT[last]:
-        if name in context['broken_tools']:
-            continue
-        if name == 'check_link' and not unchecked_links(context):
-            continue
-        if name == 'check_sender' and context['sender_checked']:
-            continue
-        if name == 'lookup_official_contact' and not unlooked_orgs(context):
-            continue
-        if name == 'search_scam_guide' and context['searches'] >= MAX_SEARCHES:
-            continue
-        if name == 'ask_human_helper' and context['helper_offered']:
-            continue
-        allowed.append(name)
+    for name in ROUTING:
+        if precondition_met(name, context):
+            allowed.append(name)
     return allowed
+
+
+def not_available_note(name, context):
+    if not context['signals_extracted']:
+        return 'Call extract_signals first.'
+    return name + ' cannot be used now. It is allowed only ' + ROUTING[name] + '.'
 
 
 def evidence_ids(context):
@@ -737,14 +752,12 @@ def run_requested_tool(name, argument, context, runtime):
     """Validate, run and record one tool call. Returns (tool_result, status)
     where status is 'ran', 'rejected' or 'failed'."""
     allowed = available_actions(context)
-    if name not in TOOLS:
+    if name not in ROUTING:
         return result(False, 'Tool not available: ' + name, {'allowed_actions': allowed}), 'rejected'
-    if name not in allowed:
-        if not context['signals_extracted']:
-            note = 'Call extract_signals first.'
-        else:
-            note = name + ' cannot be used now (already done, nothing left to check, or not available).'
-        return result(False, note, {'allowed_actions': allowed}), 'rejected'
+    if name not in allowed or name == 'done':
+        # 'done' only arrives here when its precondition is not met (the loop
+        # sends an allowed 'done' to the verdict gate instead).
+        return result(False, not_available_note(name, context), {'allowed_actions': allowed}), 'rejected'
 
     tool = TOOLS[name]
     clean = {}
@@ -788,7 +801,6 @@ def run_requested_tool(name, argument, context, runtime):
     context['evidence'].append({'id': evidence_id, 'tool': name, 'summary': outcome['message'],
                                 'facts': outcome['data'].get('facts', [])})
     context['calls_made'][call_key] = evidence_id
-    context['last_action'] = name
     context['tool_sequence'].append(name)
     return outcome, 'ran'
 
@@ -818,7 +830,8 @@ def make_system_prompt():
     prompt += '- likely_safe: only if check_sender shows a saved contact, there are no strong warning signs, '
     prompt += 'at most one weak sign, and every link was checked and is official.\n'
     prompt += '- uncertain: when the evidence cannot settle it, for example an unknown sender with no warning signs. '
-    prompt += 'Use ask_human_helper before choosing uncertain.\n'
+    prompt += 'Use check_sender and then ask_human_helper before choosing uncertain. '
+    prompt += 'uncertain is not allowed when there is a strong warning sign.\n'
     prompt += 'Notes such as "asks you to call back" or "not a saved contact" are NOT warning signs.\n'
     prompt += 'If you are unsure, search_scam_guide can tell you whether a message like this matches a known scam '
     prompt += 'or a normal pattern.\n\n'
@@ -936,6 +949,12 @@ def why_label_needs(label, context):
         + '; '.join(problems)
 
 
+def help_first_note(context):
+    if context['sender_checked']:
+        return 'use ask_human_helper first'
+    return 'use check_sender, then ask_human_helper first'
+
+
 def check_verdict(argument, context):
     """Return (accepted, checks). checks is a list of {rule, ok, detail}."""
     checks = []
@@ -973,11 +992,17 @@ def check_verdict(argument, context):
         checks.append({'rule': 'evidence supports likely_scam', 'ok': ok,
                        'detail': 'ok' if ok else why_label_needs('likely_scam', context)})
     else:
-        # Being more careful than the evidence requires is allowed.
-        checks.append({'rule': 'uncertain is allowed (more careful is fine)', 'ok': True,
-                       'detail': 'evidence supports ' + supported})
+        strong = flags_with_strength(context, 'strong')
+        if strong:
+            # A strong warning sign settles it: "not sure" would hide a clear danger.
+            checks.append({'rule': 'uncertain is not allowed when a strong warning sign was found', 'ok': False,
+                           'detail': 'strong sign ' + strong[0]['name'] + ' found; the evidence supports likely_scam'})
+        else:
+            # Weak signs only: being more careful than the evidence requires is allowed.
+            checks.append({'rule': 'uncertain is allowed (more careful is fine)', 'ok': True,
+                           'detail': 'evidence supports ' + supported})
         checks.append({'rule': 'help was offered before uncertain', 'ok': context['helper_offered'],
-                       'detail': 'ok' if context['helper_offered'] else 'use ask_human_helper first'})
+                       'detail': 'ok' if context['helper_offered'] else help_first_note(context)})
 
     unmentioned = []
     lower = explanation.lower()
@@ -1133,7 +1158,7 @@ def new_context(message, guide_path, search_mode):
         'link_results': {}, 'sender_checked': False, 'sender_trusted': None, 'sender_name': None,
         'official_contacts': {}, 'guide_matches': [], 'searches': 0, 'retrieval_modes': [],
         'helper_offered': False, 'helper_consent': None, 'helper_offered_by': None,
-        'evidence': [], 'current_evidence_id': None, 'calls_made': {}, 'last_action': None,
+        'evidence': [], 'current_evidence_id': None, 'calls_made': {},
         'tool_sequence': [], 'tool_failures': [], 'broken_tools': [],
         'gate_rejections': 0, 'readability_rewrites': 0, 'rejected_proposals': 0,
         'consecutive_rejections': 0, 'gate_downgraded': False, 'model_labels': [],
@@ -1248,7 +1273,10 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
             record['argument'] = proposal['argument']
             show(verbose, 'MODEL DECISION : ' + proposal['action'] + ' ' + short_json(proposal['argument']))
 
-            if proposal['action'] == 'done':
+            # 'done' goes through the same routing as the tools: before
+            # extract_signals it is a normal rejected proposal (it counts
+            # toward no_progress), and only an allowed 'done' reaches the gate.
+            if proposal['action'] == 'done' and 'done' in available_actions(context):
                 feedback, accepted = handle_done(proposal['argument'], context, record, verbose)
                 if context['gate_downgraded']:
                     ended_by = 'verdict'
@@ -1328,7 +1356,7 @@ def handle_done(argument, context, record, verbose):
         supported = supported_label(context)
         hint = 'With the evidence so far, Python can support: ' + supported
         if supported == 'uncertain' and not context['helper_offered']:
-            hint += ' (use ask_human_helper first)'
+            hint += ' (' + help_first_note(context) + ')'
         return result(False, 'GATE REJECTED your answer: ' + ' | '.join(failed) + '. ' + hint
                       + '. Fix it, or gather more evidence first.'), None
 
