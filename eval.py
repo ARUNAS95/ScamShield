@@ -43,6 +43,7 @@ import contextlib
 import hashlib
 import io
 import json
+import math
 import time
 from pathlib import Path
 
@@ -55,6 +56,7 @@ EVAL_FILES = {
     'eval': HERE / 'data' / 'eval_set.json',
     'holdout': HERE / 'data' / 'eval_holdout.json',
     'holdout2': HERE / 'data' / 'eval_holdout2.json',
+    'large': HERE / 'data' / 'eval_large.json',   # 614 messages written blind, frozen
 }
 OUT_DIR = HERE / 'evidence' / 'eval'
 SOURCE_FILES = ['scamshield_agent.py', 'rag.py', 'eval.py', 'data/scam_guide.json', 'data/organizations.json',
@@ -330,6 +332,18 @@ def evaluate_agent(mode, limit=None, ids=None, set_name='eval'):
     return summary
 
 
+def wilson(hits, total):
+    """95% confidence range for a proportion (Wilson score interval).
+    With few messages the range is wide; with many it is narrow."""
+    if total == 0:
+        return None
+    z = 1.96
+    p = hits / total
+    centre = (p + z * z / (2 * total)) / (1 + z * z / total)
+    half = z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / (1 + z * z / total)
+    return [round(max(0.0, centre - half), 3), round(min(1.0, centre + half), 3)]
+
+
 def summarize_agent(rows, mode):
     count = len(rows)
     correct = 0
@@ -386,6 +400,9 @@ def summarize_agent(rows, mode):
     return {
         'search_mode': mode, 'messages': count,
         'accuracy': round(correct / count, 3) if count else None, 'correct': correct,
+        'accuracy_ci95': wilson(correct, count),
+        'false_safe_rate_ci95': wilson(false_safe, not_safe_total),
+        'false_alarm_rate_ci95': wilson(false_alarm, safe_total),
         'model_last_label_accuracy': round(model_correct / count, 3) if count else None,
         'false_safe': false_safe, 'not_safe_messages': not_safe_total,
         'false_alarm': false_alarm, 'safe_messages': safe_total,
@@ -401,6 +418,8 @@ def summarize_agent(rows, mode):
 
 def print_agent_summary(s):
     print('\nAGENT (%s search): %d/%d correct = %.0f%%' % (s['search_mode'], s['correct'], s['messages'], 100 * s['accuracy']))
+    if s.get('accuracy_ci95'):
+        print('  95%% confidence range for accuracy: %.1f%% to %.1f%%' % (100 * s['accuracy_ci95'][0], 100 * s['accuracy_ci95'][1]))
     print('  false "safe" answers : %d of %d messages that are not safe' % (s['false_safe'], s['not_safe_messages']))
     print('  false alarms (scam)  : %d of %d safe messages' % (s['false_alarm'], s['safe_messages']))
     print('  uncertain answers    : %d' % s['uncertain_answers'])
@@ -427,7 +446,8 @@ if __name__ == '__main__':
     parser.add_argument('--rules', action='store_true',
                         help='check the warning-sign rules alone (instant, no model, no embeddings)')
     parser.add_argument('--set', choices=list(EVAL_FILES), default='eval',
-                        help='which labeled set: eval (25 messages), holdout (12) or holdout2 (14, written before round 3)')
+                        help='which labeled set: eval (25 messages), holdout (12), holdout2 (14, written before the '
+                             'round-2 fixes) or large (614, written blind without seeing the rules)')
     args = parser.parse_args()
     if not args.retrieval and not args.agent and not args.model_queries and not args.rules:
         parser.print_help()
