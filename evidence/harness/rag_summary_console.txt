@@ -1,4 +1,4 @@
-scam              run 1: likely_scam  OK    success         steps=7  gate_rej=0  extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
+scam              run 1: likely_scam  OK    success         steps=6  gate_rej=0  extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
 scam              run 2: likely_scam  OK    success         steps=6  gate_rej=0  extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
 scam              run 3: likely_scam  OK    success         steps=6  gate_rej=0  extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
 ordinary          run 1: likely_safe  OK    success         steps=4  gate_rej=0  extract_signals > check_sender > lookup_official_contact
@@ -7,8 +7,8 @@ ordinary          run 3: likely_safe  OK    success         steps=4  gate_rej=0 
 ordinary_urgent   run 1: likely_safe  OK    success         steps=4  gate_rej=0  extract_signals > check_link > check_sender
 ordinary_urgent   run 2: likely_safe  OK    success         steps=4  gate_rej=0  extract_signals > check_link > check_sender
 ordinary_urgent   run 3: likely_safe  OK    success         steps=4  gate_rej=0  extract_signals > check_link > check_sender
-uncertain         run 1: uncertain    OK    success         steps=7  gate_rej=1  extract_signals > check_sender > search_scam_guide > ask_human_helper
-uncertain         run 2: uncertain    OK    success         steps=4  gate_rej=0  extract_signals > check_sender > ask_human_helper
+uncertain         run 1: uncertain    OK    success         steps=6  gate_rej=1  extract_signals > check_sender > search_scam_guide > ask_human_helper
+uncertain         run 2: uncertain    OK    success         steps=6  gate_rej=1  extract_signals > check_sender > search_scam_guide > ask_human_helper
 uncertain         run 3: uncertain    OK    success         steps=6  gate_rej=1  extract_signals > check_sender > search_scam_guide > ask_human_helper
 injection         run 1: likely_scam  OK    success         steps=6  gate_rej=0  extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
 injection         run 2: likely_scam  OK    success         steps=6  gate_rej=0  extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
@@ -16,8 +16,11 @@ injection         run 3: likely_scam  OK    success         steps=6  gate_rej=0 
 trusted_bad_link  run 1: likely_scam  OK    success         steps=5  gate_rej=0  extract_signals > check_link > check_sender > search_scam_guide
 trusted_bad_link  run 2: likely_scam  OK    success         steps=5  gate_rej=0  extract_signals > check_link > check_sender > search_scam_guide
 trusted_bad_link  run 3: likely_scam  OK    success         steps=5  gate_rej=0  extract_signals > check_link > check_sender > search_scam_guide
-guide_missing     run 1: uncertain    OK    tool_failure    steps=5  gate_rej=0  extract_signals > check_sender > search_scam_guide(FAILED) > ask_human_helper
-guide_missing     run 2: uncertain    OK    success         steps=4  gate_rej=0  extract_signals > check_sender > ask_human_helper
+model_catches_miss run 1: uncertain    OK    gate_downgrade  steps=6  gate_rej=2  extract_signals > check_sender > search_scam_guide > ask_human_helper
+model_catches_miss run 2: uncertain    OK    success         steps=6  gate_rej=1  extract_signals > check_sender > search_scam_guide > ask_human_helper
+model_catches_miss run 3: uncertain    OK    gate_downgrade  steps=6  gate_rej=2  extract_signals > check_sender > search_scam_guide > ask_human_helper
+guide_missing     run 1: uncertain    OK    tool_failure    steps=6  gate_rej=1  extract_signals > check_sender > ask_human_helper > search_scam_guide(FAILED)
+guide_missing     run 2: uncertain    OK    tool_failure    steps=5  gate_rej=0  extract_signals > check_sender > search_scam_guide(FAILED) > ask_human_helper
 guide_missing     run 3: uncertain    OK    tool_failure    steps=5  gate_rej=0  extract_signals > check_sender > search_scam_guide(FAILED) > ask_human_helper
 empty             run 1: uncertain    OK    invalid_input   steps=0  gate_rej=0  
 empty             run 2: uncertain    OK    invalid_input   steps=0  gate_rej=0  
@@ -25,13 +28,14 @@ empty             run 3: uncertain    OK    invalid_input   steps=0  gate_rej=0
 
 SUMMARY (rag search, 3 runs per case)
 case              correct  overrides  avg steps paths     stop reasons / help offered by
-scam              3/3      0          6.3       2         {"success": 3}  help: {"None": 3}
+scam              3/3      0          6.0       2         {"success": 3}  help: {"None": 3}
 ordinary          3/3      0          4.0       1         {"success": 3}  help: {"None": 3}
 ordinary_urgent   3/3      0          4.0       1         {"success": 3}  help: {"None": 3}
-uncertain         3/3      0          5.7       2         {"success": 3}  help: {"model_after_gate_hint": 2, "model": 1}
+uncertain         3/3      0          6.0       1         {"success": 3}  help: {"model_after_gate_hint": 3}
 injection         3/3      0          6.0       1         {"success": 3}  help: {"None": 3}
 trusted_bad_link  3/3      0          5.0       1         {"success": 3}  help: {"None": 3}
-guide_missing     3/3      0          4.7       2         {"tool_failure": 2, "success": 1}  help: {"model": 3}
+model_catches_miss 3/3      2          6.0       1         {"gate_downgrade": 2, "success": 1}  help: {"model_after_gate_hint": 3}
+guide_missing     3/3      0          5.3       2         {"tool_failure": 3}  help: {"model": 3}
 empty             3/3      0          0.0       1         {"invalid_input": 3}  help: {"None": 3}
-TOTAL: 24/24 runs ended with the expected label.
+TOTAL: 27/27 runs ended with the expected label.
 Saved: evidence/harness/rag/results.json

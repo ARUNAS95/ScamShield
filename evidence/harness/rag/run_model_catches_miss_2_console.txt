@@ -1,0 +1,65 @@
+CASE model_catches_miss  RUN 2  MODE rag
+SENDER : +1-555-0177
+MESSAGE: Grandma it's Emma. I'm in trouble and can't talk right now. A man named Mike will come to your door tonight to pick up the cash, please put it in an envelope. I'll explain later.
+
+=== STEP 1 ===
+MODEL DECISION : extract_signals {}
+VALIDATION     : ok
+TOOL RESULT E1 : strong: none; weak: none; 0 link(s); claims to be: no known organization
+NEXT OPTIONS   : check_sender, search_scam_guide, done
+
+=== STEP 2 ===
+MODEL DECISION : check_sender {"sender": "+1-555-0177"}
+VALIDATION     : ok
+TOOL RESULT E2 : +1-555-0177 is a saved contact: Emma (granddaughter).
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
+
+=== STEP 3 ===
+MODEL DECISION : search_scam_guide {"query": "asks for cash in envelope"}
+VALIDATION     : ok
+TOOL RESULT E3 : Found 2 guide entries (rag): G01: Government agencies never ask for gift cards; G04: Package
+                 delivery fee texts.
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
+
+=== STEP 4 ===
+MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2", "E3"], "explanation": "This looks like a
+                 scam. The message asks for cash in an envelope. Government agencies never ask for gift cards.
+                 Do not send money."}
+GATE           : REJECTED - evidence supports likely_scam -> likely_scam needs at least 1 strong or 2 weak
+                 warning signs; found 0 strong and 0 weak
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
+
+=== STEP 5 ===
+MODEL DECISION : ask_human_helper {"reason": "E2 shows the message comes from a saved contact, but E3 shows
+                 the message asks for cash in an envelope, which is a red flag. I'm not sure if this is a scam
+                 or not. Please check with a trusted family member."}
+VALIDATION     : ok
+TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
+                 message was sent.
+NEXT OPTIONS   : search_scam_guide, done
+
+=== STEP 6 ===
+MODEL DECISION : done {"label": "uncertain", "evidence": ["E2", "E3", "E4"], "explanation": "We are not sure
+                 about this message. It comes from a saved contact, but it asks for cash in an envelope, which
+                 is a red flag. A trusted family member was told to check."}
+GATE           : PASSED - evidence supports uncertain
+
+====================== SCAMSHIELD RESULT ======================
+VERDICT     : NOT SURE - ASK SOMEONE YOU TRUST
+STOP REASON : success   (steps: 6, rejected proposals: 0, gate rejections: 1)
+TOOLS USED  : extract_signals -> check_sender -> search_scam_guide -> ask_human_helper
+EVIDENCE    :
+  E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: no known organization
+  E2 check_sender: +1-555-0177 is a saved contact: Emma (granddaughter).
+  E3 search_scam_guide: Found 2 guide entries (rag): G01: Government agencies never ask for gift cards; G04:
+      Package delivery fee texts.
+  E4 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
+      real message was sent.
+EXPLANATION (model):
+  We are not sure about this message. It comes from a saved contact, but it asks for cash in an envelope,
+  which is a red flag. A trusted family member was told to check.
+WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
+              we have let Priya (daughter) know so they can help.
+HUMAN HELP  : offered by model_after_gate_hint, consent = True (simulated)
+TRACE       : evidence/harness/rag/run_model_catches_miss_2_trace.json
+===============================================================

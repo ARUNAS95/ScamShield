@@ -22,17 +22,16 @@ TOOL RESULT E3 : +1-555-0177 is a saved contact: Emma (granddaughter).
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
-MODEL DECISION : search_scam_guide {"query": "lookalike links from family members"}
+MODEL DECISION : search_scam_guide {"query": "lookalike website from family member"}
 VALIDATION     : ok
-TOOL RESULT E4 : Found 2 guide entries (rag): G09: Hacked accounts of friends and family; G03: Lookalike
-                 website addresses.
+TOOL RESULT E4 : Found 2 guide entries (rag): G03: Lookalike website addresses; G09: Hacked accounts of
+                 friends and family.
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 5 ===
 MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2", "E4"], "explanation": "This looks like a
-                 scam. The link in the message is a lookalike of the real First City Bank website. It might be
-                 a hacked account of Emma. Do not click the link. Call Emma on her usual number to check if
-                 she sent it."}
+                 scam. The link looks like a real bank website but is not. Call Emma on her usual number to
+                 check if she sent this."}
 GATE           : PASSED - evidence supports likely_scam
 
 ====================== SCAMSHIELD RESULT ======================
@@ -44,13 +43,14 @@ EVIDENCE    :
   E2 check_link: firstcity-bank-login.co is a LOOKALIKE of the official First City Bank website (strong
       warning sign).
   E3 check_sender: +1-555-0177 is a saved contact: Emma (granddaughter).
-  E4 search_scam_guide: Found 2 guide entries (rag): G09: Hacked accounts of friends and family; G03:
-      Lookalike website addresses.
+  E4 search_scam_guide: Found 2 guide entries (rag): G03: Lookalike website addresses; G09: Hacked accounts of
+      friends and family.
 EXPLANATION (model):
-  This looks like a scam. The link in the message is a lookalike of the real First City Bank website. It might
-  be a hacked account of Emma. Do not click the link. Call Emma on her usual number to check if she sent it.
+  This looks like a scam. The link looks like a real bank website but is not. Call Emma on her usual number to
+  check if she sent this.
 WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. Call Emma (granddaughter) on
               the number you already have and ask if they really sent it.
-Tip from our guide (G09): Do not click. Call that person on their usual number and ask if they sent it.
+Tip from our guide (G03): Never type personal details into a link from a text. Type the official address
+  yourself or call.
 TRACE       : evidence/harness/rag/run_trusted_bad_link_3_trace.json
 ===============================================================

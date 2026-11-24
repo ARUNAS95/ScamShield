@@ -23,7 +23,7 @@ NEXT OPTIONS   : ask_human_helper, done
 
 === STEP 4 ===
 MODEL DECISION : ask_human_helper {"reason": "E1 and E2 show the message asks you to call back and comes from
-                 a number that is not in your contacts. We are not sure if this is a scam."}
+                 a number that is not in your contacts. We are not sure if this is safe."}
 VALIDATION     : ok
 TOOL RESULT E3 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
                  message was sent.
@@ -31,8 +31,8 @@ NEXT OPTIONS   : done
 
 === STEP 5 ===
 MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2"], "explanation": "We are not sure about
-                 this message. It asks you to call back and comes from a number that is not in your contacts.
-                 A trusted helper was told, but there is no clear warning sign."}
+                 this message. It asks you to call back and comes from a number that is not in your
+                 contacts."}
 GATE           : PASSED - evidence supports uncertain
 
 ====================== SCAMSHIELD RESULT ======================
@@ -46,7 +46,7 @@ EVIDENCE    :
       real message was sent.
 EXPLANATION (model):
   We are not sure about this message. It asks you to call back and comes from a number that is not in your
-  contacts. A trusted helper was told, but there is no clear warning sign.
+  contacts.
 WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
               we have let Priya (daughter) know so they can help.
 HUMAN HELP  : offered by model, consent = True (simulated)

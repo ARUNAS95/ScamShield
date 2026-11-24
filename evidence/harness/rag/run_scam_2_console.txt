@@ -27,7 +27,7 @@ TOOL RESULT E4 : +1-555-0199 is NOT a saved contact (this alone is not a warning
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 5 ===
-MODEL DECISION : search_scam_guide {"query": "gift card scam Medicare"}
+MODEL DECISION : search_scam_guide {"query": "gift card Medicare scam"}
 VALIDATION     : ok
 TOOL RESULT E5 : Found 2 guide entries (rag): G01: Government agencies never ask for gift cards; G02: Fake
                  Medicare benefit alerts.
@@ -35,8 +35,9 @@ NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 6 ===
 MODEL DECISION : done {"label": "likely_scam", "evidence": ["E1", "E2", "E5"], "explanation": "This looks like
-                 a scam. The message asks for a gift card, which is a strong warning sign. It also pretends to
-                 be Medicare with a lookalike link. Government agencies never ask for gift cards."}
+                 a scam. It asks for a gift card, which is a strong warning sign. The link looks like the real
+                 Medicare site but is not. Medicare never asks for money or gift cards. Do not reply or click
+                 the link."}
 GATE           : PASSED - evidence supports likely_scam
 
 ====================== SCAMSHIELD RESULT ======================
@@ -52,8 +53,8 @@ EVIDENCE    :
   E5 search_scam_guide: Found 2 guide entries (rag): G01: Government agencies never ask for gift cards; G02:
       Fake Medicare benefit alerts.
 EXPLANATION (model):
-  This looks like a scam. The message asks for a gift card, which is a strong warning sign. It also pretends
-  to be Medicare with a lookalike link. Government agencies never ask for gift cards.
+  This looks like a scam. It asks for a gift card, which is a strong warning sign. The link looks like the
+  real Medicare site but is not. Medicare never asks for money or gift cards. Do not reply or click the link.
 WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. If you are worried, call
               Medicare at 1-800-555-0101 (from our trusted list).
 Tip from our guide (G01): Do not buy the card. Hang up or delete the text and call the agency using the number
