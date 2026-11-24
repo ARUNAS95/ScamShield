@@ -262,6 +262,118 @@ def test_new_code_request_wordings():
     assert 'code_request' not in agent.flag_names(signals_for('call the number on the back of your card'))
 
 
+def rules_label(text, sender):
+    """The label the evidence supports when every lookup tool runs (no model),
+    like eval.py --rules. Returns (label, warning sign names, links)."""
+    message = {'sender': sender, 'text': text}
+    context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
+    runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    for link in list(context['links']):
+        agent.run_requested_tool('check_link', {'url': link}, context, runtime)
+    agent.run_requested_tool('check_sender', {'sender': sender}, context, runtime)
+    names = []
+    for flag in context['flags']:
+        if flag['strength'] != 'info':
+            names.append(flag['name'])
+    return agent.supported_label(context), names, context['links']
+
+
+MOM = '+1-555-0150'        # saved contact: Priya (daughter)
+EMMA = '+1-555-0177'       # saved contact: Emma (granddaughter)
+PHARMACY = '+1-555-0142'   # saved contact: Main Street Pharmacy
+BANK = '+1-555-0131'       # saved contact: First City Bank alerts
+STRANGER = '+1-555-0169'   # not saved
+
+# Ordinary texts from saved contacts that use risky words harmlessly.
+# Every one must stay likely_safe (no false alarm).
+FALSE_ALARM_REGRESSIONS = [
+    (MOM, "Hi Mom, I'll pay you back on Venmo tomorrow for the groceries."),
+    (EMMA, "I got you a Target gift card for your birthday, it's in your mailbox!"),
+    (EMMA, 'I put a Starbucks gift card in your birthday card, it should arrive Friday.'),
+    (MOM, 'Mom, I will send you a gift card for Christmas, any store you like?'),
+    (MOM, 'The wifi password is bluebird7 when you come over.'),
+    (MOM, "Dad's PIN for the garage keypad changed, I'll tell you in person."),
+    (MOM, 'Dinner at 5 p.m.Love you'),
+    (MOM, 'Meet me at 12 Oak St.Apt 4 is on the left.'),
+    (EMMA, 'See you at 8 a.m.See you soon Grandma'),
+    (MOM, 'I sent you $20 on Venmo for lunch.'),
+    (EMMA, 'Thanks Grandma! I paid you back on Zelle.'),
+    (MOM, 'Bake sale is Saturday, Venmo info is on the flyer.'),
+    (PHARMACY, 'Main Street Pharmacy: your refill is ready. Questions? Call us at 1-555-0142.'),
+    (PHARMACY, 'Main Street Pharmacy: your flu shot is booked for Monday at 10 a.m. See you then.'),
+    (BANK, 'First City Bank: your statement is ready. Log in at firstcitybank.example to view it.'),
+    (BANK, 'First City Bank: a payment of $60.00 to Elm Power was made from your account.'),
+    (MOM, 'Hi Mom, Dr. Lee said the pharmacy needs your new insurance card. I will bring it Sunday.'),
+]
+
+# Scams that earlier rules called safe or missed (critic probes). None of
+# them may ever be likely_safe; each must be likely_scam.
+FALSE_SAFE_REGRESSIONS = [
+    (EMMA, 'Grandma please buy a gіft cаrd and send me the numbers'),     # Cyrillic i and a
+    (MOM, 'Mom check your order here: аmazon.com/orders'),                      # Cyrillic a
+    (MOM, 'Renew your plan at medicare[.]gov-renew[.]com'),                           # defanged
+    (MOM, 'Look: hxxps://usps-redelivery[.]co/track'),                                # defanged scheme
+    (EMMA, 'Grandma \U0001F381 can you text me the numbers from the cards I asked for?'),
+    (EMMA, 'can you get 2 Apple cards and send me the claim numbers'),
+    (EMMA, 'grab three Steam cards at the store for me please'),
+    (EMMA, 'please send a photo of the front and back of your credit card'),
+    (MOM, "what's the 6 number text you got? I need it"),
+    (EMMA, 'send $80 PayPal friends and family please'),
+    (EMMA, 'CashApp me $50 real quick'),
+    (MOM, 'Look at this: http://user@203.0.113.9/photos'),
+    (MOM, 'Look at this: medicare.gov@evil-login.ru/photos'),
+    (STRANGER, 'Congrats! You have been selected for a $500 reward. Claim it at rewards.example.org'),
+    (MOM, 'MEDICARE ALERT: buy a $200 gift card and send the card number today.'),
+]
+
+
+def test_false_alarm_regressions():
+    assert len(FALSE_ALARM_REGRESSIONS) >= 12
+    for sender, text in FALSE_ALARM_REGRESSIONS:
+        label, names, links = rules_label(text, sender)
+        assert label == 'likely_safe', (text, label, names, links)
+
+
+def test_false_safe_regressions():
+    for sender, text in FALSE_SAFE_REGRESSIONS:
+        label, names, links = rules_label(text, sender)
+        assert label == 'likely_scam', (text, label, names, links)
+
+
+def test_demo_cases_keep_their_labels():
+    for name in CASES:
+        if name in ('empty', 'guide_missing'):
+            continue
+        label, names, links = rules_label(CASES[name]['text'], CASES[name]['sender'])
+        assert label == CASES[name]['expected_label'], (name, label, names)
+
+
+def test_link_tricks_found():
+    # Cyrillic letters stay in the link and make it a strong sign.
+    label, names, links = rules_label('Sign in: аmazon.com/login', MOM)
+    assert links == ['аmazon.com'] and 'lookalike_letters_link' in names
+    assert agent.classify_domain('аmazon.com', DATA) == ('other_alphabet', 'Amazon')
+    # Defanged links are turned back into links before they are checked.
+    assert agent.normalize_domain('medicare[.]gov-renew[.]com') == 'medicare.gov-renew.com'
+    assert agent.normalize_domain('hxxps://bit(.)ly/x') == 'bit.ly'
+    # Anything before @ is dropped, so the real address is classified.
+    assert agent.normalize_domain('http://user@203.0.113.9/x') == '203.0.113.9'
+    assert agent.normalize_domain('medicare.gov@evil-login.ru') == 'evil-login.ru'
+    label, names, links = rules_label('see http://user@203.0.113.9/x', MOM)
+    assert 'ip_link' in names and 'hidden_address_link' in names
+    # E-mail addresses are still not links.
+    assert signals_for('Write to john.smith@gmail.com or bob@mail.com')['links'] == []
+    # Sentence ends and abbreviations are not links, but ".Com" still is.
+    assert signals_for('Dinner at 5 p.m.Love you. Oak St.Apt 4. 8 a.m.See you. Mr.Smith called.')['links'] == []
+    assert signals_for('Visit Medicare-Renew.Com today')['links'] == ['medicare-renew.com']
+
+
+def test_gift_card_present_is_not_a_sign():
+    assert 'gift_card' not in agent.flag_names(signals_for('Happy birthday! I got you a gift card, it is in your mailbox.'))
+    assert 'gift_card' in agent.flag_names(signals_for('Can you buy a gift card for me? I will send you the money back.'))
+
+
 # ------------------------------------------------------------------------
 # 4. The verdict gate: checked against recorded evidence, not model claims
 # ------------------------------------------------------------------------
@@ -853,6 +965,11 @@ if __name__ == '__main__':
         ('disguised gift card words found (g1ft, fullwidth, spaced)', test_disguised_gift_card_words_found),
         ('payment apps are strong warning signs', test_payment_apps_are_strong),
         ('new code request wordings', test_new_code_request_wordings),
+        ('false-alarm regressions stay safe (%d texts)' % len(FALSE_ALARM_REGRESSIONS), test_false_alarm_regressions),
+        ('false-safe regressions are scams (%d texts)' % len(FALSE_SAFE_REGRESSIONS), test_false_safe_regressions),
+        ('demo cases keep their labels (rules only)', test_demo_cases_keep_their_labels),
+        ('link tricks: other alphabet, defanged, hidden @, sentence ends', test_link_tricks_found),
+        ('gift card as a present is not a warning sign', test_gift_card_present_is_not_a_sign),
         ('fabricated evidence id rejected', test_fabricated_evidence_rejected),
         ('model insisting scam is safe -> gate downgrade', test_model_insists_scam_is_safe),
         ('injection cannot make message safe', test_injection_cannot_make_message_safe),
