@@ -223,6 +223,9 @@ shows how a saved run ended, taken from its trace, and how many repeated runs en
 <section class="flow">
 <h2>6. Testing and results</h2>
 <h3>Offline tests</h3>
+<p><b>What it is:</b> automated checks that run without the AI; a scripted fake model gives answers we wrote in
+advance, including deliberately wrong ones (for example insisting a scam is safe). <b>What it proves:</b> Python's
+checks catch bad model answers.</p>
 <p><code>python3 tests.py</code>: <b>{{TESTS}}</b> tests passed at build time. They use a scripted model (no Ollama),
 including deliberately wrong answers: bad JSON, invented arguments, fabricated evidence ids, "safe" forced on a scam,
 "uncertain" on a strong sign, injection, consent yes/no, a missing guide, Ollama down, a single failed model call,
@@ -230,6 +233,9 @@ failed post-checks, the step limit, no progress, readability, guide search ranki
 a false-safe regression list (critic probes that must be scams) and a rule-coverage list from review round 3. <code>python3 tests.py --break-gate</code> replaces the gate's <code>supported_label</code> with
 "always likely_safe": <b>{{BREAK_GATE}}</b> tests then fail (<code>evidence/eval/break_gate_tests.txt</code>), so
 the tests notice a broken gate.</p>
+<p><b>Break the gate on purpose. What it is:</b> the verdict gate is replaced by one that believes every message is
+safe, and all tests are run again. <b>What it proves:</b> the tests really detect a broken safety check; they are not
+empty tests that pass whatever the code does.</p>
 
 <h3>Live agent evaluation</h3>
 <p>Four labeled sets of fictional messages, separate from the demo cases. One live run per message with
@@ -249,9 +255,13 @@ the tests notice a broken gate.</p>
 <p><b>False "safe" answers</b>, the most harmful mistake for an older adult: {{FALSE_SAFE_SUMMARY}}.</p>
 
 <h3>The large blind test set</h3>
+<p><b>What it is:</b> {{LARGE_MESSAGES}} messages ({{LARGE_COUNTS}}) written by a separate AI agent that could not
+see the detection rules, frozen before testing. <b>What it proves:</b> how well ScamShield handles wording it was
+never tuned for. With this many messages the 95% range is only a few points wide.</p>
 <ul>
   <li><b>Rules only</b> (<code>python3 eval.py --rules --set large</code>, no model): {{LARGE_RULES}}.</li>
   <li><b>Live agent</b> (model + gate): {{LARGE_AGENT}}.</li>
+  <li><b>Hardest message types:</b> {{LARGE_WEAKEST}}.</li>
 </ul>
 
 <h3>Warning-sign rules alone on test sets 2 and 3 (no model)</h3>

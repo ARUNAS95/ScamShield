@@ -389,6 +389,8 @@ def large_test_numbers(rules_text, agent_data):
     rules = parse_rules(rules_text)
     not_safe_total = 0
     safe_total = 0
+    expected_counts = {'likely_scam': 0, 'likely_safe': 0, 'uncertain': 0}
+    rules_categories = {}
     if rules_text:
         for line in rules_text.splitlines():
             parts = line.split()
@@ -397,6 +399,14 @@ def large_test_numbers(rules_text, agent_data):
                     safe_total += 1
                 else:
                     not_safe_total += 1
+                expected_counts[parts[2]] = expected_counts.get(parts[2], 0) + 1
+                cat = rules_categories.setdefault(parts[1], {'correct': 0, 'total': 0})
+                cat['total'] += 1
+                if parts[4] == 'OK':
+                    cat['correct'] += 1
+    if not rules_text and agent_data:
+        for row in agent_data.get('rows', []):
+            expected_counts[row['expected']] = expected_counts.get(row['expected'], 0) + 1
     if rules:
         ci = wilson(rules['correct'], rules['total'])
         out['rules'] = {'score': slash(rules['correct'], rules['total']),
@@ -413,7 +423,43 @@ def large_test_numbers(rules_text, agent_data):
                         'false_safe': of(s.get('false_safe'), s.get('not_safe_messages')),
                         'false_alarm': of(s.get('false_alarm'), s.get('safe_messages'))}
     out['messages'] = (rules or {}).get('total') or (agent_data or {}).get('summary', {}).get('messages') or PENDING
+    out['counts'] = {'scam': expected_counts['likely_scam'], 'safe': expected_counts['likely_safe'],
+                     'uncertain': expected_counts['uncertain']}
+    # the weakest message types: by the full agent when its run exists, else by the rules
+    agent_categories = ((agent_data or {}).get('summary') or {}).get('per_category') or {}
+    ranked_from = agent_categories or rules_categories
+    out['weakest_by'] = 'agent' if agent_categories else ('rules' if rules_categories else PENDING)
+    ranked = sorted([name for name in ranked_from if ranked_from[name]['total'] >= 6],
+                    key=lambda name: (ranked_from[name]['correct'] / ranked_from[name]['total'],
+                                      -ranked_from[name]['total']))
+    out['weakest'] = []
+    for name in ranked[:3]:
+        item = {'category': name, 'name': category_words(name), 'rules': None, 'agent': None}
+        if name in rules_categories:
+            item['rules'] = slash(rules_categories[name]['correct'], rules_categories[name]['total'])
+        if name in agent_categories:
+            item['agent'] = slash(agent_categories[name]['correct'], agent_categories[name]['total'])
+        out['weakest'].append(item)
     return out
+
+
+CATEGORY_WORDS = {'obfuscation': 'disguised-spelling', 'qr': 'QR-code', 'short': 'very short', 'misc': 'other',
+                  'weak_combo': 'weak-sign', 'reply_cancel': 'reply-to-cancel', 'hacked_contact': 'hacked-contact',
+                  'prompt_injection': 'AI-instruction (injection)', 'link_tricks': 'link-trick'}
+
+
+def category_words(name):
+    """'scam_tech_support' -> 'Tech support scams' (a display name only)."""
+    kind, _, rest = name.partition('_')
+    rest = CATEGORY_WORDS.get(rest, rest.replace('_', ' '))
+    if rest.startswith('impersonation '):
+        rest = rest.split(' ', 1)[1] + ' impersonation'
+    tail = {'scam': ' scams', 'safe': ' (safe)', 'uncertain': ' (not sure)'}.get(kind, '')
+    for small, proper in [('irs', 'IRS'), ('ssa', 'SSA'), ('usps', 'USPS'), ('wifi', 'Wi-Fi'), ('ups', 'UPS'),
+                          ('fedex', 'FedEx'), ('dmv', 'DMV')]:
+        rest = re.sub(r'\b' + small + r'\b', proper, rest)
+    words = (rest or kind) + tail
+    return words[:1].upper() + words[1:]
 
 
 def parse_break_gate(text):
@@ -992,7 +1038,22 @@ def main():
          if lr else PENDING)
     fill(values, 'LARGE_AGENT', e('%s (%s, 95%% range %s); false "safe": %s; false alarms: %s'
                                   % (la['score'], la['percent'], la['range'], la['false_safe'], la['false_alarm']))
-         if la else e('not run (a live run of all 614 messages takes about 2 hours; listed as a possible extension)'))
+         if la else e('live run in progress (one run per message, about 2 hours); this document is rebuilt when '
+                      'evidence/eval/large_agent_results.json is written'))
+    counts = large['counts']
+    fill(values, 'LARGE_COUNTS', e('%d scams, %d safe, %d not sure' % (counts['scam'], counts['safe'],
+                                                                         counts['uncertain'])))
+    weakest = []
+    for item in large['weakest']:
+        scores = []
+        if item['agent']:
+            scores.append('full agent ' + item['agent'])
+        if item['rules']:
+            scores.append('rules alone ' + item['rules'])
+        weakest.append(item['name'] + ' (' + ', '.join(scores) + ')')
+    by_words = {'agent': 'by the full agent', 'rules': 'by the rules alone; the live run is in progress'}
+    fill(values, 'LARGE_WEAKEST', e(('; '.join(weakest) + ' (ranked ' + by_words.get(large['weakest_by'], '') + ')')
+                                    if weakest else PENDING))
 
     # harness
     fill(values, 'HARNESS_TABLE', harness_table(runs))
@@ -1019,6 +1080,8 @@ def main():
         live_false_safe += numbers['false_safe_count'] or 0
     live_runs += runs['runs']
     live_false_safe += runs['false_safe']
+    core_runs = live_runs - (sets['large']['messages'] or 0 if sets['large']['available'] else 0)
+    core_false_safe = live_false_safe - (sets['large']['false_safe_count'] or 0 if sets['large']['available'] else 0)
     live_total = ('%d live runs, %d false "safe"' % (live_runs, live_false_safe)) if live_complete else PENDING
     fill(values, 'LIVE_TOTAL', e(live_total))
     parts = []
@@ -1077,7 +1140,7 @@ def main():
     for case in runs['cases']:
         c = runs['cases'][case]
         harness_cases[case] = {'correct': c['correct'], 'runs': c['runs'], 'safe': c['safe'],
-                               'stop_reasons': c['stop_reasons']}
+                               'stop_reasons': c['stop_reasons'], 'expected': c['expected']}
     deck = {
         'student': STUDENT, 'course': COURSE, 'repo': REPO_URL, 'date': today.strftime('%B %d, %Y').replace(' 0', ' '),
         'tests': ('%d of %d' % (tests['passed'], tests['total'])) if tests else PENDING,
@@ -1088,6 +1151,8 @@ def main():
         'live_total': live_total,
         'live_runs': live_runs if live_complete else PENDING,
         'live_false_safe': live_false_safe if live_complete else PENDING,
+        'live_core_runs': core_runs if live_complete else PENDING,
+        'live_core_false_safe': core_false_safe if live_complete else PENDING,
         'break_gate': ('%d of %d' % (break_gate['failed'], break_gate['total'])) if break_gate else PENDING,
         'break_gate_failed': break_gate['failed'] if break_gate else PENDING,
         'break_gate_total': break_gate['total'] if break_gate else PENDING,

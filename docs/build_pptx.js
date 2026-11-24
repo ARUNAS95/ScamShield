@@ -485,72 +485,222 @@ s.addNotes('Each problem case was run repeatedly with the live model. Injection:
   'input stops before the model is called. If Ollama is down, the call is retried twice and the run stops with ' +
   'model_error, which the offline tests cover.');
 
-// ================================================================ 9. Testing and results
+// ================================================================ 9. How we tested
 pres.addSection({ title: 'Results' });
-s = content('Results', 'Testing and results', 'Testing and results');
+s = content('Results', 'How we tested', 'How we tested ScamShield');
 const S = D.sets || {};
 const evalSet = S.eval || {};
 const t2 = S.test2 || {};
 const t3 = S.test3 || {};
-const stats = [
-  [isPending(D.tests_passed) ? PENDING : D.tests_passed + '/' + D.tests_total, 'offline tests pass (scripted model)', BLUE],
-  [isPending(D.break_gate_failed) ? PENDING : String(D.break_gate_failed),
-    'tests fail when the gate is broken on purpose', BLUE],
-  [isPending(D.live_false_safe) ? PENDING : String(D.live_false_safe),
-    'false "safe" answers in ' + (isPending(D.live_runs) ? 'all' : D.live_runs) + ' live runs', GREEN],
-  [D.harness_total, 'repeated demo runs correct (' + D.harness_runs_per_case + ' per case)', GREEN],
-];
-for (let i = 0; i < stats.length; i++) {
-  const x = LEFT + i * 3.08;
-  foldedBox(s, x, 1.95, 2.85, 2.0, WHITE, SAGE, 0.34, 'stat');
-  const pend = stats[i][0] === PENDING;
-  T(s, stats[i][0], { x: x + 0.15, y: 2.05, w: 2.4, h: 0.85, fontSize: pend ? 26 : 40, bold: true,
-    color: pend ? RUST : stats[i][2], valign: 'middle' });
-  T(s, stats[i][1], { x: x + 0.15, y: 2.92, w: 2.55, h: 0.95, fontSize: 16, color: INK });
-}
-const lines = [
-  [{ text: 'Test set 1 (' + (evalSet.messages || PENDING) + ' messages): ', options: { bold: true } },
-    { text: 'live agent ' + evalSet.correct + ' correct, false "safe" ' + evalSet.false_safe }],
-  [{ text: 'Test sets 2 and 3: ', options: { bold: true } },
-    { text: 'live agent ' + t2.correct + ' and ' + t3.correct + ' correct. Written before rule fixes, then used ' +
-      'to fix the rules, so no longer held out.' }],
-];
-const runsList = [];
-lines.forEach(function (parts, i) {
-  parts.forEach(function (part, j) {
-    const options = Object.assign({}, part.options || {});
-    if (j === 0) {
-      options.bullet = { indent: 20 };
-    }
-    if (j === parts.length - 1 && i < lines.length - 1) {
-      options.breakLine = true;
-    }
-    runsList.push({ text: part.text, options: options });
-  });
-});
-T(s, runsList, { x: LEFT, y: 4.15, w: CONTENT_W, h: 1.35, fontSize: 18, color: INK, paraSpaceAfter: 8 });
 const L = D.large || {};
 const LR = L.rules;
 const LA = L.agent;
-foldedBox(s, LEFT, 5.6, CONTENT_W, 1.45, BLUE, null, 0.42, 'large test callout');
+const counts = L.counts || {};
+function val(value) {
+  return isPending(value) ? PENDING : String(value);
+}
+// harness cases that ended "safe" when they should not have (the false "safe" answers)
+const hc = D.harness_cases || {};
+const falseSafeCases = Object.keys(hc).filter(function (c) {
+  return hc[c].safe > 0 && hc[c].expected !== 'likely_safe';
+});
+const failCaseWords = falseSafeCases.length === 1 ? 'one hard case (' + falseSafeCases[0] + ')' :
+  (falseSafeCases.length ? falseSafeCases.join(', ') : 'none');
+const COL_NUM = LEFT + 0.25;
+const COL_IS = 3.95;
+const COL_PROVES = 8.4;
+const W_IS = 4.2;
+const W_PROVES = 3.95;
+T(s, 'WHAT IT IS', { x: COL_IS, y: 1.78, w: W_IS, h: 0.32, fontSize: 14, bold: true, color: BLUE, charSpacing: 1 });
+T(s, 'WHAT IT PROVES', { x: COL_PROVES, y: 1.78, w: W_PROVES, h: 0.32, fontSize: 14, bold: true, color: GREEN,
+  charSpacing: 1 });
+const layers = [
+  { n: '1', name: 'Offline tests', big: isPending(D.tests_passed) ? PENDING : D.tests_passed + '/' + D.tests_total + ' pass',
+    color: BLUE, h: 1.12,
+    is: [{ text: 'Automated checks that run without the AI. A fake model gives scripted answers, including deliberately ' +
+      'wrong ones (e.g. insisting a scam is safe).' }],
+    proves: [{ text: 'Python\'s checks catch bad model answers.' }] },
+  { n: '2', name: 'Break the gate on purpose',
+    big: isPending(D.break_gate_failed) ? PENDING : D.break_gate_failed + ' of ' + D.break_gate_total + ' fail',
+    color: BLUE, h: 1.0,
+    is: [{ text: 'We replaced the verdict gate with one that believes every message is safe, and ran the same tests again.' }],
+    proves: [{ text: 'The tests really notice a broken safety check. They are not empty tests.' }] },
+  { n: '3', name: 'Live runs, real model', big: isPending(D.live_core_runs) ? PENDING : D.live_core_runs + ' runs',
+    sub: isPending(D.live_core_false_safe) ? '' : D.live_core_false_safe + ' false "safe"', color: GREEN, h: 1.36,
+    is: [
+      { text: 'The real agent (qwen3:8b) checks each message. ' },
+      { text: 'Test set 1: ' + val(evalSet.correct) + ' correct', options: { bold: true } },
+      { text: ', ' + val(evalSet.false_safe).split(' of ')[0] + ' false "safe". ' },
+      { text: 'Demo cases: ' + val(D.harness_total) + ' correct', options: { bold: true } },
+      { text: ' (each run ' + val(D.harness_runs_per_case) + ' times).' },
+    ],
+    proves: [{ text: 'The real agent works end to end. The ' + val(D.live_core_false_safe) + ' false "safe" answers ' +
+      'come from ' + failCaseWords + ', reported honestly.' }] },
+  { n: '4', name: 'Large blind test', big: val(L.messages) + ' messages', color: GREEN, h: 1.0,
+    is: [{ text: 'Messages written by a separate AI agent that never saw our rules, frozen before testing.' }],
+    proves: [{ text: 'How ScamShield does on wording it was never tuned for. ' },
+      { text: 'Results on the next slide.', options: { bold: true, color: BLUE } }] },
+];
+let rowY = 2.14;
+layers.forEach(function (r) {
+  foldedBox(s, LEFT, rowY, CONTENT_W, r.h, WHITE, SAGE, 0.3, 'layer ' + r.n);
+  T(s, r.n + '  ' + r.name, { x: COL_NUM, y: rowY + 0.1, w: 3.0, h: 0.32, fontSize: 15, bold: true, color: GREEN });
+  const pend = r.big === PENDING;
+  T(s, r.big, { x: COL_NUM, y: rowY + 0.42, w: 3.0, h: 0.5, fontSize: pend ? 20 : 28, bold: true,
+    color: pend ? RUST : r.color, valign: 'middle' });
+  if (r.sub) {
+    T(s, r.sub, { x: COL_NUM, y: rowY + 0.92, w: 3.0, h: 0.32, fontSize: 16, bold: true, color: RUST });
+  }
+  T(s, r.is, { x: COL_IS, y: rowY + 0.12, w: W_IS, h: r.h - 0.22, fontSize: 16, color: INK, valign: 'middle' });
+  T(s, r.proves, { x: COL_PROVES, y: rowY + 0.12, w: W_PROVES, h: r.h - 0.22, fontSize: 16, color: INK,
+    valign: 'middle' });
+  rowY += r.h + 0.1;
+});
+T(s, 'Not counted as fair tests: test sets 2 and 3 (live agent ' + val(t2.correct) + ' and ' + val(t3.correct) +
+  ') were used to fix the rules. Their runs are inside the ' + val(D.live_core_runs) + ' live runs.',
+{ x: LEFT, y: rowY + 0.02, w: CONTENT_W, h: 0.34, fontSize: 14, italic: true, color: GREEN, valign: 'middle' });
+s.addNotes('This slide shows the four ways I tested ScamShield. Every number is read from the saved evidence files ' +
+  'when the deck is built. ' +
+  'One, offline tests: ' + val(D.tests) + ' tests pass. They run without the AI. A fake, scripted model gives answers I ' +
+  'wrote in advance, many of them deliberately wrong: bad JSON, invented arguments, "safe" on a scam, injection, a ' +
+  'missing guide, Ollama down. Passing means Python\'s checks catch those bad answers. ' +
+  'Two, breaking the gate on purpose: I replaced the verdict gate with one that says every message is safe and ran the ' +
+  'same tests. ' + val(D.break_gate) + ' tests then fail. That is good: it shows the tests really notice when the ' +
+  'safety check is broken, so they are not empty tests. ' +
+  'Three, live runs with the real model, qwen3:8b. On test set 1 the agent got ' + val(evalSet.correct) + ' right with ' +
+  val(evalSet.false_safe) + ' false "safe" answers. Each demo case was run ' + val(D.harness_runs_per_case) +
+  ' times: ' + val(D.harness_total) + ' correct. Together with test sets 2 and 3 that is ' + val(D.live_core_runs) +
+  ' live runs and ' + val(D.live_core_false_safe) + ' false "safe" answers, both from ' + failCaseWords + ', where ' +
+  'neither the rules nor the model saw a problem. ' +
+  'Test sets 2 and 3 are small and I used them to fix the rules, so I do not count them as fair tests. ' +
+  'Four, the large blind test with ' + val(L.messages) + ' messages, on the next slide.');
+
+// ================================================================ 10. Blind test
+s = content('Results', 'Blind test', 'Blind test: ' + val(L.messages) + ' messages it had never seen');
+// left column: what blind means, the mix of messages, the hardest message types
+const LCW = 3.75;
+foldedBox(s, LEFT, 1.9, LCW, 2.45, BLUE, null, 0.4, 'what blind means');
+T(s, 'What "blind" means', { x: LEFT + 0.22, y: 2.02, w: LCW - 0.75, h: 0.4, fontSize: 18, bold: true, color: CREAM });
 T(s, [
-  { text: 'Large blind test set: ', options: { bold: true } },
-  { text: L.messages + ' messages written by a separate AI agent that never saw the rules (frozen). ' },
-  { text: 'Rules only: ' + (LR ? LR.score + ' (' + LR.percent + ', 95% range ' + LR.range + ')' : PENDING) + '. ',
-    options: { bold: true } },
-  { text: (LA ? 'Live agent: ' + LA.score + ' (' + LA.percent + ', 95% range ' + LA.range + ').' : 'Live run of all 614: not done (about 2 hours), future work.'),
-    options: { bold: true } },
-], { x: LEFT + 0.3, y: 5.7, w: CONTENT_W - 0.9, h: 1.25, fontSize: 18, color: WHITE, valign: 'middle' });
-s.addNotes('Every number here is read from the saved evidence files when the deck is built. ' +
-  'The offline tests use a scripted model that gives deliberately wrong answers: bad JSON, invented arguments, ' +
-  '"safe" on a scam, injection, a missing guide, Ollama down. When I break the gate on purpose so it always says ' +
-  'safe, ' + D.break_gate + ' tests fail, so the tests really check the gate. Over all live runs: ' + D.live_total +
-  '. The demo cases were each run ' + D.harness_runs_per_case + ' times. Test sets 2 and 3 were written before ' +
-  'rule fixes and then used to fix the rules, so I no longer call them held out. The large blind test set has ' +
-  L.messages + ' messages written by a separate AI agent that never saw the rules; it is frozen. The 95% range ' +
-  'says where the true score very likely lies. ' +
-  (LA ? 'The live agent scored ' + LA.score + '.' : 'The live agent run on it was not finished when this deck was built.') +
-  (D.live_wrong && D.live_wrong.length ? ' Wrong answers on the smaller sets: ' + D.live_wrong.join(', ') + '.' : ''));
+  { text: 'Written by a separate AI agent that could not see our detection rules.',
+    options: { bullet: { indent: 16 }, breakLine: true } },
+  { text: 'Frozen before testing: never changed to improve the score.', options: { bullet: { indent: 16 } } },
+], { x: LEFT + 0.22, y: 2.5, w: LCW - 0.4, h: 1.75, fontSize: 16, color: WHITE, paraSpaceAfter: 8 });
+const mix = [[counts.scam, 'scams', V_SCAM], [counts.safe, 'safe', V_SAFE], [counts.uncertain, 'not sure', V_UNSURE]];
+mix.forEach(function (m, i) {
+  const x = LEFT + i * 1.27;
+  s.addShape(pres.shapes.RECTANGLE, { x: x, y: 4.5, w: 1.17, h: 0.95, fill: { color: WHITE },
+    line: { color: m[2], width: 1.5 }, objectName: 'mix ' + m[1] });
+  T(s, val(m[0]), { x: x, y: 4.55, w: 1.17, h: 0.5, fontSize: 24, bold: true, color: m[2], align: 'center',
+    valign: 'middle' });
+  T(s, m[1], { x: x, y: 5.03, w: 1.17, h: 0.34, fontSize: 14, color: INK, align: 'center', valign: 'middle' });
+});
+foldedBox(s, LEFT, 5.6, LCW, 1.55, WHITE, SAGE, 0.32, 'weakest');
+T(s, 'Hardest types' + (L.weakest_by === 'agent' ? ' (full agent)' : ' (rules alone)'),
+  { x: LEFT + 0.2, y: 5.68, w: LCW - 0.55, h: 0.34, fontSize: 15, bold: true, color: GREEN });
+const weakRuns = (L.weakest || []).map(function (wk, i) {
+  const score = L.weakest_by === 'agent' ? wk.agent : wk.rules;
+  return { text: wk.name + ': ' + score, options: { breakLine: i < L.weakest.length - 1 } };
+});
+T(s, weakRuns.length ? weakRuns : PENDING, { x: LEFT + 0.2, y: 6.04, w: LCW - 0.3, h: 1.05, fontSize: 16, color: INK,
+  paraSpaceAfter: 2 });
+
+// right column: rules alone vs full agent
+const RX = 4.65;
+const PW = 3.95;
+const PGAP = 0.18;
+function shortRange(ci) {
+  return ci ? Math.round(ci[0] * 100) + '–' + Math.round(ci[1] * 100) + '%' : PENDING;
+}
+function panel(x, kind, title, sub, result) {
+  const dark = kind === 'agent';
+  const fg = dark ? WHITE : INK;
+  foldedBox(s, x, 1.9, PW, 2.8, dark ? BLUE : WHITE, dark ? null : SAGE, 0.4, title);
+  T(s, title, { x: x + 0.22, y: 2.02, w: PW - 0.7, h: 0.4, fontSize: 20, bold: true, color: dark ? CREAM : BLUE });
+  T(s, sub, { x: x + 0.22, y: 2.42, w: PW - 0.5, h: 0.3, fontSize: 14, color: dark ? WHITE : GREEN });
+  if (!result) {
+    T(s, 'Live run in progress', { x: x + 0.22, y: 2.95, w: PW - 0.44, h: 0.6, fontSize: 26, bold: true, color: CREAM });
+    T(s, 'One live run per message takes about 2 hours. This slide is rebuilt from the results when it finishes.',
+      { x: x + 0.22, y: 3.6, w: PW - 0.44, h: 0.95, fontSize: 16, color: WHITE });
+    return;
+  }
+  T(s, result.percent, { x: x + 0.22, y: 2.8, w: 1.75, h: 0.85, fontSize: 48, bold: true,
+    color: dark ? CREAM : BLUE, valign: 'middle' });
+  T(s, result.score.replace('/', ' of ') + ' correct', { x: x + 1.95, y: 2.8, w: PW - 2.1, h: 0.85, fontSize: 16,
+    color: fg, valign: 'middle' });
+  const cells = [
+    [shortRange(result.ci), '95% range'],
+    [result.false_safe.split(' of ')[0], 'false "safe" of ' + result.false_safe.split(' of ')[1]],
+    [result.false_alarm.split(' of ')[0], 'false alarms of ' + result.false_alarm.split(' of ')[1]],
+  ];
+  cells.forEach(function (c, i) {
+    const cx = x + 0.22 + i * 1.2;
+    T(s, c[0], { x: cx, y: 3.78, w: 1.18, h: 0.4, fontSize: 20, bold: true, color: i === 1 ? (dark ? CREAM : RUST) : fg });
+    T(s, c[1], { x: cx, y: 4.18, w: 1.12, h: 0.5, fontSize: 14, color: fg });
+  });
+}
+panel(RX, 'rules', 'Rules alone', 'no AI: Python\'s warning-sign rules only', LR);
+panel(RX + PW + PGAP, 'agent', 'Full agent', 'AI (qwen3:8b) + Python checks', LA);
+
+// range bars: where the true accuracy very likely lies
+const bars = [
+  ['Rules alone (' + val(L.messages) + ')', LR ? LR.ci : null, LR ? LR.range : PENDING, GREEN],
+  ['Full agent (' + val(L.messages) + ')', LA ? LA.ci : null, LA ? LA.range : 'in progress', BLUE],
+  ['Test set 1 (' + val(evalSet.messages) + ')', evalSet.ci || null, val(evalSet.range), SKY],
+];
+let low = 1;
+bars.forEach(function (b) {
+  if (b[1]) {
+    low = Math.min(low, b[1][0]);
+  }
+});
+const AX0 = Math.max(0, Math.floor((low * 100 - 2) / 10) * 10);
+const TRACK_X = 8.0;
+const TRACK_W = 4.5;
+function ax(percent) {
+  return TRACK_X + (percent - AX0) / (100 - AX0) * TRACK_W;
+}
+T(s, '95% range: where the true accuracy very likely lies', { x: RX, y: 4.85, w: 8.0, h: 0.32, fontSize: 15,
+  bold: true, color: GREEN });
+bars.forEach(function (b, i) {
+  const y = 5.22 + i * 0.36;
+  T(s, [{ text: b[0] + ': ', options: { bold: true } }, { text: b[2].replace(' to ', '–') }],
+    { x: RX, y: y, w: 3.3, h: 0.3, fontSize: 14, color: INK, valign: 'middle' });
+  s.addShape(pres.shapes.RECTANGLE, { x: TRACK_X, y: y + 0.13, w: TRACK_W, h: 0.04, fill: { color: SAGE },
+    line: { color: SAGE, width: 0 }, objectName: 'track' });
+  if (b[1]) {
+    const x0 = ax(b[1][0] * 100);
+    const x1 = ax(b[1][1] * 100);
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x0, y: y + 0.03, w: Math.max(0.08, x1 - x0), h: 0.24,
+      rectRadius: 0.12, fill: { color: b[3] }, line: { color: b[3], width: 0 }, objectName: 'range ' + b[0] });
+  }
+});
+for (let t = AX0; t <= 100; t += 10) {
+  T(s, t + '%', { x: ax(t) - 0.35, y: 6.3, w: 0.7, h: 0.26, fontSize: 14, color: GREEN, align: 'center' });
+}
+const halves = [LR, LA].filter(function (r) { return r && r.ci; }).map(function (r) {
+  return (r.ci[1] - r.ci[0]) * 50;
+});
+const half = halves.length ? Math.round(Math.max.apply(null, halves)) : null;
+T(s, 'With ' + val(L.messages) + ' messages the true accuracy is very likely within ±' + (half === null ? '?' : half) +
+  ' points; with ' + val(evalSet.messages) + ' messages it could be anywhere from ' +
+  val(evalSet.range).replace(' to ', ' to ') + '.',
+{ x: RX, y: 6.62, w: 8.08, h: 0.55, fontSize: 16, italic: true, color: INK, valign: 'middle' });
+s.addNotes('This is the fairest test. The ' + val(L.messages) + ' messages were written by a separate AI agent that ' +
+  'could not see my detection rules, the code or the other test sets, and the set was frozen before testing, so I ' +
+  'never changed it to get a better score. It has ' + val(counts.scam) + ' scams, ' + val(counts.safe) + ' safe ' +
+  'messages and ' + val(counts.uncertain) + ' messages where the right answer is not sure. ' +
+  (LR ? 'Rules alone, with no AI at all, get ' + LR.score + ' right, which is ' + LR.percent + '. ' +
+    'They wrongly call ' + LR.false_safe + ' messages that are not safe "safe", and raise ' + LR.false_alarm +
+    ' false alarms on safe messages. ' : '') +
+  (LA ? 'The full agent, the model plus all of Python\'s checks, gets ' + LA.score + ', which is ' + LA.percent +
+    ', with ' + LA.false_safe + ' false "safe" answers and ' + LA.false_alarm + ' false alarms. ' :
+    'The full agent run on all ' + val(L.messages) + ' messages takes about two hours and was still running when this ' +
+    'deck was built. ') +
+  'The 95% range means: if we could test on endless similar messages, the true accuracy would very likely fall in ' +
+  'this range. With ' + val(L.messages) + ' messages it is narrow, about plus or minus ' + val(half) + ' points; with ' +
+  'the ' + val(evalSet.messages) + ' messages of test set 1 it is ' + val(evalSet.range) + ', so a perfect score ' +
+  'there says much less. The hardest message types are listed bottom left.');
 
 // ================================================================ 10. What I learned
 pres.addSection({ title: 'Wrap-up' });
