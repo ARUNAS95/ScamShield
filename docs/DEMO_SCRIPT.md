@@ -1,7 +1,8 @@
 # ScamShield: 5-minute live demo script
 
-Four short live runs: an ordinary message (safe), a clear scam, an uncertain message (routing and
-human help), and a tool failure (problem case). The prompt injection is an optional extra if time is left.
+Five short live runs: an ordinary message (safe), a clear scam, an uncertain message (routing and
+human help), and two problem cases: a tool failure, and a scam the rules miss (the model's concern makes it
+"not sure", never "safe"). The prompt injection is an optional extra if time is left.
 Every command uses `--consent yes`, so the simulated family-alert question never waits for typing.
 
 ## Before class (5 minutes, not part of the talk)
@@ -20,6 +21,7 @@ python3 scamshield_agent.py --case ordinary --consent yes --quiet   # warms up t
   `evidence/harness/rag/run_scam_1_console.txt`,
   `evidence/harness/rag/run_uncertain_1_console.txt`,
   `evidence/harness/rag/run_guide_missing_1_console.txt`,
+  `evidence/harness/rag/run_model_catches_miss_1_console.txt`,
   `evidence/harness/rag/run_injection_1_console.txt` (optional extra).
 - Have the slide "How it works" (the diagram) ready to switch back to.
 
@@ -40,20 +42,21 @@ python3 scamshield_agent.py --case ordinary --consent yes --quiet   # warms up t
 
 | Time | Step |
 |---|---|
-| 0:00 to 0:20 | Set-up sentence |
-| 0:20 to 1:00 | Run 1: ordinary (safe) |
-| 1:00 to 2:10 | Run 2: scam |
-| 2:10 to 3:40 | Run 3: uncertain (routing, human help) |
-| 3:40 to 4:40 | Run 4: guide_missing (problem case: tool failure) |
-| 4:40 to 5:00 | Wrap-up, open a trace file |
+| 0:00 to 0:15 | Set-up sentence |
+| 0:15 to 0:50 | Run 1: ordinary (safe) |
+| 0:50 to 1:50 | Run 2: scam |
+| 1:50 to 3:00 | Run 3: uncertain (routing, human help) |
+| 3:00 to 3:50 | Run 4: guide_missing (problem case: tool failure) |
+| 3:50 to 4:45 | Run 5: model_catches_miss (problem case: the rules miss it) |
+| 4:45 to 5:00 | Wrap-up, open a trace file |
 | extra | Optional: injection |
 
-### 0:00 to 0:20: set-up
+### 0:00 to 0:15: set-up
 
 Say: "ScamShield checks one fictional text message. The local model chooses one tool at a time; Python
 checks every choice and only accepts a verdict that the recorded evidence supports."
 
-### 0:20 to 1:00: run 1, an ordinary pharmacy reminder
+### 0:15 to 0:50: run 1, an ordinary pharmacy reminder
 
 ```bash
 python3 scamshield_agent.py --case ordinary --consent yes
@@ -66,7 +69,7 @@ Point at:
 3. Banner: **LIKELY SAFE**. Say: "Safe needs a saved contact, no strong signs, at most one weak sign,
    every link checked and official, and no tool failure. Everything else is 'scam' or 'not sure'."
 
-### 1:00 to 2:10: run 2, the Medicare gift-card scam
+### 0:50 to 1:50: run 2, the Medicare gift-card scam
 
 ```bash
 python3 scamshield_agent.py --case scam --consent yes
@@ -84,7 +87,7 @@ Point at:
 Expected: verdict likely scam. The exact tools and their order may differ between runs; that is the
 model deciding.
 
-### 2:10 to 3:40: run 3, the doctor's office that cannot be confirmed (routing and human help)
+### 1:50 to 3:00: run 3, the doctor's office that cannot be confirmed (routing and human help)
 
 ```bash
 python3 scamshield_agent.py --case uncertain --consent yes
@@ -101,7 +104,7 @@ Point at:
 4. Banner: **NOT SURE - ASK SOMEONE YOU TRUST**, and `HUMAN HELP : offered by model` (on its own),
    `model_after_gate_hint` (after the gate told it) or `python` (Python offered it).
 
-### 3:40 to 4:40: run 4, the missing guide (tool failure)
+### 3:00 to 3:50: run 4, the missing guide (tool failure)
 
 ```bash
 python3 scamshield_agent.py --case guide_missing --consent yes
@@ -117,7 +120,30 @@ Point at:
 The model does not always search the guide. If it does not, there is no tool failure in this run (the
 answer is still "not sure"): show the saved run where it did, `evidence/harness/rag/run_guide_missing_1_console.txt`.
 
-### 4:40 to 5:00: wrap-up
+### 3:50 to 4:45: run 5, a scam the rules miss (the model's concern)
+
+```bash
+python3 scamshield_agent.py --case model_catches_miss --consent yes
+```
+
+Say first: "Emma is a saved contact. The text says a man will come to the door tonight to pick up cash,
+put it in an envelope, she will explain later. That is a known courier trick, but none of our rules
+recognizes this wording."
+
+Point at:
+1. `STEP 1`: `strong: none; weak: none`. Say: "The rules missed it."
+2. `check_sender`: a saved contact. On evidence alone, Python could support "safe".
+3. The model proposes `likely_scam`, and `GATE : REJECTED` because no warning sign was recorded. The
+   feedback invites "uncertain" and `ask_human_helper`. If the model then tries `likely_safe`, the gate
+   rejects that too: "you raised a concern earlier; answer uncertain and use ask_human_helper".
+4. Banner: **NOT SURE - ASK SOMEONE YOU TRUST**, human help offered. Say: "The rules missed it; the
+   model's concern made it 'not sure', never 'safe'. Python can block the model's label, but the model's
+   worry can only make the answer more careful."
+
+The model decides the tool order and whether it is worried. If it is not worried, the evidence alone
+would support "safe": that is the honest limit of the rules (see Known limitations in the README).
+
+### 4:45 to 5:00: wrap-up
 
 ```bash
 python3 -m json.tool evidence/guide_missing_trace.json | head -40
@@ -145,6 +171,7 @@ test 'injection cannot make message safe' shows that with a scripted model that 
 |---|---|
 | Ollama is slow (a step takes more than about 20 s) | Press Ctrl+C and show the matching saved console log, e.g. `cat evidence/harness/rag/run_uncertain_1_console.txt`. Say: "This is the same command, recorded earlier." |
 | Ollama is not running | `ollama serve` in another tab, or use the saved console logs. Optionally show the safe failure: the run retries the model call twice and then stops with `model_error`, never "safe". |
+| `model_catches_miss` run is slow or ends differently | Show `evidence/harness/rag/run_model_catches_miss_1_console.txt`; if the live model ever called it safe, say so honestly: the rules cannot see this trick, and only a worried model or a human can. |
 | `guide_missing` run did not search the guide (no tool failure) | Show `evidence/harness/rag/run_guide_missing_1_console.txt`, a saved run where the search failed and the stop reason is `tool_failure`. |
 | The model chooses a different tool order than expected | Good: point out that the order is the model's decision and Python only checks it. |
 | A `MODEL ERROR ... (retry 1 of 2)` line appears | Point at it: a failed model call is retried and the retry is recorded in the trace. |
