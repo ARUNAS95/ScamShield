@@ -889,6 +889,25 @@ def test_helper_post_check_reads_the_log_back():
     assert 'post-check failed' in record['tool_failures'][0] and 'alert log' in record['tool_failures'][0]
 
 
+def test_python_help_offer_is_checked_and_traced():
+    log = TEMP / 'alerts.log'
+    if log.exists():
+        log.unlink()
+    # The model never offers help and runs out of steps: Python offers it.
+    record = run('uncertain', [
+        action('extract_signals'),
+        action('check_sender', sender='+1-555-0163'),
+    ], consent_fn=agent.consent_yes, max_steps=2)
+    assert record['final_label'] == 'uncertain' and record['helper_offered_by'] == 'python'
+    last = record['trace'][-1]
+    assert last['action'] == 'ask_human_helper' and last['raw_reply'] is None
+    assert last['state_update'] == 'offered by Python'
+    assert last['check_result']['post_check']['ok'] is True
+    assert 'alert log' in last['check_result']['post_check']['detail']
+    assert record['steps'] == 2 and len(record['trace']) == 3
+    assert 'SIMULATED' in log.read_text()
+
+
 def test_tool_exception_step_has_check_result():
     original = agent.TOOLS['check_sender']['run']
 
@@ -1244,6 +1263,7 @@ if __name__ == '__main__':
         ('post-checks recorded for each tool', test_post_checks_recorded_for_each_tool),
         ('failed post-check is a tool failure', test_post_check_failure_is_a_tool_failure),
         ('helper post-check reads the alert log back', test_helper_post_check_reads_the_log_back),
+        ('help offered by Python is post-checked and traced', test_python_help_offer_is_checked_and_traced),
         ('tool exception step still has a check_result', test_tool_exception_step_has_check_result),
         ('badly shaped result shows in tool_sequence', test_badly_shaped_result_in_tool_sequence),
         ('trace keeps the exact gate feedback', test_trace_keeps_exact_gate_feedback),
