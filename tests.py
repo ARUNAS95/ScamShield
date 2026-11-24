@@ -203,6 +203,61 @@ def test_ordinary_message_has_no_warning_signs():
     assert not agent.flags_with_strength(context, 'weak')
 
 
+def signals_for(text, sender='+1-555-0100'):
+    """Run extract_signals on any text and return the context."""
+    message = {'sender': sender, 'text': text}
+    context = agent.new_context(message, rag.GUIDE_FILE, 'keyword')
+    runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
+    agent.run_requested_tool('extract_signals', {}, context, runtime)
+    return context
+
+
+def test_any_web_address_ending_is_a_link():
+    context = signals_for('Confirm at parcel-help.shop or HTTPS://Pay.Example.SITE/x?y=1 or desk.online')
+    assert context['links'] == ['parcel-help.shop', 'pay.example.site', 'desk.online']
+    assert agent.classify_domain('parcel-help.shop', DATA) == ('unknown', None)
+
+
+def test_ordinary_text_is_not_a_link():
+    context = signals_for('Dr. Lee at the Oak St. store, $45.20 by 8 pm. Bring a list, e.g. pills. Mail bob@mail.com')
+    assert context['links'] == []
+
+
+def test_ip_address_link_is_strong():
+    context = signals_for('Verify it at http://192.168.10.45/login')
+    assert context['links'] == ['192.168.10.45']
+    assert agent.classify_domain('192.168.10.45', DATA) == ('ip_address', None)
+    runtime = {'data': DATA, 'consent_fn': agent.consent_no, 'alert_log': TEMP / 'alerts.log'}
+    outcome, status = agent.run_requested_tool('check_link', {'url': 'http://192.168.10.45/login'}, context, runtime)
+    assert status == 'ran' and 'ip_link' in agent.flag_names(context)
+    assert agent.supported_label(context) == 'likely_scam'
+
+
+def test_disguised_gift_card_words_found():
+    for text in ['Pay with g1ft c@rds today', 'Pay with \uff47\uff49\uff46\uff54\uff0d\uff43\uff41\uff52\uff44\uff53',
+                 'Pay with g i f t - c a r d s', 'Buy gift-cards now',
+                 'Please pick up some store cards and read me the numbers']:
+        assert 'gift_card' in agent.flag_names(signals_for(text)), text
+    # Fullwidth letters still name the organization.
+    assert signals_for('\uff29\uff32\uff33 notice')['claimed_orgs'] == ['IRS']
+
+
+def test_payment_apps_are_strong():
+    for text in ['Send me $300 through Zelle', 'pay the charge by MoneyGram or Venmo', 'send it on Cash App',
+                 'wire me the money tonight']:
+        assert 'payment_app' in agent.flag_names(signals_for(text)), text
+    # Saying money was SENT is not a request, so family news is not flagged.
+    assert 'payment_app' not in agent.flag_names(signals_for('I sent you $20 on Venmo for lunch'))
+
+
+def test_new_code_request_wordings():
+    for text in ['Tell me the 6-digit code you just got', 'what is the code you received?',
+                 'read me the numbers on the back of your debit card']:
+        assert 'code_request' in agent.flag_names(signals_for(text)), text
+    # The usual bank alert wording (singular "number") is not a code request.
+    assert 'code_request' not in agent.flag_names(signals_for('call the number on the back of your card'))
+
+
 # ------------------------------------------------------------------------
 # 4. The verdict gate: checked against recorded evidence, not model claims
 # ------------------------------------------------------------------------
@@ -557,6 +612,12 @@ if __name__ == '__main__':
         ('extract_signals on scam message', test_extract_signals_scam_message),
         ('injection is a strong warning sign', test_extract_signals_injection_is_strong),
         ('ordinary message has no warning signs', test_ordinary_message_has_no_warning_signs),
+        ('any web address ending is a link', test_any_web_address_ending_is_a_link),
+        ('ordinary text (Dr., St., $45.20, 8 pm., e.g.) is not a link', test_ordinary_text_is_not_a_link),
+        ('IP-address link is a strong warning sign', test_ip_address_link_is_strong),
+        ('disguised gift card words found (g1ft, fullwidth, spaced)', test_disguised_gift_card_words_found),
+        ('payment apps are strong warning signs', test_payment_apps_are_strong),
+        ('new code request wordings', test_new_code_request_wordings),
         ('fabricated evidence id rejected', test_fabricated_evidence_rejected),
         ('model insisting scam is safe -> gate downgrade', test_model_insists_scam_is_safe),
         ('injection cannot make message safe', test_injection_cannot_make_message_safe),

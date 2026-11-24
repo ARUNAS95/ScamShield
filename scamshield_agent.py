@@ -25,6 +25,7 @@ import json
 import re
 import secrets
 import sys
+import unicodedata
 from pathlib import Path
 
 import requests
@@ -93,10 +94,64 @@ def result(ok, message, data=None):
 # 4. Small helpers for links, phone numbers and organizations
 # ------------------------------------------------------------------------
 
+# A link is any of these three shapes (the text is lower-cased first):
+#   1. anything that starts with http:// or https://
+#   2. a number address like 192.168.10.45 (with an optional /path)
+#   3. a web address: name.name with a 2 to 24 letter ending (.com, .shop,
+#      .online, ...), with an optional /path. Any ending counts, so a new
+#      ending is never missed; check_link marks endings it does not know as
+#      'unknown', which already blocks likely_safe.
+# The "not after a letter, digit, dot, @ or -" rule and the 2-letter minimum
+# keep ordinary text out: "Dr. Lee", "Oak St. store", "$45.20", "8 pm.",
+# "e.g." and e-mail addresses are not links.
 LINK_PATTERN = re.compile(
-    r'(?:https?://)?(?:www\.)?((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+'
-    r'(?:com|gov|net|org|co|info|biz|io|example|ly|us|me|xyz|top|app))\b(?:/[^\s]*)?')
+    r'https?://[^\s<>"\']+'
+    r'|(?<![\w.@-])(?:\d{1,3}\.){3}\d{1,3}\b(?::\d+)?(?:/[^\s]*)?'
+    r'|(?<![\w.@-])(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,24}\b(?:/[^\s]*)?')
+IP_ADDRESS_PATTERN = re.compile(r'(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})')
 PHONE_PATTERN = re.compile(r'(?<!\d)(?:\+?1[-.\s])?(?:\(?\d{3}\)?[-.\s])?\d{3}[-.\s]\d{4}(?!\d)')
+
+# Look-alike characters scammers use to dodge simple word filters
+# ("g1ft c@rd"). They are only undone next to a letter, so "$45" and
+# "5-digit" stay as they are.
+LOOKALIKE_LETTERS = {'0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '@': 'a', '$': 's'}
+LOOKALIKE_PATTERN = re.compile(r'(?<=[a-z])[01345@$]|[01345@$](?=[a-z])')
+# Three or more single letters with single spaces between them ("g i f t").
+SPACED_LETTERS_PATTERN = re.compile(r'\b(?:[a-z] ){2,}[a-z]\b')
+
+
+def normalize_text(text):
+    """Unicode NFKC turns fullwidth and other fancy letters into plain ones:
+    'ＧＩＦＴ' -> 'GIFT', '－' -> '-'. (Look-alike letters from other
+    alphabets, such as Cyrillic, are NOT changed; a known limit.)"""
+    return unicodedata.normalize('NFKC', text)
+
+
+def undo_one_lookalike(match):
+    character = match.group(0)
+    return LOOKALIKE_LETTERS.get(character, character)
+
+
+def join_spaced_letters(match):
+    return match.group(0).replace(' ', '')
+
+
+def undo_disguises(lower_text):
+    """A second copy of the (lower-case, NFKC) text used ONLY for warning-sign
+    matching: 'g1ft c@rds' -> 'gift cards', 'g i f t' -> 'gift'.
+    Links are always taken from the undisguised text."""
+    text = LOOKALIKE_PATTERN.sub(undo_one_lookalike, lower_text)
+    return SPACED_LETTERS_PATTERN.sub(join_spaced_letters, text)
+
+
+def is_ip_address(domain):
+    match = IP_ADDRESS_PATTERN.fullmatch(domain)
+    if match is None:
+        return False
+    for part in match.groups():
+        if int(part) > 255:
+            return False
+    return True
 
 
 def normalize_domain(url):
@@ -107,7 +162,7 @@ def normalize_domain(url):
             text = text[len(prefix):]
     if text.startswith('www.'):
         text = text[4:]
-    for mark in ['/', '?', '#']:
+    for mark in ['/', '?', '#', ':']:
         text = text.split(mark)[0]
     return text.strip('.,;:)(')
 
@@ -131,7 +186,9 @@ def edit_distance(a, b):
 
 def classify_domain(domain, data):
     """Return (status, organization). status is official, known_bad,
-    shortened, lookalike or unknown. Nothing is ever opened."""
+    ip_address, shortened, lookalike or unknown. Nothing is ever opened."""
+    if is_ip_address(domain):
+        return 'ip_address', None
     if domain in data['domains']['known_bad']:
         return 'known_bad', None
     for org in data['organizations']:
@@ -184,17 +241,31 @@ def find_organization(name, data):
 
 SIGNAL_RULES = [
     {'name': 'gift_card', 'strength': 'strong',
-     'patterns': [r'\bgift ?cards?\b', r'\bprepaid cards?\b', r'\bitunes cards?\b', r'\bgoogle play cards?\b'],
+     'patterns': [r'\bgift\s*-?\s*cards?\b', r'\bprepaid cards?\b', r'\bitunes cards?\b',
+                  r'\bgoogle play cards?\b',
+                  # "pick up some store cards ... read me the numbers"
+                  r'\bstore cards?\b.{0,80}\bnumbers?\b'],
      'fact': 'asks you to pay with a gift card',
-     'keywords': ['gift card', 'prepaid card', 'itunes', 'google play']},
+     'keywords': ['gift card', 'prepaid card', 'store card', 'itunes', 'google play']},
     {'name': 'crypto', 'strength': 'strong',
      'patterns': [r'\bbitcoin\b', r'\bcrypto', r'\bwire transfer\b', r'\bwestern union\b'],
      'fact': 'asks for payment by cryptocurrency or wire transfer',
      'keywords': ['bitcoin', 'crypto', 'wire']},
+    # Money apps and transfer services: money sent this way is very hard to
+    # get back. Only a REQUEST to send or pay with one counts, so "I sent
+    # you $20 on Venmo" from family is not a warning sign.
+    {'name': 'payment_app', 'strength': 'strong',
+     'patterns': [r'\b(send|pay|transfer|wire)\b.{0,60}\b(zelle|venmo|cash ?app|moneygram)\b',
+                  r'\bwire (me |us )?(the )?(money|funds|payment|cash)\b'],
+     'fact': 'asks you to send money through a money app or transfer service, which is very hard to get back',
+     'keywords': ['zelle', 'venmo', 'cash app', 'moneygram', 'wire', 'money app', 'payment app', 'transfer']},
     {'name': 'code_request', 'strength': 'strong',
      'patterns': [r'\b(verification|security|one[- ]time|login) (pass)?code\b', r'\botp\b', r'\bpin\b',
                   r'\bpassword', r'\bsocial security number\b', r'\bssn\b', r'\baccount number\b',
-                  r'\bsend (me |us )?the code\b'],
+                  r'\bsend (me |us )?the code\b',
+                  r'\bcodes? (that )?you (just )?(got|received)\b',
+                  r'\b\d[- ]?digit (code|number|pin)\b',
+                  r'\bnumbers on (the back of )?your (\w+ ){0,2}card\b'],
      'fact': 'asks for a code, password or personal number',
      'keywords': ['code', 'password', 'pin', 'social security number', 'account number', 'personal number']},
     {'name': 'ai_directed', 'strength': 'strong',
@@ -247,6 +318,12 @@ LINK_FLAGS = {
     'known_bad': {'name': 'known_bad_link', 'strength': 'strong',
                   'fact': 'has a link to a website known for scams',
                   'keywords': ['link', 'website', 'web address']},
+    # A link made only of numbers (192.168.10.45) is STRONG: real companies
+    # and agencies use a named website, and a number address hides who runs
+    # the site. None of the organizations in our trusted list uses one.
+    'ip_address': {'name': 'ip_link', 'strength': 'strong',
+                   'fact': 'has a link made only of numbers that hides who runs the website',
+                   'keywords': ['link', 'website', 'web address', 'numbers']},
     'shortened': {'name': 'shortened_link', 'strength': 'weak',
                   'fact': 'has a short link that hides where it really goes',
                   'keywords': ['link', 'short']},
@@ -293,14 +370,18 @@ def validate_extract_signals(argument, context, runtime):
 
 
 def run_extract_signals(argument, context, runtime):
-    text = context['message']['text']
+    # Two copies of the text: 'lower' (NFKC, lower case) for links and phone
+    # numbers, and 'undisguised' (look-alike letters undone, spaced letters
+    # joined) that is ALSO searched for warning signs and organizations.
+    text = normalize_text(context['message']['text'])
     lower = text.lower()
+    undisguised = undo_disguises(lower)
     evidence_id = context['current_evidence_id']
 
     links = []
     for match in LINK_PATTERN.finditer(lower):
         domain = normalize_domain(match.group(0))
-        if domain not in links:
+        if domain and domain not in links:
             links.append(domain)
     phones = []
     for match in PHONE_PATTERN.finditer(text):
@@ -309,14 +390,16 @@ def run_extract_signals(argument, context, runtime):
 
     for rule in SIGNAL_RULES:
         for pattern in rule['patterns']:
-            if re.search(pattern, lower):
+            if re.search(pattern, lower) or re.search(pattern, undisguised):
                 add_flag(context, rule['name'], rule['strength'], rule['fact'], rule['keywords'], evidence_id)
                 break
 
     claimed = []
     for org in runtime['data']['organizations']:
         for alias in org['aliases']:
-            if re.search(r'\b' + re.escape(alias) + r'\b', lower) and org['name'] not in claimed:
+            pattern = r'\b' + re.escape(alias) + r'\b'
+            found = re.search(pattern, lower) or re.search(pattern, undisguised)
+            if found and org['name'] not in claimed:
                 claimed.append(org['name'])
 
     context['links'] = links
