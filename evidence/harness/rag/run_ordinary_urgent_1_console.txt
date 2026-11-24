@@ -6,16 +6,19 @@ MESSAGE: Main Street Pharmacy: Please confirm your refill by Friday. Reply YES o
 MODEL DECISION : extract_signals {}
 VALIDATION     : ok
 TOOL RESULT E1 : strong: none; weak: urgency; 1 link(s); claims to be: Main Street Pharmacy
+NEXT OPTIONS   : check_link, check_sender, lookup_official_contact, search_scam_guide, done
 
 === STEP 2 ===
 MODEL DECISION : check_link {"url": "mainstreetpharmacy.example"}
 VALIDATION     : ok
 TOOL RESULT E2 : mainstreetpharmacy.example is the official website of Main Street Pharmacy.
+NEXT OPTIONS   : check_sender, lookup_official_contact, search_scam_guide, done
 
 === STEP 3 ===
 MODEL DECISION : check_sender {"sender": "+1-555-0142"}
 VALIDATION     : ok
 TOOL RESULT E3 : +1-555-0142 is a saved contact: Main Street Pharmacy.
+NEXT OPTIONS   : lookup_official_contact, search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
 MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message

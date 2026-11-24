@@ -6,43 +6,61 @@ MESSAGE: Hi, this is Dr. Lee's office. Please call us back about your appointmen
 MODEL DECISION : extract_signals {}
 VALIDATION     : ok
 TOOL RESULT E1 : strong: none; weak: none; 0 link(s); claims to be: no known organization
+NEXT OPTIONS   : check_sender, search_scam_guide, done
 
 === STEP 2 ===
 MODEL DECISION : check_sender {"sender": "+1-555-0163"}
 VALIDATION     : ok
 TOOL RESULT E2 : +1-555-0163 is NOT a saved contact (this alone is not a warning sign).
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 3 ===
 MODEL DECISION : search_scam_guide {"query": "asks you to call back"}
 VALIDATION     : ok
 TOOL RESULT E3 : Found 2 guide entries (rag): G15: Unknown callers asking you to call back; G17: Real
                  appointment reminders.
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
 MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3"], "explanation": "We are not sure
-                 about this message. It asks you to call back and comes from a number you don't know. These
-                 could be signs of a scam, but they could also be a real reminder. If you're unsure, ask a
-                 family member for help."}
-GATE           : REJECTED - help was offered before uncertain -> use ask_human_helper first
+                 about this message. It asks you to call back, and the number is not in your contacts. Guide
+                 G15 says unknown callers asking for a call back can be a scam, but guide G17 says real
+                 reminders also ask for a call back. You should call the office using a number you already
+                 have, like from an appointment card."}
+GATE           : REJECTED - help must be offered before uncertain -> use ask_human_helper first
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 5 ===
 MODEL DECISION : ask_human_helper {"reason": "E1 and E2 show the message asks you to call back and comes from
-                 a number you don't know. These could be signs of a scam, but they could also be a real
-                 reminder. We suggest asking a trusted family member for help to confirm."}
+                 a number that is not in your contacts. Guide G15 suggests this could be a scam, but guide G17
+                 says real reminders also ask for a call back. We need to check with a trusted family member
+                 to be sure."}
 VALIDATION     : ok
 TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
                  message was sent.
+NEXT OPTIONS   : search_scam_guide, done
 
 === STEP 6 ===
 MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not
-                 sure about this message. It asks you to call back and comes from a number you don't know.
-                 These could be signs of a scam, but they could also be a real reminder. A trusted family
-                 member has been asked for help to confirm."}
+                 sure about this message. It asks you to call back, and the number is not in your contacts.
+                 Guide G15 says unknown callers asking for a call back can be a scam, but guide G17 says real
+                 reminders also ask for a call back. A trusted helper was told to check, but no real message
+                 was sent."}
+GATE           : PASSED - evidence supports uncertain
+READABILITY    : needs simpler words - shorten this sentence to 22 words or fewer: "Guide G15 says unknown
+                 callers asking for a call back can be a scam, but guide G17 says real reminders also ask for
+                 a call back."
+NEXT OPTIONS   : search_scam_guide, done
+
+=== STEP 7 ===
+MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not
+                 sure about this message. It asks you to call back and the number is unknown. Real reminders
+                 also ask for a call back."}
 GATE           : PASSED - evidence supports uncertain
 
 ====================== SCAMSHIELD RESULT ======================
 VERDICT     : NOT SURE - ASK SOMEONE YOU TRUST
-STOP REASON : success   (steps: 6, rejected proposals: 0, gate rejections: 1)
+STOP REASON : success   (steps: 7, rejected proposals: 0, gate rejections: 1)
 TOOLS USED  : extract_signals -> check_sender -> search_scam_guide -> ask_human_helper
 EVIDENCE    :
   E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: no known organization
@@ -52,13 +70,12 @@ EVIDENCE    :
   E4 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
       real message was sent.
 EXPLANATION (model):
-  We are not sure about this message. It asks you to call back and comes from a number you don't know. These
-  could be signs of a scam, but they could also be a real reminder. A trusted family member has been asked for
-  help to confirm.
+  We are not sure about this message. It asks you to call back and the number is unknown. Real reminders also
+  ask for a call back.
 WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
               we have let Priya (daughter) know so they can help.
 Tip from our guide (G15): Call the office using a number you already have, such as from an appointment card,
   or ask a family member.
-HUMAN HELP  : offered by model, consent = True (simulated)
+HUMAN HELP  : offered by model_after_gate_hint, consent = True (simulated)
 TRACE       : evidence/harness/rag/run_uncertain_1_trace.json
 ===============================================================

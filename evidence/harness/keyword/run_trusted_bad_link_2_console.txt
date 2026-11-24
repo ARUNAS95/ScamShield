@@ -6,28 +6,33 @@ MESSAGE: Grandma it's Emma! Look at the photos from my trip here: firstcity-bank
 MODEL DECISION : extract_signals {}
 VALIDATION     : ok
 TOOL RESULT E1 : strong: none; weak: none; 1 link(s); claims to be: no known organization
+NEXT OPTIONS   : check_link, check_sender, search_scam_guide, done
 
 === STEP 2 ===
 MODEL DECISION : check_link {"url": "firstcity-bank-login.co"}
 VALIDATION     : ok
 TOOL RESULT E2 : firstcity-bank-login.co is a LOOKALIKE of the official First City Bank website (strong
                  warning sign).
+NEXT OPTIONS   : check_sender, search_scam_guide, done
 
 === STEP 3 ===
 MODEL DECISION : check_sender {"sender": "+1-555-0177"}
 VALIDATION     : ok
 TOOL RESULT E3 : +1-555-0177 is a saved contact: Emma (granddaughter).
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
-MODEL DECISION : search_scam_guide {"query": "lookalike bank website"}
+MODEL DECISION : search_scam_guide {"query": "lookalike website from family contact"}
 VALIDATION     : ok
-TOOL RESULT E4 : Found 2 guide entries (keyword): G03: Lookalike website addresses; G13: Shortened links hide
-                 where they go.
+TOOL RESULT E4 : Found 2 guide entries (keyword): G03: Lookalike website addresses; G11: Fake tax or IRS
+                 threats.
+NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 5 ===
 MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2", "E4"], "explanation": "This looks like a
-                 scam. The link pretends to be the real First City Bank website. Never type personal details
-                 into a link from a text. Type the official address yourself or call."}
+                 scam. The link in the message pretends to be the real First City Bank website. Never type
+                 personal details into a link from a text. Call the bank directly using a number you know is
+                 official."}
 GATE           : PASSED - evidence supports likely_scam
 
 ====================== SCAMSHIELD RESULT ======================
@@ -39,11 +44,11 @@ EVIDENCE    :
   E2 check_link: firstcity-bank-login.co is a LOOKALIKE of the official First City Bank website (strong
       warning sign).
   E3 check_sender: +1-555-0177 is a saved contact: Emma (granddaughter).
-  E4 search_scam_guide: Found 2 guide entries (keyword): G03: Lookalike website addresses; G13: Shortened
-      links hide where they go.
+  E4 search_scam_guide: Found 2 guide entries (keyword): G03: Lookalike website addresses; G11: Fake tax or
+      IRS threats.
 EXPLANATION (model):
-  This looks like a scam. The link pretends to be the real First City Bank website. Never type personal
-  details into a link from a text. Type the official address yourself or call.
+  This looks like a scam. The link in the message pretends to be the real First City Bank website. Never type
+  personal details into a link from a text. Call the bank directly using a number you know is official.
 WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. Call Emma (granddaughter) on
               the number you already have and ask if they really sent it.
 Tip from our guide (G03): Never type personal details into a link from a text. Type the official address

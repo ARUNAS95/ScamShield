@@ -1,23 +1,24 @@
 H01  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
 H02  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
-H03  likely_scam  -> uncertain    WRONG gate_downgrade  steps=9  gate_rej=2 tools=extract_signals > check_link > check_link > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
-H04  likely_scam  -> likely_scam  OK    success         steps=7  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
-H05  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
-H06  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+H03  likely_scam  -> uncertain    WRONG gate_downgrade  steps=9  gate_rej=2 tools=extract_signals > check_link > check_link > lookup_official_contact > check_sender > search_scam_guide > ask_human_helper
+H04  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+H05  likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+H06  likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
 H07  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
 H08  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
 H09  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
-H10  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
-H11  uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+H10  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+H11  uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
 H12  uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
 
 AGENT (rag search): 11/12 correct = 92%
   false "safe" answers : 0 of 9 messages that are not safe
   false alarms (scam)  : 0 of 3 safe messages
   uncertain answers    : 3
-  model last label right: 92%   gate overrides: 2   gate rejections: 5
-  average steps        : 5.08   distinct tool sequences: 7
-  guide searched in 10 messages; correct guide entry used: 7/7
+  model last label right: 100%   gate overrides: 1   gate rejections: 4
+  average steps        : 4.67   distinct tool sequences: 10
+  guide searched in 8 messages; correct guide entry used: 6/6
+  human help offered by: {"None": 9, "model_after_gate_hint": 3}
   scam          6/7
   legit         3/3
   uncertain     2/2
