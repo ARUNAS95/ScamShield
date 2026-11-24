@@ -1862,12 +1862,27 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         explanation = template_explanation(label, context)
         source = 'template'
 
+    model_steps = len(trace)
     # "Ask a human" is always offered when we are not sure (unless input was invalid).
     if label == 'uncertain' and not context['helper_offered'] and stop_reason != 'invalid_input':
         reason = 'ScamShield could not confirm this message (' + stop_reason + ').'
-        run_ask_human_helper({'reason': reason}, context, runtime)
+        outcome = run_ask_human_helper({'reason': reason}, context, runtime)
         context['helper_offered_by'] = 'python'
         show(verbose, '\nPYTHON         : offered human help because the result is uncertain.')
+        # The same post-check as a model-requested alert (the log is read
+        # back when the person agreed), and a trace step, so every action
+        # with a consequence is in the trace.
+        checked, detail = post_check('ask_human_helper', {'reason': reason}, context, runtime)
+        context['post_checks'].append({'tool': 'ask_human_helper', 'evidence_id': None, 'ok': checked,
+                                       'detail': detail})
+        if not checked:
+            context['tool_failures'].append('ask_human_helper (offered by Python) post-check failed: ' + detail)
+            stop_reason = choose_stop_reason(context, ended_by)
+        trace.append({'step': model_steps + 1, 'raw_reply': None, 'action': 'ask_human_helper',
+                      'argument': {'reason': reason}, 'parse_ok': None, 'validation_ok': True,
+                      'available_actions': available_actions(context), 'evidence_id': None,
+                      'observation': outcome, 'check_result': {'post_check': context['post_checks'][-1]},
+                      'state_update': 'offered by Python', 'continue_or_stop': 'stop', 'model_retries': []})
     elif context['helper_offered'] and context['helper_offered_by'] is None:
         context['helper_offered_by'] = model_helper_source(context)
 
@@ -1900,7 +1915,7 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
         'evidence': context['evidence'],
         'warning_signs': context['flags'],
         'tool_sequence': context['tool_sequence'],
-        'steps': len(trace),
+        'steps': model_steps,   # model steps; a help offer by Python is an extra trace step
         'rejected_proposals': context['rejected_proposals'],
         'gate_rejections': context['gate_rejections'],
         'readability_rewrites': context['readability_rewrites'],
