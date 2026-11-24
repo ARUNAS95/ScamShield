@@ -282,6 +282,26 @@ data/                 fictional messages, contacts, organizations, websites, gui
                       held-out set (eval_holdout.json), embeddings
 evidence/             saved traces, console logs and results (eval/, harness/)
 DEVLOG.md             development findings
+docs/                 project document, slide deck, diagram, demo script, study guide (and their build scripts)
+```
+
+## Deliverables
+
+| File | What it is |
+|---|---|
+| [docs/ScamShield_Project_Document.pdf](docs/ScamShield_Project_Document.pdf) | Project document: problem, workflow with diagram, an annotated real trace, problem cases, results, how to run, limitations, individual work |
+| [docs/ScamShield_Presentation.pptx](docs/ScamShield_Presentation.pptx) | Slide deck for the class presentation, with speaker notes |
+| [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | 5-minute live demo script with commands, what to point at, and fallbacks |
+| [docs/EXPLAIN.md](docs/EXPLAIN.md) | Study guide: the loop, key functions with line numbers, gate rules, likely questions |
+| [docs/workflow.svg](docs/workflow.svg) / [docs/workflow.png](docs/workflow.png) | The workflow diagram |
+
+The PDF and the deck are generated: every result number in them is read from the files in `evidence/`
+at build time and the test count comes from running `tests.py` (missing results are shown as "pending").
+To rebuild them (needs Google Chrome and Node.js; the language model is not called):
+
+```bash
+npm install --prefix docs     # once: installs pptxgenjs for the slide deck
+python3 docs/build_docs.py    # writes docs/ScamShield_Project_Document.pdf and docs/ScamShield_Presentation.pptx
 ```
 
 ## Known limitations
