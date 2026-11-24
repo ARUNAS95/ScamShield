@@ -62,7 +62,7 @@ RULES_FILES = {
     'large': ['large_rules.txt'],
 }
 HARNESS_FILES = ['evidence/harness/results.json', 'evidence/harness/rag/results.json']
-SET_NAMES = {'eval': 'Evaluation set', 'test2': 'Test set 2', 'test3': 'Test set 3', 'large': 'Large blind test set'}
+SET_NAMES = {'eval': 'Test set 1', 'test2': 'Test set 2', 'test3': 'Test set 3', 'large': 'Large blind test set'}
 
 
 def find_chrome():
@@ -961,11 +961,16 @@ def main():
     else:
         fill(values, 'TESTS', PENDING)
 
-    fill(values, 'AGENT_TABLE', agent_table([
-        (sets['eval'], 'Evaluation&nbsp;set'), (sets['test2'], 'Test&nbsp;set&nbsp;2'),
-        (sets['test3'], 'Test&nbsp;set&nbsp;3'), (sets['large'], 'Large&nbsp;blind<br>test&nbsp;set')]))
+    table_sets = [(sets['eval'], 'Test&nbsp;set&nbsp;1'), (sets['test2'], 'Test&nbsp;set&nbsp;2'),
+                  (sets['test3'], 'Test&nbsp;set&nbsp;3')]
+    if sets['large']['file']:
+        # The large set is only shown live when that (about 2 hour) run exists.
+        table_sets.append((sets['large'], 'Large&nbsp;blind<br>test&nbsp;set'))
+    fill(values, 'AGENT_TABLE', agent_table(table_sets))
     misses = ''
     for key in ['eval', 'test2', 'test3', 'large']:
+        if key == 'large' and not sets[key]['available']:
+            continue   # the large set was scored with the rules only
         misses += wrong_rows_html(sets[key], SET_NAMES[key])
     fill(values, 'EVAL_MISSES', misses)
     fill(values, 'EVAL_MESSAGES', e(sets['eval'].get('messages') or PENDING))
@@ -987,7 +992,7 @@ def main():
          if lr else PENDING)
     fill(values, 'LARGE_AGENT', e('%s (%s, 95%% range %s); false "safe": %s; false alarms: %s'
                                   % (la['score'], la['percent'], la['range'], la['false_safe'], la['false_alarm']))
-         if la else pending_html('live agent run'))
+         if la else e('not run (a live run of all 614 messages takes about 2 hours; listed as a possible extension)'))
 
     # harness
     fill(values, 'HARNESS_TABLE', harness_table(runs))
@@ -1018,6 +1023,8 @@ def main():
     fill(values, 'LIVE_TOTAL', e(live_total))
     parts = []
     for key in ['eval', 'test2', 'test3', 'large']:
+        if key == 'large' and not sets[key]['available']:
+            continue
         parts.append(SET_NAMES[key].lower() + ': ' + sets[key]['false_safe'])
     parts.append('repeated demo runs: ' + (of(runs['false_safe'], runs['runs']) if runs['runs'] else PENDING))
     fill(values, 'FALSE_SAFE_SUMMARY', e('; '.join(parts)))

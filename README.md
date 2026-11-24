@@ -348,7 +348,7 @@ larger set matters.
 found nothing, the guide search returned nothing relevant, and the model proposed "safe" without raising a
 concern, so the gate had nothing to block (`evidence/harness/run_model_catches_miss_*_trace.json`). Across
 all earlier rounds this case ended "not sure" in 9 of 9 runs with embedding search and in 4 of 9 runs with
-keyword search only, so removing the embeddings probably made this one case weaker; it was kept simple on
+keyword search only (see `evidence/harness/rag/results.json` and `keyword/results.json` on the earlier `main` commit fe084ba, and the DEVLOG rounds), so removing the embeddings probably made this one case weaker; it was kept simple on
 purpose and the case was not tuned. Overall: **2 false "safe" answers in 78 live runs**, both on this case.
 
 Known wrong answers on the labeled sets from the rules (they do not depend on the model):
@@ -460,7 +460,7 @@ python3 docs/build_docs.py    # writes docs/ScamShield_Project_Document.pdf and 
   is read back from the log; the independent check is the verdict gate (`supported_label`).
 - `model_catches_miss` shows the limit of the rules: a cash-courier text from a saved contact has no
   warning sign the rules know. The best the system can then do is "not sure" when the model is worried;
-  when the model was not worried either, the answer can be "safe" (it happened in earlier live runs).
+  when the model was not worried either, the answer can be "safe" (it happened in 2 of the 3 current harness runs of `model_catches_miss`).
 - A phone number is only compared with the official number of an organization the message names. A
   saved family contact asking you to call a stranger's number is not flagged by this rule.
 - Test sets 1 to 3 are small and written by the same person as the rules; the large blind test set was
