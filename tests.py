@@ -1248,44 +1248,8 @@ def test_safe_tip_only_for_the_senders_organization():
 
 
 # ------------------------------------------------------------------------
-# 10. Checkpointing (Nov 4 lecture: save state to a file and resume)
+# 10. Console and settings
 # ------------------------------------------------------------------------
-
-def test_checkpoint_resume_gives_same_result():
-    replies = [
-        action('extract_signals'),
-        action('check_link', url='medicare-help.co'),
-        done('likely_scam', ['E1', 'E2'], 'This looks like a scam. It wants a gift card and has a fake link.'),
-    ]
-    whole = run('scam', list(replies))
-
-    checkpoint = TEMP / 'scam_checkpoint.json'
-    first = run('scam', list(replies), checkpoint_path=checkpoint, stop_after=2)
-    assert first.get('interrupted') is True
-    resumed = agent.run_agent(None, ask_model_fn=scripted_model(replies[2:]), verbose=False,
-                              resume_from=checkpoint, checkpoint_path=checkpoint,
-                              trace_path=TEMP / 'resumed.json', alert_log=TEMP / 'alerts.log')
-    assert resumed['final_label'] == whole['final_label'] == 'likely_scam'
-    assert resumed['tool_sequence'] == whole['tool_sequence']
-
-
-def test_resume_of_finished_run_refuses():
-    replies = [
-        action('extract_signals'),
-        done('likely_scam', ['E1'], 'This looks like a scam. It wants a gift card.'),
-    ]
-    checkpoint = TEMP / 'finished_checkpoint.json'
-    record = run('scam', list(replies), checkpoint_path=checkpoint)
-    assert record['final_label'] == 'likely_scam'
-    assert agent.load_json(checkpoint)['finished']['final_label'] == 'likely_scam'
-
-    def model_must_not_be_called(messages):
-        raise AssertionError('a finished run was re-run')
-    again = agent.run_agent(None, ask_model_fn=model_must_not_be_called, verbose=False,
-                            resume_from=checkpoint, checkpoint_path=checkpoint,
-                            trace_path=TEMP / 'again.json', alert_log=TEMP / 'alerts.log')
-    assert again['refused'] is True and 'already finished: likely_scam' in again['message']
-
 
 def test_console_shows_next_options():
     output = io.StringIO()
@@ -1429,8 +1393,6 @@ if __name__ == '__main__':
         ('guide tip must fit the message (no G05 on the USPS case)', test_guide_tip_must_fit_the_message),
         ('tip relevance: organization and main red flag (no G05/G09 on USPS)', test_tip_relevance_by_organization_and_main_flag),
         ('safe tip only for the sender\'s organization', test_safe_tip_only_for_the_senders_organization),
-        ('checkpoint resume gives same result', test_checkpoint_resume_gives_same_result),
-        ('resume of a finished run refuses', test_resume_of_finished_run_refuses),
         ('console shows NEXT OPTIONS (routing visible)', test_console_shows_next_options),
         ('settings come from environment variables with defaults', test_settings_come_from_environment_with_defaults),
         ('SCAMSHIELD_MODEL override takes effect (subprocess)', test_model_setting_override_takes_effect),

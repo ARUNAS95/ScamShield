@@ -1635,15 +1635,9 @@ def save_json(path, value):
         json.dump(value, handle, indent=2, ensure_ascii=False)
 
 
-def save_checkpoint(path, state):
-    if path:
-        save_json(path, state)
-
-
 def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mode='no',
               guide_path=rag.GUIDE_FILE, max_steps=MAX_STEPS, verbose=True,
-              case_name='custom', trace_path=None, checkpoint_path=None, resume_from=None,
-              stop_after=None, alert_log=None, data=None,
+              case_name='custom', trace_path=None, alert_log=None, data=None,
               model_retry_wait=MODEL_RETRY_WAIT):
     """Check one message. Returns the full record (also saved as a JSON trace)."""
     if data is None:
@@ -1654,32 +1648,9 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
     }
     EVIDENCE_DIR.mkdir(exist_ok=True)
 
-    # ---- Resume from a checkpoint, or start fresh ----
-    if resume_from:
-        saved = load_json(resume_from)
-        finished = saved.get('finished')
-        if finished is None and saved['trace'] and saved['trace'][-1]['continue_or_stop'] == 'stop':
-            finished = {'final_label': 'unknown (the last step already stopped)'}
-        if finished is not None:
-            # Running a finished case again would ask the model new questions
-            # and could change the answer; the saved result stands.
-            note = 'This run already finished: ' + str(finished['final_label'])
-            print(note + '. Nothing was re-run. Start a new run with --case or --message.')
-            return {'refused': True, 'message': note, 'final_label': finished['final_label']}
-        context = saved['context']
-        messages = saved['messages']
-        trace = saved['trace']
-        first_step = saved['step'] + 1
-        case_name = saved['case']
-        consent_mode = saved.get('consent_mode', consent_mode)
-        message = context['message']
-        show(verbose, 'RESUMING ' + case_name + ' from checkpoint after step ' + str(saved['step']))
-    else:
-        context = new_context(message, guide_path)
-        messages = None
-        trace = []
-        first_step = 1
-
+    context = new_context(message, guide_path)
+    messages = None
+    trace = []
     ended_by = None
     accepted = None   # (label, explanation, explanation_source)
 
@@ -1692,12 +1663,12 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
         ended_by = 'invalid_input'
         show(verbose, 'INPUT CHECK: the message is longer than %d characters.' % MAX_MESSAGE_LENGTH)
 
-    if ended_by is None and messages is None:
+    if ended_by is None:
         run_tag = secrets.token_hex(3)
         messages = [{'role': 'system', 'content': make_system_prompt()},
                     {'role': 'user', 'content': make_request_message(message, run_tag, available_actions(context))}]
 
-    step = first_step - 1
+    step = 0
     while ended_by is None and step < max_steps:
         step += 1
         record = {'step': step, 'raw_reply': None, 'action': None, 'argument': None, 'parse_ok': False,
@@ -1814,17 +1785,11 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
             show(verbose, 'NEXT OPTIONS   : ' + ', '.join(available_actions(context)))
         trace.append(record)
 
-        save_checkpoint(checkpoint_path, {'case': case_name, 'step': step, 'consent_mode': consent_mode,
-                                          'context': context, 'messages': messages, 'trace': trace})
-        if stop_after is not None and step >= stop_after and ended_by is None:
-            show(verbose, '\nSTOPPED ON PURPOSE after step %d (checkpoint saved to %s).' % (step, checkpoint_path))
-            return {'interrupted': True, 'step': step, 'checkpoint': str(checkpoint_path)}
-
     if ended_by is None:
         ended_by = 'step_limit'
 
     return finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_mode, trace_path, verbose,
-                      messages=messages, checkpoint_path=checkpoint_path)
+                      messages=messages)
 
 
 def handle_done(argument, context, record, verbose):
@@ -1934,7 +1899,7 @@ def choose_stop_reason(context, ended_by):
 
 
 def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_mode, trace_path, verbose,
-               messages=None, checkpoint_path=None):
+               messages=None):
     stop_reason = choose_stop_reason(context, ended_by)
 
     if stop_reason == 'invalid_input':
@@ -2034,11 +1999,6 @@ def finish_run(context, runtime, trace, ended_by, accepted, case_name, consent_m
     if trace_path is None:
         trace_path = EVIDENCE_DIR / (case_name + '_trace.json')
     save_json(trace_path, record)
-    # Mark the checkpoint as finished, so --resume refuses to run it again.
-    if checkpoint_path and Path(checkpoint_path).exists():
-        saved = load_json(checkpoint_path)
-        saved['finished'] = {'final_label': label, 'stop_reason': stop_reason}
-        save_checkpoint(checkpoint_path, saved)
     try:
         record['trace_file'] = str(Path(trace_path).resolve().relative_to(HERE))
     except ValueError:
@@ -2086,8 +2046,6 @@ def main():
                         help='how the simulated family alert gets consent (default: ask in the terminal)')
     parser.add_argument('--max-steps', type=int, default=MAX_STEPS)
     parser.add_argument('--quiet', action='store_true', help='only print the final result')
-    parser.add_argument('--resume', help='continue a run from a checkpoint file')
-    parser.add_argument('--stop-after', type=int, help='stop on purpose after N steps (to demo checkpoints)')
     parser.add_argument('--list-cases', action='store_true')
     args = parser.parse_args()
 
@@ -2098,11 +2056,6 @@ def main():
         return
 
     consent_fn = CONSENT_FUNCTIONS[args.consent]
-    if args.resume:
-        run_agent(None, consent_fn=consent_fn, consent_mode=args.consent, verbose=not args.quiet,
-                  max_steps=args.max_steps, resume_from=args.resume, checkpoint_path=args.resume)
-        return
-
     guide_path = rag.GUIDE_FILE
     if args.case:
         if args.case not in cases:
@@ -2124,8 +2077,7 @@ def main():
     print('MESSAGE: ' + message['text'])
     run_agent(message, consent_fn=consent_fn, consent_mode=args.consent, guide_path=guide_path,
               max_steps=args.max_steps, verbose=not args.quiet,
-              case_name=case_name, checkpoint_path=EVIDENCE_DIR / (case_name + '_checkpoint.json'),
-              stop_after=args.stop_after)
+              case_name=case_name)
 
 
 if __name__ == '__main__':

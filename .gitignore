@@ -10,7 +10,6 @@ venv/
 .vscode/
 
 # Run-time files (sample evidence we want to keep is committed with git add -f)
-evidence/*_checkpoint.json
 evidence/scratch/
 # Single runs from `scamshield_agent.py --case ...` (recreated on every run);
 # the committed evidence lives in evidence/eval/ and evidence/harness/
