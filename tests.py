@@ -68,7 +68,7 @@ def run(name_or_message, replies, consent_fn=agent.consent_no, guide_path=rag.GU
     return agent.run_agent(message, ask_model_fn=scripted_model(replies), consent_fn=consent_fn,
                            guide_path=guide_path, search_mode=search_mode, verbose=False,
                            case_name='test_' + label, trace_path=TEMP / (label + '_trace.json'),
-                           alert_log=TEMP / 'alerts.log', **extra)
+                           alert_log=TEMP / 'alerts.log', model_retry_wait=0, **extra)
 
 
 def fresh_context(case_name):
@@ -496,9 +496,114 @@ def test_model_unreachable():
     def ollama_down(messages):
         raise ConnectionError('Ollama is not running')
     record = agent.run_agent(case_message('scam'), ask_model_fn=ollama_down, verbose=False,
-                             trace_path=TEMP / 'down.json', alert_log=TEMP / 'alerts.log')
+                             trace_path=TEMP / 'down.json', alert_log=TEMP / 'alerts.log', model_retry_wait=0)
     assert record['stop_reason'] == 'model_error'
     assert record['final_label'] == 'uncertain' and record['helper_offered_by'] == 'python'
+    # It was tried again MAX_MODEL_RETRIES times before giving up.
+    assert len(record['trace'][0]['model_retries']) == agent.MAX_MODEL_RETRIES
+
+
+def test_model_fails_once_then_works():
+    replies = [action('extract_signals'),
+               done('likely_scam', ['E1'], 'This looks like a scam. It asks for a gift card.')]
+    calls = {'count': 0}
+
+    def flaky_model(messages):
+        calls['count'] += 1
+        if calls['count'] == 1:
+            raise TimeoutError('Ollama was busy')
+        return json.dumps(replies.pop(0))
+    record = agent.run_agent(case_message('scam'), ask_model_fn=flaky_model, verbose=False,
+                             trace_path=TEMP / 'flaky.json', alert_log=TEMP / 'alerts.log', model_retry_wait=0)
+    assert record['stop_reason'] == 'success' and record['final_label'] == 'likely_scam'
+    assert len(record['trace'][0]['model_retries']) == 1
+    assert 'Ollama was busy' in record['trace'][0]['model_retries'][0]
+
+
+# ---- Post-action checks: verify the state change really happened ----
+
+def test_post_checks_recorded_for_each_tool():
+    record = run('scam', [
+        action('extract_signals'),
+        action('check_link', url='medicare-help.co/renew'),
+        action('check_sender', sender='+1-555-0199'),
+        action('lookup_official_contact', org='Medicare'),
+        action('search_scam_guide', query='gift card medicare'),
+        done('likely_scam', ['E1', 'E2'], 'This looks like a scam. It asks for a gift card and has a fake link.'),
+    ])
+    assert record['stop_reason'] == 'success'
+    for step in record['trace'][:5]:
+        assert step['check_result']['post_check']['ok'] is True, step
+
+
+def test_post_check_failure_is_a_tool_failure():
+    original = agent.TOOLS['check_sender']['run']
+
+    def lazy_check_sender(argument, context, runtime):
+        return agent.result(True, 'Checked (but nothing was recorded).', {'facts': []})
+    agent.TOOLS['check_sender']['run'] = lazy_check_sender
+    try:
+        record = run('uncertain', [
+            action('extract_signals'),
+            action('check_sender', sender='+1-555-0163'),
+            done('likely_safe', ['E1'], 'This message looks safe.'),
+            done('likely_safe', ['E1'], 'This message looks safe.'),
+        ])
+    finally:
+        agent.TOOLS['check_sender']['run'] = original
+    assert record['stop_reason'] == 'tool_failure' and record['final_label'] == 'uncertain'
+    assert 'check_sender(FAILED)' in record['tool_sequence']
+    assert 'post-check failed' in record['tool_failures'][0]
+    assert record['trace'][1]['check_result']['post_check']['ok'] is False
+
+
+def test_helper_post_check_reads_the_log_back():
+    original = agent.TOOLS['ask_human_helper']['run']
+
+    def alert_never_written(argument, context, runtime):
+        context['helper_offered'] = True
+        context['helper_consent'] = True
+        context['helper_alert'] = 'ScamShield practice alert that was never written'
+        return agent.result(True, 'Alert written (it was not).', {'facts': []})
+    agent.TOOLS['ask_human_helper']['run'] = alert_never_written
+    try:
+        record = run('uncertain', [
+            action('extract_signals'),
+            action('check_sender', sender='+1-555-0163'),
+            action('ask_human_helper', reason='E2 shows an unknown number.'),
+        ], consent_fn=agent.consent_yes, max_steps=3)
+    finally:
+        agent.TOOLS['ask_human_helper']['run'] = original
+    assert 'ask_human_helper(FAILED)' in record['tool_sequence']
+    assert 'post-check failed' in record['tool_failures'][0] and 'alert log' in record['tool_failures'][0]
+
+
+def test_badly_shaped_result_in_tool_sequence():
+    original = agent.TOOLS['search_scam_guide']['run']
+
+    def bad_shape(argument, context, runtime):
+        return 'just a string'
+    agent.TOOLS['search_scam_guide']['run'] = bad_shape
+    try:
+        record = run('uncertain', [
+            action('extract_signals'),
+            action('search_scam_guide', query='doctor office'),
+        ], max_steps=2)
+    finally:
+        agent.TOOLS['search_scam_guide']['run'] = original
+    assert 'search_scam_guide(FAILED)' in record['tool_sequence']
+    assert record['stop_reason'] == 'tool_failure'
+
+
+def test_trace_keeps_exact_gate_feedback():
+    record = run('scam', [
+        action('extract_signals'),
+        done('likely_safe', ['E1'], 'This message looks safe.'),
+        done('likely_scam', ['E1'], 'This looks like a scam. It asks for a gift card.'),
+    ])
+    observation = record['trace'][1]['observation']
+    assert type(observation) == dict and observation['message'].startswith('GATE REJECTED your answer')
+    assert 'Python can support: likely_scam' in observation['message']
 
 
 def test_empty_message_invalid_input():
@@ -702,6 +807,12 @@ if __name__ == '__main__':
         ('message cannot close the markers', test_message_cannot_close_markers),
         ('missing guide -> tool_failure, never safe', test_missing_guide_is_tool_failure_not_safe),
         ('model unreachable -> model_error', test_model_unreachable),
+        ('model fails once, retry works -> success', test_model_fails_once_then_works),
+        ('post-checks recorded for each tool', test_post_checks_recorded_for_each_tool),
+        ('failed post-check is a tool failure', test_post_check_failure_is_a_tool_failure),
+        ('helper post-check reads the alert log back', test_helper_post_check_reads_the_log_back),
+        ('badly shaped result shows in tool_sequence', test_badly_shaped_result_in_tool_sequence),
+        ('trace keeps the exact gate feedback', test_trace_keeps_exact_gate_feedback),
         ('empty message -> invalid_input', test_empty_message_invalid_input),
         ('three bad replies -> no_progress', test_no_progress_after_three_bad_replies),
         ('step limit', test_step_limit),

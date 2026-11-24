@@ -25,6 +25,7 @@ import json
 import re
 import secrets
 import sys
+import time
 import unicodedata
 from pathlib import Path
 
@@ -53,6 +54,8 @@ MAX_SEARCHES = 3               # search_scam_guide calls allowed per message
 MAX_ARGUMENT_LENGTH = 300
 MAX_MESSAGE_LENGTH = 1000
 HISTORY_KEEP = 10              # recent messages kept (the evidence ledger is never trimmed)
+MAX_MODEL_RETRIES = 2          # a failed model call is tried again this many times
+MODEL_RETRY_WAIT = 2           # seconds to wait before each retry (tests use 0)
 
 LABELS = ['likely_scam', 'likely_safe', 'uncertain']
 GOAL = ('Decide whether one text message is likely a scam, likely safe, or uncertain, '
@@ -599,6 +602,7 @@ def run_ask_human_helper(argument, context, runtime):
              + argument['reason'][:200] + ' Please give them a call.')
     consent = ask_for_consent(runtime, alert, helper['name'])
     context['helper_offered'] = True
+    context['helper_alert'] = alert
     context['helper_consent'] = consent
     if consent:
         stamp = datetime.datetime.now().isoformat(timespec='seconds')
@@ -748,6 +752,49 @@ def evidence_ledger(context):
     return 'EVIDENCE SO FAR:\n  ' + '\n  '.join(lines)
 
 
+def post_check(name, argument, context, runtime):
+    """After a tool says it worked, check that the expected change really
+    happened (robust browser agent note: verify, do not assume).
+    Returns (ok, detail)."""
+    if name == 'extract_signals':
+        return context['signals_extracted'] is True, 'signals_extracted is ' + str(context['signals_extracted'])
+    if name == 'check_link':
+        domain = normalize_domain(argument['url'])
+        return domain in context['link_results'], domain + ' recorded in link_results'
+    if name == 'check_sender':
+        return context['sender_checked'] is True, 'sender_checked is ' + str(context['sender_checked'])
+    if name == 'lookup_official_contact':
+        org = find_organization(argument['org'], runtime['data'])
+        ok = org is not None and org['name'] in context['official_contacts']
+        return ok, str(argument['org']) + ' recorded in official_contacts'
+    if name == 'search_scam_guide':
+        ok = len(context['retrieval_modes']) == context['searches'] and context['searches'] > 0
+        return ok, 'retrieval mode recorded for search %d' % context['searches']
+    if name == 'ask_human_helper':
+        if context['helper_offered'] is not True:
+            return False, 'helper_offered was not set'
+        if not context['helper_consent']:
+            return True, 'help offered, the person said no, nothing written'
+        # Read the log back: the simulated alert must really be there.
+        try:
+            with open(runtime['alert_log'], encoding='utf-8') as handle:
+                written = handle.read()
+        except OSError:
+            return False, 'the alert log could not be read back'
+        if context['helper_alert'] and context['helper_alert'] in written:
+            return True, 'alert line found in the alert log'
+        return False, 'the alert line is missing from the alert log'
+    return False, 'no post-check defined for ' + name
+
+
+def record_tool_failure(name, problem, context):
+    context['tool_failures'].append(problem)
+    context['broken_tools'].append(name)
+    context['tool_sequence'].append(name + '(FAILED)')
+    return result(False, 'TOOL FAILURE: ' + problem + '. Continue with other evidence or ask a human.',
+                  {'allowed_actions': available_actions(context)}), 'failed'
+
+
 def run_requested_tool(name, argument, context, runtime):
     """Validate, run and record one tool call. Returns (tool_result, status)
     where status is 'ran', 'rejected' or 'failed'."""
@@ -783,16 +830,17 @@ def run_requested_tool(name, argument, context, runtime):
     except Exception as error:
         # Show paths relative to the project so traces do not reveal the local folder.
         problem = name + ' failed: ' + type(error).__name__ + ': ' + str(error).replace(str(HERE) + '/', '')
-        context['tool_failures'].append(problem)
-        context['broken_tools'].append(name)
-        context['tool_sequence'].append(name + '(FAILED)')
-        return result(False, 'TOOL FAILURE: ' + problem + '. Continue with other evidence or ask a human.',
-                      {'allowed_actions': available_actions(context)}), 'failed'
+        return record_tool_failure(name, problem, context)
 
     if type(outcome) != dict or set(outcome) != {'ok', 'message', 'data'}:
-        context['tool_failures'].append(name + ' returned a badly shaped result')
-        context['broken_tools'].append(name)
-        return result(False, 'TOOL FAILURE: ' + name + ' returned a badly shaped result.'), 'failed'
+        return record_tool_failure(name, name + ' returned a badly shaped result', context)
+
+    # Post-action check: did the state change the tool promised really happen?
+    checked, detail = post_check(name, clean, context, runtime)
+    context['post_checks'].append({'tool': name, 'evidence_id': context['current_evidence_id'],
+                                   'ok': checked, 'detail': detail})
+    if not checked:
+        return record_tool_failure(name, name + ' post-check failed: ' + detail, context)
 
     if extra:
         outcome['message'] += ' (Ignored unexpected argument keys: ' + ', '.join(extra) + '.)'
@@ -1157,9 +1205,9 @@ def new_context(message, guide_path, search_mode):
         'links': [], 'phones': [], 'claimed_orgs': [], 'flags': [],
         'link_results': {}, 'sender_checked': False, 'sender_trusted': None, 'sender_name': None,
         'official_contacts': {}, 'guide_matches': [], 'searches': 0, 'retrieval_modes': [],
-        'helper_offered': False, 'helper_consent': None, 'helper_offered_by': None,
+        'helper_offered': False, 'helper_consent': None, 'helper_offered_by': None, 'helper_alert': None,
         'evidence': [], 'current_evidence_id': None, 'calls_made': {},
-        'tool_sequence': [], 'tool_failures': [], 'broken_tools': [],
+        'tool_sequence': [], 'tool_failures': [], 'broken_tools': [], 'post_checks': [],
         'gate_rejections': 0, 'readability_rewrites': 0, 'rejected_proposals': 0,
         'consecutive_rejections': 0, 'gate_downgraded': False, 'model_labels': [],
     }
@@ -1190,7 +1238,8 @@ def save_checkpoint(path, state):
 def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mode='no',
               guide_path=rag.GUIDE_FILE, search_mode='rag', max_steps=MAX_STEPS, verbose=True,
               case_name='custom', trace_path=None, checkpoint_path=None, resume_from=None,
-              stop_after=None, embed_fn=None, vectors=None, alert_log=None, data=None):
+              stop_after=None, embed_fn=None, vectors=None, alert_log=None, data=None,
+              model_retry_wait=MODEL_RETRY_WAIT):
     """Check one message. Returns the full record (also saved as a JSON trace)."""
     if data is None:
         data = load_data()
@@ -1246,10 +1295,28 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
         if len(messages) > 2 + HISTORY_KEEP:
             messages = messages[:2] + messages[-HISTORY_KEEP:]
 
-        try:
-            raw = ask_model_fn(messages)
-        except Exception as error:
-            record['observation'] = 'MODEL ERROR: ' + type(error).__name__ + ': ' + str(error)[:200]
+        # Ask the model. A failed call (Ollama busy, timeout) is retried up to
+        # MAX_MODEL_RETRIES times after a short wait; each retry is recorded.
+        raw = None
+        record['model_retries'] = []
+        model_problem = None
+        attempt = 0
+        while attempt <= MAX_MODEL_RETRIES:
+            try:
+                raw = ask_model_fn(messages)
+                model_problem = None
+                break
+            except Exception as error:
+                model_problem = 'MODEL ERROR: ' + type(error).__name__ + ': ' + str(error)[:200]
+                attempt += 1
+                if attempt <= MAX_MODEL_RETRIES:
+                    record['model_retries'].append(model_problem + ' (retry %d of %d after %s s)'
+                                                   % (attempt, MAX_MODEL_RETRIES, model_retry_wait))
+                    show(verbose, record['model_retries'][-1])
+                    if model_retry_wait:
+                        time.sleep(model_retry_wait)
+        if model_problem is not None:
+            record['observation'] = model_problem + ' (gave up after %d retries)' % MAX_MODEL_RETRIES
             record['continue_or_stop'] = 'stop'
             trace.append(record)
             show(verbose, record['observation'])
@@ -1259,12 +1326,12 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
 
         proposal, parse_note = parse_action(raw)
         if proposal is None:
-            record['observation'] = 'PARSER ERROR: ' + parse_note
             record['state_update'] = 'Rejected reply sent back to the model.'
             context['rejected_proposals'] += 1
             context['consecutive_rejections'] += 1
             feedback = result(False, 'PARSER ERROR: ' + parse_note + ' Return only JSON like '
                               '{"action":"tool_name","argument":{...}}', {'allowed_actions': available_actions(context)})
+            record['observation'] = feedback   # the exact feedback the model gets
             show(verbose, 'MODEL REPLY    : ' + str(raw)[:160])
             show(verbose, 'VALIDATION     : REJECTED - ' + parse_note)
         else:
@@ -1281,8 +1348,11 @@ def run_agent(message, ask_model_fn=ask_model, consent_fn=consent_no, consent_mo
                 if context['gate_downgraded']:
                     ended_by = 'verdict'
             else:
+                checks_before = len(context['post_checks'])
                 feedback, status = run_requested_tool(proposal['action'], proposal['argument'], context, runtime)
                 record['observation'] = feedback
+                if len(context['post_checks']) > checks_before:
+                    record['check_result'] = {'post_check': context['post_checks'][-1]}
                 if status == 'ran':
                     record['validation_ok'] = True
                     record['evidence_id'] = feedback['data']['evidence_id']
@@ -1350,30 +1420,38 @@ def handle_done(argument, context, record, verbose):
         if context['gate_rejections'] >= MAX_GATE_REJECTIONS:
             context['gate_downgraded'] = True
             record['state_update'] = 'Gate rejected twice; Python will use the label the evidence supports.'
+            record['observation'] = ('GATE REJECTED (' + ' | '.join(failed) + '). Rejected %d times, so Python '
+                                     'uses the label the evidence supports; nothing more is sent to the model.'
+                                     % context['gate_rejections'])
             return None, None
         record['state_update'] = 'Gate rejected the verdict; feedback sent to the model.'
-        record['observation'] = 'GATE REJECTED'
         supported = supported_label(context)
         hint = 'With the evidence so far, Python can support: ' + supported
         if supported == 'uncertain' and not context['helper_offered']:
             hint += ' (' + help_first_note(context) + ')'
-        return result(False, 'GATE REJECTED your answer: ' + ' | '.join(failed) + '. ' + hint
-                      + '. Fix it, or gather more evidence first.'), None
+        feedback = result(False, 'GATE REJECTED your answer: ' + ' | '.join(failed) + '. ' + hint
+                          + '. Fix it, or gather more evidence first.')
+        record['observation'] = feedback   # the exact feedback the model gets
+        return feedback, None
 
     show(verbose, 'GATE           : PASSED - evidence supports ' + argument['label'])
     problems = check_readability(argument['explanation'], argument['label'])
     record['check_result']['readability'] = problems
     if not problems:
         record['state_update'] = 'Verdict accepted by the gate and readability check.'
+        record['observation'] = 'VERDICT ACCEPTED: ' + argument['label']
         return None, (argument['label'], argument['explanation'].strip(), 'model')
 
     show(verbose, 'READABILITY    : needs simpler words - ' + ' | '.join(problems))
     if context['readability_rewrites'] < MAX_READABILITY_REWRITES:
         context['readability_rewrites'] += 1
         record['state_update'] = 'Verdict accepted, but the model was asked to simplify the wording once.'
-        return result(False, 'Your label is supported, but please rewrite the explanation for an older adult: '
-                      + ' | '.join(problems) + '. Send done again with the same label.'), None
+        feedback = result(False, 'Your label is supported, but please rewrite the explanation for an older adult: '
+                          + ' | '.join(problems) + '. Send done again with the same label.')
+        record['observation'] = feedback   # the exact feedback the model gets
+        return feedback, None
     record['state_update'] = 'Wording still too hard; Python used its plain-language template.'
+    record['observation'] = 'READABILITY: still too hard after one rewrite; Python used its template.'
     return None, (argument['label'], template_explanation(argument['label'], context), 'template')
 
 
