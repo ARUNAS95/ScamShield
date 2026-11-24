@@ -8,6 +8,8 @@ no matter what the model says.
 Run:  python tests.py
 """
 
+import contextlib
+import io
 import json
 import shutil
 import tempfile
@@ -27,7 +29,9 @@ DATA = agent.load_data()
 
 
 def run_test(name, test_function):
-    test_function()
+    # The agent prints a result banner; hide it so the PASS list is readable.
+    with contextlib.redirect_stdout(io.StringIO()):
+        test_function()
     print('PASS:', name)
 
 
@@ -827,15 +831,10 @@ if __name__ == '__main__':
         ('RAG: legit pattern alone cannot make safe', test_legit_pattern_match_alone_cannot_make_safe),
         ('checkpoint resume gives same result', test_checkpoint_resume_gives_same_result),
     ]
-    import contextlib
-    import io
     failed = 0
     for name, function in tests:
         try:
-            # The agent prints a result banner; hide it so the PASS list is readable.
-            with contextlib.redirect_stdout(io.StringIO()):
-                function()
-            print('PASS:', name)
+            run_test(name, function)
         except AssertionError as error:
             failed += 1
             print('FAIL:', name, error)
