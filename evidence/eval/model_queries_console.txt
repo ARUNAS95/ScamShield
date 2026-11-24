@@ -1,0 +1,21 @@
+
+RETRIEVAL WITH THE MODEL'S OWN QUERIES (16 searches from the rag agent run)
+  S01  "Medicare renewal scam"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S02  "IRS final notice pay taxes or be arreste"   keyword=miss rag_no_metadata=HIT rag=HIT
+  S03  "ssn suspension scam"   keyword=miss rag_no_metadata=HIT rag=HIT
+  S04  "money request from lookalike website"   keyword=miss rag_no_metadata=miss rag=miss
+  S05  "code request and money request"   keyword=miss rag_no_metadata=miss rag=miss
+  S06  "bank account locked link"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S07  "prize money scams"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S08  "money request new number secrecy"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S09  "crypto money request"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S10  "urgent package delivery link"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S11  "medicare scam link"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  S12  "gift card request"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  I01  "First City Bank link scam"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  I02  "Social Security benefits stop unless you"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  U01  "dental office calls to confirm appointme"   keyword=HIT rag_no_metadata=HIT rag=HIT
+  U05  "asks you to call back"   keyword=HIT rag_no_metadata=HIT rag=HIT
+keyword          hit@2 = 12/16 = 75%
+rag_no_metadata  hit@2 = 14/16 = 88%
+rag              hit@2 = 14/16 = 88%

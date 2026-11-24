@@ -5,7 +5,7 @@ MESSAGE: Hi, this is Dr. Lee's office. Please call us back about your appointmen
 === STEP 1 ===
 MODEL DECISION : extract_signals {}
 VALIDATION     : ok
-TOOL RESULT E1 : 0 strong, 0 weak warning signs; 0 link(s); claims to be: no known organization
+TOOL RESULT E1 : strong: none; weak: none; 0 link(s); claims to be: no known organization
 
 === STEP 2 ===
 MODEL DECISION : check_sender {"sender": "+1-555-0163"}
@@ -13,21 +13,31 @@ VALIDATION     : ok
 TOOL RESULT E2 : +1-555-0163 is NOT a saved contact (this alone is not a warning sign).
 
 === STEP 3 ===
-MODEL DECISION : search_scam_guide {"query": "asks to call back"}
+MODEL DECISION : search_scam_guide {"query": "asks you to call back"}
 VALIDATION     : ok
-TOOL RESULT E3 : Found 2 guide entries (rag).
+TOOL RESULT E3 : Found 2 guide entries (rag): G15: Unknown callers asking you to call back; G17: Real
+                 appointment reminders.
 
 === STEP 4 ===
-MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3"], "explanation": "We are not sure about this message. It asks you to call back and comes from a number not ...
+MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3"], "explanation": "We are not sure
+                 about this message. It asks you to call back, and the number is not in your contacts. Scam
+                 guides say this could be a real reminder or a scam. Call the office using a number you
+                 already have, like from an appointment card."}
 GATE           : REJECTED - help was offered before uncertain -> use ask_human_helper first
 
 === STEP 5 ===
-MODEL DECISION : ask_human_helper {"reason": "E1 and E2 show the message asks you to call back and comes from a number not in your contacts. The guide says to call the office using a number you ...
+MODEL DECISION : ask_human_helper {"reason": "E1 and E2 show the message asks you to call back and comes from
+                 a number not in your contacts. Scam guides suggest this could be a real reminder or a scam.
+                 We recommend asking a trusted family member for help."}
 VALIDATION     : ok
-TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real message was sent.
+TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
+                 message was sent.
 
 === STEP 6 ===
-MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not sure about this message. It asks you to call back and comes from a numbe...
+MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not
+                 sure about this message. It asks you to call back, and the number is not in your contacts.
+                 Scam guides say this could be a real reminder or a scam. A trusted family member was told for
+                 help."}
 GATE           : PASSED - evidence supports uncertain
 
 ====================== SCAMSHIELD RESULT ======================
@@ -35,14 +45,19 @@ VERDICT     : NOT SURE - ASK SOMEONE YOU TRUST
 STOP REASON : success   (steps: 6, rejected proposals: 0, gate rejections: 1)
 TOOLS USED  : extract_signals -> check_sender -> search_scam_guide -> ask_human_helper
 EVIDENCE    :
-  E1 extract_signals: 0 strong, 0 weak warning signs; 0 link(s); claims to be: no known organization
+  E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: no known organization
   E2 check_sender: +1-555-0163 is NOT a saved contact (this alone is not a warning sign).
-  E3 search_scam_guide: Found 2 guide entries (rag).
-  E4 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No real message was sent.
+  E3 search_scam_guide: Found 2 guide entries (rag): G15: Unknown callers asking you to call back; G17: Real
+      appointment reminders.
+  E4 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
+      real message was sent.
 EXPLANATION (model):
-  We are not sure about this message. It asks you to call back and comes from a number not in your contacts. These are not strong warning signs, but the guide says to call the office using a number you already have. A trusted helper was told about this message.
-WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and we have let Priya (daughter) know so they can help.
-Tip from our guide (G15): Call the office using a number you already have, such as from an appointment card, or ask a family member.
+  We are not sure about this message. It asks you to call back, and the number is not in your contacts. Scam
+  guides say this could be a real reminder or a scam. A trusted family member was told for help.
+WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
+              we have let Priya (daughter) know so they can help.
+Tip from our guide (G15): Call the office using a number you already have, such as from an appointment card,
+  or ask a family member.
 HUMAN HELP  : offered by model, consent = True (simulated)
 TRACE       : evidence/harness/rag/run_uncertain_2_trace.json
 ===============================================================

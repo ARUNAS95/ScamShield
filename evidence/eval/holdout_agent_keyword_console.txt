@@ -1,0 +1,24 @@
+H01  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+H02  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+H03  likely_scam  -> uncertain    WRONG gate_downgrade  steps=9  gate_rej=2 tools=extract_signals > check_link > check_link > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+H04  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+H05  likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+H06  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+H07  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+H08  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+H09  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
+H10  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+H11  uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+H12  uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+
+AGENT (keyword search): 11/12 correct = 92%
+  false "safe" answers : 0 of 9 messages that are not safe
+  false alarms (scam)  : 0 of 3 safe messages
+  uncertain answers    : 3
+  model last label right: 83%   gate overrides: 3   gate rejections: 6
+  average steps        : 4.83   distinct tool sequences: 10
+  guide searched in 9 messages; correct guide entry used: 6/7
+  scam          6/7
+  legit         3/3
+  uncertain     2/2
+Saved: evidence/eval/holdout_agent_keyword_results.json

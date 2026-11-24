@@ -1,0 +1,29 @@
+
+RETRIEVAL: is a correct guide entry in the top 2? (21 messages with a known answer)
+id     expected     keyword                rag_no_metadata        rag                   
+S01    G02,G03      HIT  G02,G01           HIT  G02,G01           HIT  G02,G01          
+S02    G11          HIT  G20,G11           HIT  G20,G11           HIT  G20,G11          
+S03    G12          HIT  G12,G01           HIT  G12,G06           HIT  G12,G01          
+S04    G04          HIT  G04,G03           HIT  G04,G03           HIT  G04,G03          
+S05    G19,G06      HIT  G06,G19           HIT  G06,G19           HIT  G06,G19          
+S06    G10          HIT  G10,G18           HIT  G10,G06           HIT  G10,G03          
+S07    G07          HIT  G07,G03           HIT  G07,G03           HIT  G07,G09          
+S08    G05          HIT  G05,G14           HIT  G05,G14           HIT  G05,G15          
+S09    G08          HIT  G08,G14           HIT  G08,G14           HIT  G08,G07          
+S10    G13,G04      HIT  G04,G13           HIT  G04,G13           HIT  G04,G13          
+S11    G02,G03      HIT  G02,G01           HIT  G02,G01           HIT  G02,G01          
+S12    G09,G01,G05  HIT  G01,G15           HIT  G01,G15           HIT  G01,G05          
+I01    G14,G10      HIT  G06,G10           HIT  G06,G10           HIT  G10,G06          
+I02    G14,G12      miss G02,G01           miss G02,G01           HIT  G15,G14          
+L01    G16          HIT  G16,G06           HIT  G16,G06           HIT  G16,G17          
+L02    G16          HIT  G16,G06           HIT  G16,G06           HIT  G16,G09          
+L03    G18          HIT  G18,G06           HIT  G18,G06           HIT  G18,G06          
+L06    G16          HIT  G16,G17           HIT  G16,G17           HIT  G16,G17          
+U01    G17,G15      HIT  G15,G17           HIT  G17,G15           HIT  G15,G17          
+U02    G05,G15      HIT  G05,G12           HIT  G05,G15           HIT  G05,G15          
+U05    G15,G17      HIT  G15,G18           HIT  G15,G18           HIT  G15,G18          
+
+keyword          hit@2 = 20/21 = 95%
+rag_no_metadata  hit@2 = 20/21 = 95%
+rag              hit@2 = 21/21 = 100%
+Saved: evidence/eval/retrieval_results.json

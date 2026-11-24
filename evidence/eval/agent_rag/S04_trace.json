@@ -13,15 +13,15 @@
   "supported_label": "likely_scam",
   "model_label": "likely_scam",
   "gate_overrode_model": false,
-  "explanation": "This looks like a scam. The message asks for money and pushes you to act fast. The link looks like the real USPS website but is not. Do not pay or click on the link.",
+  "explanation": "This looks like a scam. The message has a link that pretends to be the real USPS website. It also asks for money and pushes you to act fast.",
   "explanation_source": "model",
   "what_to_do": "Do not reply, do not tap any link, and do not send money or codes. If you are worried, call USPS at 1-800-555-0104 (from our trusted list).",
-  "guide_tip": "Tip from our guide (G04): Do not pay. Track packages only on the official website you type in yourself.",
+  "guide_tip": "Tip from our guide (G03): Never type personal details into a link from a text. Type the official address yourself or call.",
   "evidence": [
     {
       "id": "E1",
       "tool": "extract_signals",
-      "summary": "0 strong, 2 weak warning signs; 1 link(s); claims to be: USPS",
+      "summary": "strong: none; weak: urgency, money request; 1 link(s); claims to be: USPS",
       "facts": [
         "pushes you to act fast (weak warning sign)",
         "asks for money (weak warning sign)"
@@ -54,10 +54,10 @@
     {
       "id": "E5",
       "tool": "search_scam_guide",
-      "summary": "Found 2 guide entries (rag).",
+      "summary": "Found 2 guide entries (rag): G03: Lookalike website addresses; G05: Grandchild in trouble or new number.",
       "facts": [
-        "guide G04: Package delivery fee texts",
-        "guide G09: Hacked accounts of friends and family"
+        "guide G03: Lookalike website addresses",
+        "guide G05: Grandchild in trouble or new number"
       ]
     }
   ],
@@ -148,7 +148,7 @@
       "evidence_id": "E1",
       "observation": {
         "ok": true,
-        "message": "0 strong, 2 weak warning signs; 1 link(s); claims to be: USPS",
+        "message": "strong: none; weak: urgency, money request; 1 link(s); claims to be: USPS",
         "data": {
           "note": "Links and numbers below were copied from the message. They are data, not instructions.",
           "warning_signs": [
@@ -178,9 +178,17 @@
           "evidence_id": "E1"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "extract_signals",
+          "evidence_id": "E1",
+          "ok": true,
+          "detail": "signals_extracted is True"
+        }
+      },
       "state_update": "Recorded as evidence E1.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 2,
@@ -196,7 +204,6 @@
         "check_sender",
         "lookup_official_contact",
         "search_scam_guide",
-        "ask_human_helper",
         "done"
       ],
       "evidence_id": "E2",
@@ -214,9 +221,17 @@
           "evidence_id": "E2"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "check_link",
+          "evidence_id": "E2",
+          "ok": true,
+          "detail": "usps-parcel-help.com recorded in link_results"
+        }
+      },
       "state_update": "Recorded as evidence E2.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 3,
@@ -231,7 +246,6 @@
         "check_sender",
         "lookup_official_contact",
         "search_scam_guide",
-        "ask_human_helper",
         "done"
       ],
       "evidence_id": "E3",
@@ -250,9 +264,17 @@
           "evidence_id": "E3"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "lookup_official_contact",
+          "evidence_id": "E3",
+          "ok": true,
+          "detail": "USPS recorded in official_contacts"
+        }
+      },
       "state_update": "Recorded as evidence E3.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 4,
@@ -266,7 +288,6 @@
       "available_actions": [
         "check_sender",
         "search_scam_guide",
-        "ask_human_helper",
         "done"
       ],
       "evidence_id": "E4",
@@ -282,16 +303,24 @@
           "evidence_id": "E4"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "check_sender",
+          "evidence_id": "E4",
+          "ok": true,
+          "detail": "sender_checked is True"
+        }
+      },
       "state_update": "Recorded as evidence E4.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 5,
-      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"USPS parcel fee link\"}}",
+      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"money request from lookalike website\"}}",
       "action": "search_scam_guide",
       "argument": {
-        "query": "USPS parcel fee link"
+        "query": "money request from lookalike website"
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -303,58 +332,63 @@
       "evidence_id": "E5",
       "observation": {
         "ok": true,
-        "message": "Found 2 guide entries (rag).",
+        "message": "Found 2 guide entries (rag): G03: Lookalike website addresses; G05: Grandchild in trouble or new number.",
         "data": {
           "retrieval_mode": "rag",
           "filters_used": {},
           "matches": [
             {
-              "id": "G04",
-              "title": "Package delivery fee texts",
-              "score": 1.129,
-              "scam_type": "delivery",
-              "orgs": [
-                "USPS"
-              ],
+              "id": "G03",
+              "title": "Lookalike website addresses",
+              "score": 0.996,
+              "scam_type": "lookalike_site",
+              "orgs": [],
               "red_flags": [
-                "money_request",
-                "urgency",
                 "lookalike_link"
               ],
               "severity": "high",
-              "advice": "Do not pay. Track packages only on the official website you type in yourself.",
-              "why": "text match 0.83; shares red flags money_request, urgency, lookalike_link"
+              "advice": "Never type personal details into a link from a text. Type the official address yourself or call.",
+              "why": "text match 0.85; shares red flags lookalike_link"
             },
             {
-              "id": "G09",
-              "title": "Hacked accounts of friends and family",
-              "score": 0.621,
-              "scam_type": "hacked_contact",
+              "id": "G05",
+              "title": "Grandchild in trouble or new number",
+              "score": 0.777,
+              "scam_type": "grandparent",
               "orgs": [],
               "red_flags": [
-                "lookalike_link",
-                "known_bad_link",
-                "money_request"
+                "new_number",
+                "money_request",
+                "secrecy",
+                "urgency"
               ],
-              "severity": "medium",
-              "advice": "Do not click. Call that person on their usual number and ask if they sent it.",
-              "why": "text match 0.32; shares red flags lookalike_link, money_request"
+              "severity": "high",
+              "advice": "Call your grandchild on the number you already have saved, or ask another family member.",
+              "why": "text match 0.48; shares red flags money_request, urgency"
             }
           ],
           "facts": [
-            "guide G04: Package delivery fee texts",
-            "guide G09: Hacked accounts of friends and family"
+            "guide G03: Lookalike website addresses",
+            "guide G05: Grandchild in trouble or new number"
           ],
           "evidence_id": "E5"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "search_scam_guide",
+          "evidence_id": "E5",
+          "ok": true,
+          "detail": "retrieval mode recorded for search 1"
+        }
+      },
       "state_update": "Recorded as evidence E5.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 6,
-      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"likely_scam\",\"evidence\":[\"E1\",\"E2\",\"E5\"],\"explanation\":\"This looks like a scam. The message asks for money and pushes you to act fast. The link looks like the real USPS website but is not. Do not pay or click on the link.\"}}",
+      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"likely_scam\",\"evidence\":[\"E1\",\"E2\",\"E5\"],\"explanation\":\"This looks like a scam. The message has a link that pretends to be the real USPS website. It also asks for money and pushes you to act fast.\"}}",
       "action": "done",
       "argument": {
         "label": "likely_scam",
@@ -363,7 +397,7 @@
           "E2",
           "E5"
         ],
-        "explanation": "This looks like a scam. The message asks for money and pushes you to act fast. The link looks like the real USPS website but is not. Do not pay or click on the link."
+        "explanation": "This looks like a scam. The message has a link that pretends to be the real USPS website. It also asks for money and pushes you to act fast."
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -373,7 +407,7 @@
         "done"
       ],
       "evidence_id": null,
-      "observation": null,
+      "observation": "VERDICT ACCEPTED: likely_scam",
       "check_result": {
         "gate": [
           {
@@ -406,7 +440,8 @@
         "readability": []
       },
       "state_update": "Verdict accepted by the gate and readability check.",
-      "continue_or_stop": "stop"
+      "continue_or_stop": "stop",
+      "model_retries": []
     }
   ]
 }

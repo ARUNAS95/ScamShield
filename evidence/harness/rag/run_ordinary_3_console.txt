@@ -5,32 +5,36 @@ MESSAGE: Main Street Pharmacy: Your prescription refill is ready for pickup at o
 === STEP 1 ===
 MODEL DECISION : extract_signals {}
 VALIDATION     : ok
-TOOL RESULT E1 : 0 strong, 0 weak warning signs; 0 link(s); claims to be: Main Street Pharmacy
+TOOL RESULT E1 : strong: none; weak: none; 0 link(s); claims to be: Main Street Pharmacy
 
 === STEP 2 ===
-MODEL DECISION : lookup_official_contact {"org": "Main Street Pharmacy"}
+MODEL DECISION : check_sender {"sender": "+1-555-0142"}
 VALIDATION     : ok
-TOOL RESULT E2 : Official contact for Main Street Pharmacy (from our trusted list): 1-555-0142
+TOOL RESULT E2 : +1-555-0142 is a saved contact: Main Street Pharmacy.
 
 === STEP 3 ===
-MODEL DECISION : check_sender {"sender": "1-555-0142"}
+MODEL DECISION : lookup_official_contact {"org": "Main Street Pharmacy"}
 VALIDATION     : ok
-TOOL RESULT E3 : +1-555-0142 is a saved contact: Main Street Pharmacy.
+TOOL RESULT E3 : Official contact for Main Street Pharmacy (from our trusted list): 1-555-0142
 
 === STEP 4 ===
-MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message looks safe. It comes from a saved contact. The phone number matches the of...
+MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2", "E3"], "explanation": "This message
+                 looks safe. It comes from your saved contact, Main Street Pharmacy. The phone number matches
+                 the official contact for that pharmacy."}
 GATE           : PASSED - evidence supports likely_safe
 
 ====================== SCAMSHIELD RESULT ======================
 VERDICT     : LIKELY SAFE
 STOP REASON : success   (steps: 4, rejected proposals: 0, gate rejections: 0)
-TOOLS USED  : extract_signals -> lookup_official_contact -> check_sender
+TOOLS USED  : extract_signals -> check_sender -> lookup_official_contact
 EVIDENCE    :
-  E1 extract_signals: 0 strong, 0 weak warning signs; 0 link(s); claims to be: Main Street Pharmacy
-  E2 lookup_official_contact: Official contact for Main Street Pharmacy (from our trusted list): 1-555-0142
-  E3 check_sender: +1-555-0142 is a saved contact: Main Street Pharmacy.
+  E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: Main Street Pharmacy
+  E2 check_sender: +1-555-0142 is a saved contact: Main Street Pharmacy.
+  E3 lookup_official_contact: Official contact for Main Street Pharmacy (from our trusted list): 1-555-0142
 EXPLANATION (model):
-  This message looks safe. It comes from a saved contact. The phone number matches the official number for Main Street Pharmacy. There are no warning signs.
-WHAT TO DO  : You can reply as usual. If anything feels wrong, call Main Street Pharmacy on the number you saved.
+  This message looks safe. It comes from your saved contact, Main Street Pharmacy. The phone number matches
+  the official contact for that pharmacy.
+WHAT TO DO  : You can reply as usual. If anything feels wrong, call Main Street Pharmacy on the number you
+              saved.
 TRACE       : evidence/harness/rag/run_ordinary_3_trace.json
 ===============================================================

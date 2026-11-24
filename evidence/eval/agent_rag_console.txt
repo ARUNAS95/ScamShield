@@ -1,16 +1,16 @@
 S01  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
-S02  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+S02  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
 S03  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
 S04  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
 S05  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
-S06  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact
-S07  likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
-S08  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+S06  likely_scam  -> likely_scam  OK    success         steps=7  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
+S07  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+S08  likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
 S09  likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
 S10  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
 S11  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
 S12  likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
-I01  likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+I01  likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
 I02  likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
 L01  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
 L02  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
@@ -18,8 +18,8 @@ L03  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tool
 L04  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
 L05  likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
 L06  likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
-U01  uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
-U02  uncertain    -> uncertain    OK    gate_downgrade  steps=5  gate_rej=2 tools=extract_signals > check_sender > ask_human_helper
+U01  uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+U02  uncertain    -> uncertain    OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
 U03  uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
 U04  uncertain    -> uncertain    OK    success         steps=7  gate_rej=1 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
 U05  uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
@@ -28,9 +28,9 @@ AGENT (rag search): 25/25 correct = 100%
   false "safe" answers : 0 of 19 messages that are not safe
   false alarms (scam)  : 0 of 6 safe messages
   uncertain answers    : 5
-  model last label right: 96%   gate overrides: 1   gate rejections: 6
-  average steps        : 4.64   distinct tool sequences: 14
-  guide searched in 15 messages; correct guide entry used: 13/13
+  model last label right: 96%   gate overrides: 1   gate rejections: 5
+  average steps        : 4.88   distinct tool sequences: 12
+  guide searched in 18 messages; correct guide entry used: 14/16
   scam          12/12
   injection     2/2
   legit         5/5

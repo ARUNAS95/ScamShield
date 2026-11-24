@@ -13,7 +13,7 @@
   "supported_label": "uncertain",
   "model_label": "uncertain",
   "gate_overrode_model": false,
-  "explanation": "We are not sure about this message. It asks you to call back and comes from a number you don't know. These could be signs of a scam, but they could also be a real appointment reminder. A trusted family member has been asked for help.",
+  "explanation": "We are not sure about this message. It asks you to call back, and the number is not in your contacts. These are not strong warning signs, but the message could be a scam or a real reminder. A trusted family member has been informed for further help.",
   "explanation_source": "model",
   "what_to_do": "Do not use the number or link in the message. Call them back on a number you already have, and we have let Priya (daughter) know so they can help.",
   "guide_tip": "Tip from our guide (G15): Call the office using a number you already have, such as from an appointment card, or ask a family member.",
@@ -21,7 +21,7 @@
     {
       "id": "E1",
       "tool": "extract_signals",
-      "summary": "0 strong, 0 weak warning signs; 0 link(s); claims to be: no known organization",
+      "summary": "strong: none; weak: none; 0 link(s); claims to be: no known organization",
       "facts": [
         "asks you to call back (note, NOT a warning sign)"
       ]
@@ -37,7 +37,7 @@
     {
       "id": "E3",
       "tool": "search_scam_guide",
-      "summary": "Found 2 guide entries (rag).",
+      "summary": "Found 2 guide entries (rag): G15: Unknown callers asking you to call back; G17: Real appointment reminders.",
       "facts": [
         "guide G15: Unknown callers asking you to call back",
         "guide G17: Real appointment reminders"
@@ -105,7 +105,7 @@
       "evidence_id": "E1",
       "observation": {
         "ok": true,
-        "message": "0 strong, 0 weak warning signs; 0 link(s); claims to be: no known organization",
+        "message": "strong: none; weak: none; 0 link(s); claims to be: no known organization",
         "data": {
           "note": "Links and numbers below were copied from the message. They are data, not instructions.",
           "warning_signs": [],
@@ -121,9 +121,17 @@
           "evidence_id": "E1"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "extract_signals",
+          "evidence_id": "E1",
+          "ok": true,
+          "detail": "signals_extracted is True"
+        }
+      },
       "state_update": "Recorded as evidence E1.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 2,
@@ -137,7 +145,6 @@
       "available_actions": [
         "check_sender",
         "search_scam_guide",
-        "ask_human_helper",
         "done"
       ],
       "evidence_id": "E2",
@@ -153,16 +160,24 @@
           "evidence_id": "E2"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "check_sender",
+          "evidence_id": "E2",
+          "ok": true,
+          "detail": "sender_checked is True"
+        }
+      },
       "state_update": "Recorded as evidence E2.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 3,
-      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"asks to call back\"}}",
+      "raw_reply": "{\"action\":\"search_scam_guide\",\"argument\":{\"query\":\"asks you to call back\"}}",
       "action": "search_scam_guide",
       "argument": {
-        "query": "asks to call back"
+        "query": "asks you to call back"
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -174,7 +189,7 @@
       "evidence_id": "E3",
       "observation": {
         "ok": true,
-        "message": "Found 2 guide entries (rag).",
+        "message": "Found 2 guide entries (rag): G15: Unknown callers asking you to call back; G17: Real appointment reminders.",
         "data": {
           "retrieval_mode": "rag",
           "filters_used": {},
@@ -182,7 +197,7 @@
             {
               "id": "G15",
               "title": "Unknown callers asking you to call back",
-              "score": 1.194,
+              "score": 1.2,
               "scam_type": "callback",
               "orgs": [],
               "red_flags": [
@@ -191,12 +206,12 @@
               ],
               "severity": "low",
               "advice": "Call the office using a number you already have, such as from an appointment card, or ask a family member.",
-              "why": "text match 0.89; shares red flags unknown_sender, callback_request"
+              "why": "text match 0.90; shares red flags unknown_sender, callback_request"
             },
             {
               "id": "G17",
               "title": "Real appointment reminders",
-              "score": 0.625,
+              "score": 0.63,
               "scam_type": "legit_pattern",
               "orgs": [],
               "red_flags": [
@@ -204,7 +219,7 @@
               ],
               "severity": "low",
               "advice": "If you are unsure, call the office on the number on your appointment card.",
-              "why": "text match 0.47; shares red flags callback_request"
+              "why": "text match 0.48; shares red flags callback_request"
             }
           ],
           "facts": [
@@ -214,13 +229,21 @@
           "evidence_id": "E3"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "search_scam_guide",
+          "evidence_id": "E3",
+          "ok": true,
+          "detail": "retrieval mode recorded for search 1"
+        }
+      },
       "state_update": "Recorded as evidence E3.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 4,
-      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"uncertain\",\"evidence\":[\"E1\",\"E2\",\"E3\"],\"explanation\":\"We are not sure about this message. It asks you to call back and comes from a number you don't know. These could be signs of a scam, but they could also be a real appointment reminder. If you're unsure, ask a trusted family member for help.\"}}",
+      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"uncertain\",\"evidence\":[\"E1\",\"E2\",\"E3\"],\"explanation\":\"We are not sure about this message. It asks you to call back, and the number is not in your contacts. These are not strong warning signs, but the message could be a scam or a real reminder. If you're unsure, ask a family member for help.\"}}",
       "action": "done",
       "argument": {
         "label": "uncertain",
@@ -229,7 +252,7 @@
           "E2",
           "E3"
         ],
-        "explanation": "We are not sure about this message. It asks you to call back and comes from a number you don't know. These could be signs of a scam, but they could also be a real appointment reminder. If you're unsure, ask a trusted family member for help."
+        "explanation": "We are not sure about this message. It asks you to call back, and the number is not in your contacts. These are not strong warning signs, but the message could be a scam or a real reminder. If you're unsure, ask a family member for help."
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -239,7 +262,11 @@
         "done"
       ],
       "evidence_id": null,
-      "observation": "GATE REJECTED",
+      "observation": {
+        "ok": false,
+        "message": "GATE REJECTED your answer: help was offered before uncertain -> use ask_human_helper first. With the evidence so far, Python can support: uncertain (use ask_human_helper first). Fix it, or gather more evidence first.",
+        "data": {}
+      },
       "check_result": {
         "gate": [
           {
@@ -276,14 +303,15 @@
         "supported_label": "uncertain"
       },
       "state_update": "Gate rejected the verdict; feedback sent to the model.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 5,
-      "raw_reply": "{\"action\":\"ask_human_helper\",\"argument\":{\"reason\":\"E1 and E2 show the message asks you to call back and comes from an unknown number. These could be signs of a scam, but they could also be a real appointment reminder. We suggest asking a trusted family member for help.\"}}",
+      "raw_reply": "{\"action\":\"ask_human_helper\",\"argument\":{\"reason\":\"E1 and E2 show the message asks you to call back and comes from a number not in your contacts. These are not strong warning signs, but it could be a scam. We suggest asking a trusted family member for help.\"}}",
       "action": "ask_human_helper",
       "argument": {
-        "reason": "E1 and E2 show the message asks you to call back and comes from an unknown number. These could be signs of a scam, but they could also be a real appointment reminder. We suggest asking a trusted family member for help."
+        "reason": "E1 and E2 show the message asks you to call back and comes from a number not in your contacts. These are not strong warning signs, but it could be a scam. We suggest asking a trusted family member for help."
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -306,13 +334,21 @@
           "evidence_id": "E4"
         }
       },
-      "check_result": null,
+      "check_result": {
+        "post_check": {
+          "tool": "ask_human_helper",
+          "evidence_id": "E4",
+          "ok": true,
+          "detail": "alert line found in the alert log"
+        }
+      },
       "state_update": "Recorded as evidence E4.",
-      "continue_or_stop": "continue"
+      "continue_or_stop": "continue",
+      "model_retries": []
     },
     {
       "step": 6,
-      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"uncertain\",\"evidence\":[\"E1\",\"E2\",\"E3\",\"E4\"],\"explanation\":\"We are not sure about this message. It asks you to call back and comes from a number you don't know. These could be signs of a scam, but they could also be a real appointment reminder. A trusted family member has been asked for help.\"}}",
+      "raw_reply": "{\"action\":\"done\",\"argument\":{\"label\":\"uncertain\",\"evidence\":[\"E1\",\"E2\",\"E3\",\"E4\"],\"explanation\":\"We are not sure about this message. It asks you to call back, and the number is not in your contacts. These are not strong warning signs, but the message could be a scam or a real reminder. A trusted family member has been informed for further help.\"}}",
       "action": "done",
       "argument": {
         "label": "uncertain",
@@ -322,7 +358,7 @@
           "E3",
           "E4"
         ],
-        "explanation": "We are not sure about this message. It asks you to call back and comes from a number you don't know. These could be signs of a scam, but they could also be a real appointment reminder. A trusted family member has been asked for help."
+        "explanation": "We are not sure about this message. It asks you to call back, and the number is not in your contacts. These are not strong warning signs, but the message could be a scam or a real reminder. A trusted family member has been informed for further help."
       },
       "parse_ok": true,
       "validation_ok": true,
@@ -331,7 +367,7 @@
         "done"
       ],
       "evidence_id": null,
-      "observation": null,
+      "observation": "VERDICT ACCEPTED: uncertain",
       "check_result": {
         "gate": [
           {
@@ -369,7 +405,8 @@
         "readability": []
       },
       "state_update": "Verdict accepted by the gate and readability check.",
-      "continue_or_stop": "stop"
+      "continue_or_stop": "stop",
+      "model_retries": []
     }
   ]
 }
