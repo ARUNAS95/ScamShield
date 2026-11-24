@@ -1,0 +1,17 @@
+RULES ONLY (no model), set = holdout, 12 messages
+id   category   expected     supported          evidence
+H01  scam       likely_scam  uncertain    WRONG signs: secrecy(weak) | links: none | saved contact: False
+H02  scam       likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+H03  scam       likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+H04  scam       likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+H05  scam       likely_scam  likely_scam  OK    signs: money_request(weak), prize(weak) | links: none | saved contact: False
+H06  scam       likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+H07  scam       likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+H08  legit      likely_safe  likely_safe  OK    signs: none | links: mainstreetpharmacy.example=official | saved contact: True
+H09  legit      likely_safe  likely_safe  OK    signs: money_request(weak) | links: none | saved contact: True
+H10  legit      likely_safe  likely_safe  OK    signs: none | links: none | saved contact: True
+H11  uncertain  uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+H12  uncertain  uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+
+RULES ONLY (holdout): 6/12 supported labels match the expected label
+  false "safe": 1   false alarms (scam on a safe message): 0

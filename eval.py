@@ -15,6 +15,19 @@ Two parts:
    label with OUR label (not with what the model claims). Reports
    accuracy, false "safe" answers, false alarms, steps, gate rejections.
 
+3. Rules-only check (instant, no language model, no embeddings)
+       python eval.py --rules --set eval
+       python eval.py --rules --set holdout
+   Runs extract_signals, check_link on every link and check_sender
+   directly (no model) and compares the label the evidence supports
+   with OUR label. This tests the warning-sign rules by themselves.
+
+--set eval     the 25 labeled messages in data/eval_set.json (default)
+--set holdout  12 held-out messages in data/eval_holdout.json, written
+               in different wording from the rules BEFORE the round-1
+               rule changes (paraphrases, look-alike letters, new web
+               address endings, payment apps). They are never tuned.
+
 Results are saved in evidence/eval/.
 """
 
@@ -30,12 +43,23 @@ import scamshield_agent as agent
 
 
 HERE = Path(__file__).resolve().parent
-EVAL_FILE = HERE / 'data' / 'eval_set.json'
+EVAL_FILES = {
+    'eval': HERE / 'data' / 'eval_set.json',
+    'holdout': HERE / 'data' / 'eval_holdout.json',
+}
 OUT_DIR = HERE / 'evidence' / 'eval'
 
 
-def load_eval_set():
-    return agent.load_json(EVAL_FILE)['messages']
+def load_eval_set(set_name='eval'):
+    return agent.load_json(EVAL_FILES[set_name])['messages']
+
+
+def run_prefix(set_name):
+    """File names for results: the main set keeps its old names, the
+    held-out set gets 'holdout_' in front so nothing is overwritten."""
+    if set_name == 'eval':
+        return ''
+    return set_name + '_'
 
 
 def deterministic_context(item, data):
@@ -55,10 +79,10 @@ def deterministic_context(item, data):
 # 1. Retrieval comparison
 # ------------------------------------------------------------------------
 
-def evaluate_retrieval():
+def evaluate_retrieval(set_name='eval'):
     data = agent.load_data()
     entries = rag.load_guide()
-    items = load_eval_set()
+    items = load_eval_set(set_name)
     rows = []
     totals = {}
     for mode in rag.SEARCH_MODES:
@@ -108,8 +132,9 @@ def evaluate_retrieval():
         note = '  (WARNING: %d keyword fallbacks)' % s['keyword_fallbacks'] if s['keyword_fallbacks'] else ''
         print('%-16s hit@2 = %d/%d = %.0f%%%s' % (mode, s['hits'], s['messages'], 100 * s['hit_at_2'], note))
 
-    agent.save_json(OUT_DIR / 'retrieval_results.json', {'summary': summary, 'rows': rows})
-    print('Saved:', (OUT_DIR / 'retrieval_results.json').relative_to(HERE))
+    out_file = OUT_DIR / (run_prefix(set_name) + 'retrieval_results.json')
+    agent.save_json(out_file, {'summary': summary, 'rows': rows})
+    print('Saved:', out_file.relative_to(HERE))
     return summary
 
 
@@ -176,7 +201,48 @@ def evaluate_model_queries(trace_mode='rag'):
 
 
 # ------------------------------------------------------------------------
-# 2. Live agent comparison
+# 2. Rules-only check: the warning-sign rules without any model
+# ------------------------------------------------------------------------
+
+def evaluate_rules(set_name='eval'):
+    """Run the lookup tools directly (like deterministic_context) and compare
+    the label the recorded evidence supports with OUR expected label."""
+    data = agent.load_data()
+    items = load_eval_set(set_name)
+    correct = 0
+    false_safe = 0
+    false_alarm = 0
+    print('RULES ONLY (no model), set = %s, %d messages' % (set_name, len(items)))
+    print('%-4s %-10s %-12s %-12s %-5s %s' % ('id', 'category', 'expected', 'supported', '', 'evidence'))
+    for item in items:
+        context = deterministic_context(item, data)
+        supported = agent.supported_label(context)
+        ok = supported == item['expected_label']
+        if ok:
+            correct += 1
+        if supported == 'likely_safe' and item['expected_label'] != 'likely_safe':
+            false_safe += 1
+        if supported == 'likely_scam' and item['expected_label'] == 'likely_safe':
+            false_alarm += 1
+        signs = []
+        for flag in context['flags']:
+            if flag['strength'] != 'info':
+                signs.append(flag['name'] + '(' + flag['strength'] + ')')
+        links = []
+        for link in context['links']:
+            links.append(link + '=' + str(context['link_results'].get(link)))
+        details = 'signs: ' + (', '.join(signs) or 'none')
+        details += ' | links: ' + (', '.join(links) or 'none')
+        details += ' | saved contact: ' + str(context['sender_trusted'])
+        print('%-4s %-10s %-12s %-12s %-5s %s' % (item['id'], item['category'], item['expected_label'],
+                                                 supported, 'OK' if ok else 'WRONG', details))
+    print('\nRULES ONLY (%s): %d/%d supported labels match the expected label' % (set_name, correct, len(items)))
+    print('  false "safe": %d   false alarms (scam on a safe message): %d' % (false_safe, false_alarm))
+    return correct, len(items)
+
+
+# ------------------------------------------------------------------------
+# 3. Live agent comparison
 # ------------------------------------------------------------------------
 
 def guide_ids_used(record):
@@ -188,8 +254,8 @@ def guide_ids_used(record):
     return ids
 
 
-def evaluate_agent(mode, limit=None, ids=None):
-    items = load_eval_set()
+def evaluate_agent(mode, limit=None, ids=None, set_name='eval'):
+    items = load_eval_set(set_name)
     if ids:
         chosen = []
         for item in items:
@@ -199,7 +265,7 @@ def evaluate_agent(mode, limit=None, ids=None):
     if limit:
         items = items[:limit]
     data = agent.load_data()
-    run_dir = OUT_DIR / ('agent_' + mode)
+    run_dir = OUT_DIR / (run_prefix(set_name) + 'agent_' + mode)
     rows = []
 
     for item in items:
@@ -233,9 +299,10 @@ def evaluate_agent(mode, limit=None, ids=None):
             row['stop_reason'], row['steps'], row['gate_rejections'], ' > '.join(row['tools'])), flush=True)
 
     summary = summarize_agent(rows, mode)
-    agent.save_json(OUT_DIR / ('agent_' + mode + '_results.json'), {'summary': summary, 'rows': rows})
+    out_file = OUT_DIR / (run_prefix(set_name) + 'agent_' + mode + '_results.json')
+    agent.save_json(out_file, {'summary': summary, 'rows': rows})
     print_agent_summary(summary)
-    print('Saved:', (OUT_DIR / ('agent_' + mode + '_results.json')).relative_to(HERE))
+    print('Saved:', out_file.relative_to(HERE))
     return summary
 
 
@@ -327,12 +394,18 @@ if __name__ == '__main__':
     parser.add_argument('--mode', choices=rag.SEARCH_MODES, default='rag', help='search mode for --agent')
     parser.add_argument('--limit', type=int, help='only the first N messages')
     parser.add_argument('--ids', nargs='*', help='only these message ids, e.g. S01 U02')
+    parser.add_argument('--rules', action='store_true',
+                        help='check the warning-sign rules alone (instant, no model, no embeddings)')
+    parser.add_argument('--set', choices=list(EVAL_FILES), default='eval',
+                        help='which labeled set: eval (25 messages) or holdout (12 held-out messages)')
     args = parser.parse_args()
-    if not args.retrieval and not args.agent and not args.model_queries:
+    if not args.retrieval and not args.agent and not args.model_queries and not args.rules:
         parser.print_help()
+    if args.rules:
+        evaluate_rules(args.set)
     if args.retrieval:
-        evaluate_retrieval()
+        evaluate_retrieval(args.set)
     if args.model_queries:
         evaluate_model_queries()
     if args.agent:
-        evaluate_agent(args.mode, args.limit, args.ids)
+        evaluate_agent(args.mode, args.limit, args.ids, args.set)
