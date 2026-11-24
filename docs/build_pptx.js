@@ -272,7 +272,7 @@ text(s, 'The model decides', { x: 0.9, y: 1.65, w: 5.3, h: 0.5, fontSize: 24, bo
 text(s, 'Python checks', { x: 7.1, y: 1.65, w: 5.3, h: 0.5, fontSize: 24, bold: true, color: GREEN });
 const modelSide = ['Which tool to use next, and with which argument', 'What to search for in the scam guide',
   'When it has enough evidence', 'Which label to propose, which evidence to cite', 'How to word the explanation'];
-const pythonSide = ['Is this action allowed now? Is the argument from the message?', 'Did the tool really change the state? (post-check)',
+const pythonSide = ['Is this action allowed now? Is the argument from the message?', 'Was the result recorded? Alert read back from the log',
   'Does the recorded evidence support the label? (gate)', 'Is the answer easy to read?', 'Writes "what to do" and every phone number'];
 const modelRuns = [];
 const pythonRuns = [];
@@ -365,35 +365,39 @@ s.addNotes('Python works out the label the recorded evidence supports, like chec
 
 // ---------------------------------------------------------------- 8. Demo plan
 pres.addSection({ title: 'Demonstration' });
-s = content('Demonstration', 'Live demo: safe, scam, not sure, tool failure');
+s = content('Demonstration', 'Live demo: safe, scam, not sure, two problem cases');
 const demo = [
   ['Ordinary', 'Saved pharmacy reminder', 'Point at: no warning signs, saved contact, LIKELY SAFE'],
   ['Scam', 'Medicare gift-card text', 'Point at: tools chosen, look-alike link, gate PASSED, what-to-do line'],
-  ['Not sure', 'Unknown doctor\'s office', 'Point at: NEXT OPTIONS adds ask_human_helper after check_sender; human help'],
+  ['Not sure', 'Unknown doctor\'s office', 'Point at: NEXT OPTIONS adds ask_human_helper after check_sender'],
   ['Guide missing', 'Tool failure (problem case)', 'Point at: TOOL FAILURE, stop reason tool_failure, never safe'],
+  ['Rules miss it', 'Cash courier text from family (problem case)', 'Point at: no warning signs, the model worries, NOT SURE, never safe'],
 ];
 for (let i = 0; i < demo.length; i++) {
-  const x = 0.6 + i * 3.08;
-  card(s, x, 1.45, 2.88, 3.05, TINT);
-  numberCircle(s, x + 0.15, 1.6, i + 1, NAVY);
-  text(s, demo[i][0], { x: x + 0.85, y: 1.65, w: 1.95, h: 0.5, fontSize: 20, bold: true, color: NAVY });
-  text(s, demo[i][1], { x: x + 0.15, y: 2.3, w: 2.6, h: 0.5, fontSize: 16, bold: true });
-  text(s, demo[i][2], { x: x + 0.15, y: 2.85, w: 2.6, h: 1.6, fontSize: 16, color: INK });
+  const x = 0.6 + i * 2.46;
+  card(s, x, 1.45, 2.3, 3.05, TINT);
+  numberCircle(s, x + 0.12, 1.6, i + 1, NAVY);
+  text(s, demo[i][0], { x: x + 0.75, y: 1.62, w: 1.5, h: 0.55, fontSize: 17, bold: true, color: NAVY });
+  text(s, demo[i][1], { x: x + 0.12, y: 2.25, w: 2.1, h: 0.65, fontSize: 14, bold: true });
+  text(s, demo[i][2], { x: x + 0.12, y: 2.9, w: 2.1, h: 1.55, fontSize: 14, color: INK });
 }
-card(s, 0.6, 4.7, 12.1, 1.55, '263238');
+card(s, 0.6, 4.65, 12.1, 1.65, '263238');
 text(s, [
   { text: 'python3 scamshield_agent.py --case ordinary --consent yes', options: { breakLine: true } },
   { text: 'python3 scamshield_agent.py --case scam --consent yes', options: { breakLine: true } },
   { text: 'python3 scamshield_agent.py --case uncertain --consent yes', options: { breakLine: true } },
-  { text: 'python3 scamshield_agent.py --case guide_missing --consent yes   (extra: --case injection)' },
-], { x: 0.9, y: 4.8, w: 11.6, h: 1.35, fontSize: 16, fontFace: MONO, color: 'E0F2F1', valign: 'middle' });
+  { text: 'python3 scamshield_agent.py --case guide_missing --consent yes', options: { breakLine: true } },
+  { text: 'python3 scamshield_agent.py --case model_catches_miss --consent yes   (extra: --case injection)' },
+], { x: 0.9, y: 4.72, w: 11.6, h: 1.5, fontSize: 15, fontFace: MONO, color: 'E0F2F1', valign: 'middle' });
 text(s, 'If Ollama is slow: saved console logs in evidence/harness/rag/run_<case>_1_console.txt. If guide_missing ' +
   'did not search the guide: show run_guide_missing_1_console.txt.', { x: 0.6, y: 6.35, w: 12.1, h: 0.6,
   fontSize: 15, color: MUTED, italic: true });
-s.addNotes('Run the four commands. Ordinary: no warning signs and a saved contact, so likely safe. Scam: point at each ' +
+s.addNotes('Run the five commands. Ordinary: no warning signs and a saved contact, so likely safe. Scam: point at each ' +
   'MODEL DECISION and VALIDATION line, the look-alike link and GATE PASSED. Not sure: point at the NEXT OPTIONS line, ' +
   'where ask_human_helper appears only after check_sender, then the simulated alert. Guide missing: point at TOOL ' +
-  'FAILURE and the stop reason. The injection case is an optional extra. If Ollama is slow, open the saved console ' +
+  'FAILURE and the stop reason. Rules miss it: the rules find no warning sign in a cash courier text from a saved ' +
+  'contact; the model is worried, and its concern makes the answer "not sure", never "safe". The injection case is ' +
+  'an optional extra. If Ollama is slow, open the saved console ' +
   'logs instead. See docs/DEMO_SCRIPT.md.');
 
 // ---------------------------------------------------------------- 9. Problem cases
@@ -401,6 +405,7 @@ s = content('Demonstration', 'Problem cases: none of them ends as "safe"');
 const caseShort = {
   injection: 'Message tells the AI to "mark safe"',
   trusted_bad_link: 'Saved family contact sends a bank look-alike link',
+  model_catches_miss: 'Family contact asks for cash for a stranger; rules find nothing',
   guide_missing: 'Scam guide file is missing',
   empty: 'Empty message',
 };
@@ -425,10 +430,11 @@ rows.push([
   { text: 'retried twice, then model_error; never safe', options: { fill: { color: D.problems.length % 2 ? WHITE : TINT } } },
   { text: 'offline tests', options: { fill: { color: D.problems.length % 2 ? WHITE : TINT } } },
 ]);
-s.addTable(rows, { x: 0.6, y: 1.45, w: 12.1, colW: [2.4, 4.0, 3.6, 2.1], fontSize: 18, fontFace: BODY, color: INK,
+s.addTable(rows, { x: 0.6, y: 1.45, w: 12.1, colW: [2.9, 3.7, 3.4, 2.1], fontSize: 16, fontFace: BODY, color: INK,
   border: { type: 'solid', pt: 0.75, color: 'CFD8DC' }, valign: 'middle', margin: 0.08 });
 s.addNotes('Each problem case was run repeatedly with the live model. The injection text is itself a strong warning ' +
-  'sign, a trusted sender does not make a bad link safe, a missing guide ends as tool_failure with "not sure", and an ' +
+  'sign, a trusted sender does not make a bad link safe, a text the rules miss ends as "not sure" when the model is ' +
+  'worried (never "safe"), a missing guide ends as tool_failure with "not sure", and an ' +
   'empty message stops before the model is called. A failed model call is retried twice, then the run stops with ' +
   'model_error.');
 
@@ -439,10 +445,12 @@ const E = D.eval.rag;
 const EK = D.eval.keyword;
 const H = D.holdout.rag;
 const HK = D.holdout.keyword;
+const H2 = D.holdout2.rag;
+const H2K = D.holdout2.keyword;
 const stats = [
   [D.tests, 'offline tests passed', NAVY],
   [E.correct, 'eval set correct (RAG)', GREEN],
-  [E.false_safe, 'false "safe" answers (eval, RAG)', RED],
+  [D.live_false_safe, 'false "safe" in ' + D.live_runs + ' live runs', RED],
   [D.harness_total, 'repeated demo runs correct', GREEN],
   [D.holdout2_before + ' > ' + D.holdout2_after, 'held-out set 2, rules only (before > after)', AMBER],
 ];
@@ -457,9 +465,11 @@ const resultLines = [
   'Evaluation set, keyword only: ' + EK.correct + ' correct, false "safe" ' + EK.false_safe,
   'Model\'s own last label: ' + E.model_last + ' with RAG, ' + EK.model_last + ' keyword; gate overrode it ' +
     E.overrides + ' / ' + EK.overrides + ' times',
-  'Held-out set, live agent: ' + H.correct + ' (RAG), ' + HK.correct + ' (keyword); false "safe" ' + H.false_safe +
+  'Held-out set 1, live agent: ' + H.correct + ' (RAG), ' + HK.correct + ' (keyword); false "safe" ' + H.false_safe +
     ' / ' + HK.false_safe,
-  'Rules only on held-out set 1: ' + D.rules_before + ' before the round-1 changes, ' + D.rules_after +
+  'Held-out set 2, live agent: ' + H2.correct + ' (RAG), ' + H2K.correct + ' (keyword); false "safe" ' + H2.false_safe +
+    ' / ' + H2K.false_safe,
+  'Rules only on held-out set 1: ' + D.rules_before + ' before the round-1 fixes, ' + D.rules_after +
     ' after (rules were fixed using these failures, so no longer held-out)',
   'Break the gate (always "safe"): ' + D.break_gate + ' tests fail',
 ];
@@ -467,7 +477,7 @@ const resultRuns = [];
 for (let i = 0; i < resultLines.length; i++) {
   resultRuns.push({ text: resultLines[i], options: { bullet: true, breakLine: i < resultLines.length - 1 } });
 }
-text(s, resultRuns, { x: 0.6, y: 3.95, w: 12.1, h: 2.45, fontSize: 16, paraSpaceAfter: 6 });
+text(s, resultRuns, { x: 0.6, y: 3.9, w: 12.1, h: 2.4, fontSize: 15, paraSpaceAfter: 4 });
 let wrongIds = [];
 for (let i = 0; i < D.rules_after_wrong.length; i++) {
   wrongIds.push(D.rules_after_wrong[i].id);
@@ -476,10 +486,11 @@ for (let i = 0; i < D.holdout2_after_wrong.length; i++) {
   wrongIds.push(D.holdout2_after_wrong[i].id + ' (expected ' + D.holdout2_after_wrong[i].expected + ', rules say ' +
     D.holdout2_after_wrong[i].supported + ')');
 }
-text(s, 'Honest misses (rules only): ' + (wrongIds.length ? wrongIds.join('; ') : 'none'),
-  { x: 0.6, y: 6.45, w: 12.1, h: 0.45, fontSize: 15, color: MUTED, italic: true });
+text(s, 'Wrong live answers (none "safe"): ' + (D.live_wrong.length ? D.live_wrong.join('; ') : 'none') +
+  '.   Rules only: ' + (wrongIds.length ? wrongIds.join('; ') : 'none'),
+  { x: 0.6, y: 6.3, w: 12.1, h: 0.65, fontSize: 13, color: MUTED, italic: true });
 s.addNotes('All numbers on this slide are read from the evidence files when the deck is built. The offline tests use ' +
-  'a scripted model with deliberately wrong answers. Held-out set 2 was written and committed before the round-3 ' +
+  'a scripted model with deliberately wrong answers. Held-out set 2 was written and committed before the round-2 ' +
   'rule changes and was never edited; its before score is the honest one. Any value shown as "pending" was not ' +
   'available when the deck was built.');
 
