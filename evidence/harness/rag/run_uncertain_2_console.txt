@@ -15,7 +15,7 @@ TOOL RESULT E2 : +1-555-0163 is NOT a saved contact (this alone is not a warning
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 3 ===
-MODEL DECISION : search_scam_guide {"query": "asks you to call back"}
+MODEL DECISION : search_scam_guide {"query": "asks to call back"}
 VALIDATION     : ok
 TOOL RESULT E3 : Found 2 guide entries (rag): G15: Unknown callers asking you to call back; G17: Real
                  appointment reminders.
@@ -23,14 +23,14 @@ NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 4 ===
 MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3"], "explanation": "We are not sure
-                 about this message. It asks you to call back and comes from a number you don't know. The
-                 guide says this could be a scam or a real reminder."}
+                 about this message. It asks you to call back and comes from a number you don't know. But it
+                 could be a real reminder. Ask a family member for help."}
 GATE           : REJECTED - help must be offered before uncertain -> use ask_human_helper first
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 5 ===
-MODEL DECISION : ask_human_helper {"reason": "E1 and E2 show the message asks you to call back and comes from
-                 a number you don't know. The guide says this could be a scam or a real reminder."}
+MODEL DECISION : ask_human_helper {"reason": "E1 and E2 show the message asks to call back and comes from an
+                 unknown number. We suggest alerting a trusted family member for help."}
 VALIDATION     : ok
 TOOL RESULT E4 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
                  message was sent.
@@ -39,7 +39,7 @@ NEXT OPTIONS   : search_scam_guide, done
 === STEP 6 ===
 MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2", "E3", "E4"], "explanation": "We are not
                  sure about this message. It asks you to call back and comes from a number you don't know. A
-                 trusted helper was told, but the message could still be a scam or a real reminder."}
+                 trusted family member was told for help. But it could be a real reminder."}
 GATE           : PASSED - evidence supports uncertain
 
 ====================== SCAMSHIELD RESULT ======================
@@ -55,7 +55,7 @@ EVIDENCE    :
       real message was sent.
 EXPLANATION (model):
   We are not sure about this message. It asks you to call back and comes from a number you don't know. A
-  trusted helper was told, but the message could still be a scam or a real reminder.
+  trusted family member was told for help. But it could be a real reminder.
 WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
               we have let Priya (daughter) know so they can help.
 Tip from our guide (G15): Call the office using a number you already have, such as from an appointment card,

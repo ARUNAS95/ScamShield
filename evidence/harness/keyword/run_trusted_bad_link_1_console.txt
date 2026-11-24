@@ -16,38 +16,23 @@ TOOL RESULT E2 : firstcity-bank-login.co is a LOOKALIKE of the official First Ci
 NEXT OPTIONS   : check_sender, search_scam_guide, done
 
 === STEP 3 ===
-MODEL DECISION : check_sender {"sender": "+1-555-0177"}
-VALIDATION     : ok
-TOOL RESULT E3 : +1-555-0177 is a saved contact: Emma (granddaughter).
-NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
-
-=== STEP 4 ===
-MODEL DECISION : search_scam_guide {"query": "link pretending to be bank website"}
-VALIDATION     : ok
-TOOL RESULT E4 : Found 2 guide entries (keyword): G13: Shortened links hide where they go; G10: Fake bank
-                 fraud alerts.
-NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
-
-=== STEP 5 ===
-MODEL DECISION : done {"label": "likely_scam", "evidence": ["E2", "E4"], "explanation": "This looks like a
-                 scam. The link pretends to be First City Bank. Do not tap short links from unknown senders."}
+MODEL DECISION : done {"label": "likely_scam", "evidence": ["E1", "E2"], "explanation": "This looks like a
+                 scam. The link in the message pretends to be the real First City Bank website. Do not click
+                 on it."}
 GATE           : PASSED - evidence supports likely_scam
 
 ====================== SCAMSHIELD RESULT ======================
 VERDICT     : LIKELY SCAM
-STOP REASON : success   (steps: 5, rejected proposals: 0, gate rejections: 0)
-TOOLS USED  : extract_signals -> check_link -> check_sender -> search_scam_guide
+STOP REASON : success   (steps: 3, rejected proposals: 0, gate rejections: 0)
+TOOLS USED  : extract_signals -> check_link
 EVIDENCE    :
   E1 extract_signals: strong: none; weak: none; 1 link(s); claims to be: no known organization
   E2 check_link: firstcity-bank-login.co is a LOOKALIKE of the official First City Bank website (strong
       warning sign).
-  E3 check_sender: +1-555-0177 is a saved contact: Emma (granddaughter).
-  E4 search_scam_guide: Found 2 guide entries (keyword): G13: Shortened links hide where they go; G10: Fake
-      bank fraud alerts.
 EXPLANATION (model):
-  This looks like a scam. The link pretends to be First City Bank. Do not tap short links from unknown
-  senders.
-WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. Call Emma (granddaughter) on
-              the number you already have and ask if they really sent it.
+  This looks like a scam. The link in the message pretends to be the real First City Bank website. Do not
+  click on it.
+WHAT TO DO  : Do not reply, do not tap any link, and do not send money or codes. You can delete it. If you are
+              worried, talk to Priya (daughter).
 TRACE       : evidence/harness/keyword/run_trusted_bad_link_1_trace.json
 ===============================================================

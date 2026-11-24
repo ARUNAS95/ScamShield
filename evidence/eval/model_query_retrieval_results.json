@@ -1,25 +1,25 @@
 {
   "summary": {
     "keyword": {
-      "hits": 12,
-      "searches": 17,
-      "hit_at_2": 0.706
+      "hits": 11,
+      "searches": 13,
+      "hit_at_2": 0.846
     },
     "rag_no_metadata": {
-      "hits": 13,
-      "searches": 17,
-      "hit_at_2": 0.765
+      "hits": 12,
+      "searches": 13,
+      "hit_at_2": 0.923
     },
     "rag": {
-      "hits": 14,
-      "searches": 17,
-      "hit_at_2": 0.824
+      "hits": 13,
+      "searches": 13,
+      "hit_at_2": 1.0
     }
   },
   "rows": [
     {
       "id": "S01",
-      "query": "Medicare renewal scam",
+      "query": "urgent message with lookalike link",
       "filters": {},
       "expected_guide": [
         "G02",
@@ -28,28 +28,28 @@
       "keyword": {
         "top2": [
           "G02",
-          "G01"
+          "G09"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G02",
-          "G01"
+          "G03",
+          "G09"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
           "G02",
-          "G01"
+          "G03"
         ],
         "hit": true
       }
     },
     {
       "id": "S02",
-      "query": "IRS back taxes arrest",
+      "query": "irs back taxes arrest",
       "filters": {},
       "expected_guide": [
         "G11"
@@ -107,36 +107,36 @@
     },
     {
       "id": "S04",
-      "query": "money request from lookalike website",
+      "query": "USPS parcel fee link",
       "filters": {},
       "expected_guide": [
         "G04"
       ],
       "keyword": {
         "top2": [
-          "G03",
-          "G05"
+          "G04",
+          "G07"
         ],
-        "hit": false
+        "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G03",
-          "G05"
+          "G04",
+          "G07"
         ],
-        "hit": false
+        "hit": true
       },
       "rag": {
         "top2": [
-          "G03",
-          "G05"
+          "G04",
+          "G09"
         ],
-        "hit": false
+        "hit": true
       }
     },
     {
       "id": "S05",
-      "query": "code request and money request",
+      "query": "code request from untrusted number",
       "filters": {},
       "expected_guide": [
         "G19",
@@ -144,24 +144,24 @@
       ],
       "keyword": {
         "top2": [
-          "G05",
-          "G09"
+          "G06",
+          "G16"
         ],
-        "hit": false
+        "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G05",
-          "G09"
+          "G06",
+          "G18"
         ],
-        "hit": false
+        "hit": true
       },
       "rag": {
         "top2": [
-          "G05",
-          "G09"
+          "G06",
+          "G19"
         ],
-        "hit": false
+        "hit": true
       }
     },
     {
@@ -252,37 +252,8 @@
       }
     },
     {
-      "id": "S09",
-      "query": "crypto money request",
-      "filters": {},
-      "expected_guide": [
-        "G08"
-      ],
-      "keyword": {
-        "top2": [
-          "G08",
-          "G05"
-        ],
-        "hit": true
-      },
-      "rag_no_metadata": {
-        "top2": [
-          "G08",
-          "G05"
-        ],
-        "hit": true
-      },
-      "rag": {
-        "top2": [
-          "G08",
-          "G05"
-        ],
-        "hit": true
-      }
-    },
-    {
       "id": "S10",
-      "query": "urgency short link",
+      "query": "urgent package delivery reschedule",
       "filters": {},
       "expected_guide": [
         "G13",
@@ -290,52 +261,21 @@
       ],
       "keyword": {
         "top2": [
-          "G13",
-          "G16"
+          "G04"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G13",
+          "G04",
           "G16"
         ],
         "hit": true
       },
       "rag": {
         "top2": [
-          "G13",
-          "G16"
-        ],
-        "hit": true
-      }
-    },
-    {
-      "id": "S11",
-      "query": "medicare lookalike link",
-      "filters": {},
-      "expected_guide": [
-        "G02",
-        "G03"
-      ],
-      "keyword": {
-        "top2": [
-          "G02",
-          "G03"
-        ],
-        "hit": true
-      },
-      "rag_no_metadata": {
-        "top2": [
-          "G02",
-          "G03"
-        ],
-        "hit": true
-      },
-      "rag": {
-        "top2": [
-          "G02",
-          "G03"
+          "G04",
+          "G19"
         ],
         "hit": true
       }
@@ -372,38 +312,8 @@
       }
     },
     {
-      "id": "I01",
-      "query": "ai directed link First City Bank",
-      "filters": {},
-      "expected_guide": [
-        "G14",
-        "G10"
-      ],
-      "keyword": {
-        "top2": [
-          "G10",
-          "G18"
-        ],
-        "hit": true
-      },
-      "rag_no_metadata": {
-        "top2": [
-          "G18",
-          "G10"
-        ],
-        "hit": true
-      },
-      "rag": {
-        "top2": [
-          "G10",
-          "G18"
-        ],
-        "hit": true
-      }
-    },
-    {
       "id": "I02",
-      "query": "call to stop benefits",
+      "query": "social security benefits stop unless you call",
       "filters": {},
       "expected_guide": [
         "G14",
@@ -412,28 +322,28 @@
       "keyword": {
         "top2": [
           "G01",
-          "G02"
+          "G12"
         ],
-        "hit": false
+        "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G02",
-          "G01"
+          "G01",
+          "G12"
         ],
-        "hit": false
+        "hit": true
       },
       "rag": {
         "top2": [
-          "G15",
-          "G01"
+          "G01",
+          "G12"
         ],
-        "hit": false
+        "hit": true
       }
     },
     {
       "id": "U01",
-      "query": "call to confirm cleaning",
+      "query": "dental office calls asking to confirm appointments",
       "filters": {},
       "expected_guide": [
         "G17",
@@ -441,15 +351,15 @@
       ],
       "keyword": {
         "top2": [
-          "G12",
+          "G17",
           "G15"
         ],
         "hit": true
       },
       "rag_no_metadata": {
         "top2": [
-          "G15",
-          "G17"
+          "G17",
+          "G15"
         ],
         "hit": true
       },
@@ -487,36 +397,6 @@
         "top2": [
           "G15",
           "G05"
-        ],
-        "hit": true
-      }
-    },
-    {
-      "id": "U05",
-      "query": "asks you to call back",
-      "filters": {},
-      "expected_guide": [
-        "G15",
-        "G17"
-      ],
-      "keyword": {
-        "top2": [
-          "G15",
-          "G01"
-        ],
-        "hit": true
-      },
-      "rag_no_metadata": {
-        "top2": [
-          "G15",
-          "G01"
-        ],
-        "hit": true
-      },
-      "rag": {
-        "top2": [
-          "G15",
-          "G17"
         ],
         "hit": true
       }

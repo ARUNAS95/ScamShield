@@ -16,15 +16,15 @@
       "tools": [
         "extract_signals",
         "check_link",
-        "lookup_official_contact",
         "check_sender",
+        "lookup_official_contact",
         "search_scam_guide"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 15.7,
+      "seconds": 17.9,
       "trace": "run_scam_1_trace.json",
       "console": "run_scam_1_console.txt"
     },
@@ -41,15 +41,15 @@
       "tools": [
         "extract_signals",
         "check_link",
-        "lookup_official_contact",
         "check_sender",
+        "lookup_official_contact",
         "search_scam_guide"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 15.4,
+      "seconds": 16.8,
       "trace": "run_scam_2_trace.json",
       "console": "run_scam_2_console.txt"
     },
@@ -66,15 +66,15 @@
       "tools": [
         "extract_signals",
         "check_link",
-        "lookup_official_contact",
         "check_sender",
+        "lookup_official_contact",
         "search_scam_guide"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 15.4,
+      "seconds": 15.6,
       "trace": "run_scam_3_trace.json",
       "console": "run_scam_3_console.txt"
     },
@@ -87,17 +87,17 @@
       "model_label": "likely_safe",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 4,
+      "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
         "lookup_official_contact"
       ],
       "rejected_proposals": 0,
-      "gate_rejections": 0,
+      "gate_rejections": 1,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 10.4,
+      "seconds": 14.8,
       "trace": "run_ordinary_1_trace.json",
       "console": "run_ordinary_1_console.txt"
     },
@@ -110,17 +110,17 @@
       "model_label": "likely_safe",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 4,
+      "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
         "lookup_official_contact"
       ],
       "rejected_proposals": 0,
-      "gate_rejections": 0,
+      "gate_rejections": 1,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 8.7,
+      "seconds": 14.6,
       "trace": "run_ordinary_2_trace.json",
       "console": "run_ordinary_2_console.txt"
     },
@@ -133,17 +133,17 @@
       "model_label": "likely_safe",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 4,
+      "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
         "lookup_official_contact"
       ],
       "rejected_proposals": 0,
-      "gate_rejections": 0,
+      "gate_rejections": 1,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 8.9,
+      "seconds": 14.8,
       "trace": "run_ordinary_3_trace.json",
       "console": "run_ordinary_3_console.txt"
     },
@@ -166,7 +166,7 @@
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 9.9,
+      "seconds": 9.4,
       "trace": "run_ordinary_urgent_1_trace.json",
       "console": "run_ordinary_urgent_1_console.txt"
     },
@@ -189,7 +189,7 @@
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 10.2,
+      "seconds": 9.5,
       "trace": "run_ordinary_urgent_2_trace.json",
       "console": "run_ordinary_urgent_2_console.txt"
     },
@@ -212,7 +212,7 @@
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 9.5,
+      "seconds": 10.4,
       "trace": "run_ordinary_urgent_3_trace.json",
       "console": "run_ordinary_urgent_3_console.txt"
     },
@@ -225,18 +225,17 @@
       "model_label": "uncertain",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 6,
+      "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
-        "search_scam_guide",
         "ask_human_helper"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 1,
       "explanation_source": "model",
-      "helper_offered_by": "model_after_gate_hint",
-      "seconds": 23.0,
+      "helper_offered_by": "model",
+      "seconds": 19.6,
       "trace": "run_uncertain_1_trace.json",
       "console": "run_uncertain_1_console.txt"
     },
@@ -260,7 +259,7 @@
       "gate_rejections": 1,
       "explanation_source": "model",
       "helper_offered_by": "model",
-      "seconds": 24.8,
+      "seconds": 20.7,
       "trace": "run_uncertain_2_trace.json",
       "console": "run_uncertain_2_console.txt"
     },
@@ -273,18 +272,17 @@
       "model_label": "uncertain",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 6,
+      "steps": 4,
       "tools": [
         "extract_signals",
         "check_sender",
-        "search_scam_guide",
         "ask_human_helper"
       ],
       "rejected_proposals": 0,
-      "gate_rejections": 1,
+      "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": "model",
-      "seconds": 22.6,
+      "seconds": 12.0,
       "trace": "run_uncertain_3_trace.json",
       "console": "run_uncertain_3_console.txt"
     },
@@ -301,15 +299,15 @@
       "tools": [
         "extract_signals",
         "check_link",
-        "lookup_official_contact",
         "check_sender",
+        "lookup_official_contact",
         "search_scam_guide"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 14.7,
+      "seconds": 15.1,
       "trace": "run_injection_1_trace.json",
       "console": "run_injection_1_console.txt"
     },
@@ -326,15 +324,15 @@
       "tools": [
         "extract_signals",
         "check_link",
-        "lookup_official_contact",
         "check_sender",
+        "lookup_official_contact",
         "search_scam_guide"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 14.9,
+      "seconds": 15.5,
       "trace": "run_injection_2_trace.json",
       "console": "run_injection_2_console.txt"
     },
@@ -351,15 +349,15 @@
       "tools": [
         "extract_signals",
         "check_link",
-        "lookup_official_contact",
         "check_sender",
+        "lookup_official_contact",
         "search_scam_guide"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 15.2,
+      "seconds": 14.7,
       "trace": "run_injection_3_trace.json",
       "console": "run_injection_3_console.txt"
     },
@@ -372,18 +370,16 @@
       "model_label": "likely_scam",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 5,
+      "steps": 3,
       "tools": [
         "extract_signals",
-        "check_link",
-        "check_sender",
-        "search_scam_guide"
+        "check_link"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 13.0,
+      "seconds": 7.5,
       "trace": "run_trusted_bad_link_1_trace.json",
       "console": "run_trusted_bad_link_1_console.txt"
     },
@@ -401,13 +397,13 @@
         "extract_signals",
         "check_link",
         "check_sender",
-        "search_scam_guide"
+        "ask_human_helper"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
-      "helper_offered_by": null,
-      "seconds": 11.8,
+      "helper_offered_by": "model",
+      "seconds": 12.5,
       "trace": "run_trusted_bad_link_2_trace.json",
       "console": "run_trusted_bad_link_2_console.txt"
     },
@@ -425,13 +421,13 @@
         "extract_signals",
         "check_link",
         "check_sender",
-        "search_scam_guide"
+        "ask_human_helper"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
-      "helper_offered_by": null,
-      "seconds": 12.4,
+      "helper_offered_by": "model",
+      "seconds": 12.8,
       "trace": "run_trusted_bad_link_3_trace.json",
       "console": "run_trusted_bad_link_3_console.txt"
     },
@@ -454,7 +450,7 @@
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": null,
-      "seconds": 9.7,
+      "seconds": 9.1,
       "trace": "run_model_catches_miss_1_trace.json",
       "console": "run_model_catches_miss_1_console.txt"
     },
@@ -462,22 +458,22 @@
       "case": "model_catches_miss",
       "run": 2,
       "expected": "uncertain",
-      "final_label": "likely_safe",
-      "correct": false,
-      "model_label": "likely_safe",
+      "final_label": "uncertain",
+      "correct": true,
+      "model_label": "uncertain",
       "gate_overrode_model": false,
       "stop_reason": "success",
-      "steps": 4,
+      "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
-        "search_scam_guide"
+        "ask_human_helper"
       ],
       "rejected_proposals": 0,
-      "gate_rejections": 0,
+      "gate_rejections": 1,
       "explanation_source": "model",
-      "helper_offered_by": null,
-      "seconds": 9.0,
+      "helper_offered_by": "model",
+      "seconds": 16.7,
       "trace": "run_model_catches_miss_2_trace.json",
       "console": "run_model_catches_miss_2_console.txt"
     },
@@ -494,14 +490,13 @@
       "tools": [
         "extract_signals",
         "check_sender",
-        "search_scam_guide",
         "ask_human_helper"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 1,
       "explanation_source": "model",
       "helper_offered_by": "model",
-      "seconds": 19.2,
+      "seconds": 21.3,
       "trace": "run_model_catches_miss_3_trace.json",
       "console": "run_model_catches_miss_3_console.txt"
     },
@@ -513,18 +508,19 @@
       "correct": true,
       "model_label": "uncertain",
       "gate_overrode_model": false,
-      "stop_reason": "success",
-      "steps": 4,
+      "stop_reason": "tool_failure",
+      "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
+        "search_scam_guide(FAILED)",
         "ask_human_helper"
       ],
       "rejected_proposals": 0,
       "gate_rejections": 0,
       "explanation_source": "model",
       "helper_offered_by": "model",
-      "seconds": 12.1,
+      "seconds": 13.8,
       "trace": "run_guide_missing_1_trace.json",
       "console": "run_guide_missing_1_console.txt"
     },
@@ -536,19 +532,18 @@
       "correct": true,
       "model_label": "uncertain",
       "gate_overrode_model": false,
-      "stop_reason": "tool_failure",
+      "stop_reason": "success",
       "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
-        "search_scam_guide(FAILED)",
         "ask_human_helper"
       ],
       "rejected_proposals": 0,
-      "gate_rejections": 0,
+      "gate_rejections": 1,
       "explanation_source": "model",
       "helper_offered_by": "model",
-      "seconds": 12.5,
+      "seconds": 16.2,
       "trace": "run_guide_missing_2_trace.json",
       "console": "run_guide_missing_2_console.txt"
     },
@@ -560,19 +555,18 @@
       "correct": true,
       "model_label": "uncertain",
       "gate_overrode_model": false,
-      "stop_reason": "tool_failure",
+      "stop_reason": "success",
       "steps": 5,
       "tools": [
         "extract_signals",
         "check_sender",
-        "search_scam_guide(FAILED)",
         "ask_human_helper"
       ],
       "rejected_proposals": 0,
-      "gate_rejections": 0,
+      "gate_rejections": 1,
       "explanation_source": "model",
       "helper_offered_by": "model",
-      "seconds": 13.0,
+      "seconds": 17.4,
       "trace": "run_guide_missing_3_trace.json",
       "console": "run_guide_missing_3_console.txt"
     },
@@ -650,7 +644,7 @@
       },
       "distinct_tool_sequences": 1,
       "tool_sequences": [
-        "extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide"
+        "extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide"
       ]
     },
     "ordinary": {
@@ -658,8 +652,8 @@
       "correct": 3,
       "gate_overrides": 0,
       "rejected_proposals": 0,
-      "gate_rejections": 0,
-      "average_steps": 4.0,
+      "gate_rejections": 3,
+      "average_steps": 5.0,
       "stop_reasons": {
         "success": 3
       },
@@ -694,17 +688,17 @@
       "correct": 3,
       "gate_overrides": 0,
       "rejected_proposals": 0,
-      "gate_rejections": 3,
-      "average_steps": 6.0,
+      "gate_rejections": 2,
+      "average_steps": 5.0,
       "stop_reasons": {
         "success": 3
       },
       "helper_offered_by": {
-        "model_after_gate_hint": 1,
-        "model": 2
+        "model": 3
       },
-      "distinct_tool_sequences": 1,
+      "distinct_tool_sequences": 2,
       "tool_sequences": [
+        "extract_signals > check_sender > ask_human_helper",
         "extract_signals > check_sender > search_scam_guide > ask_human_helper"
       ]
     },
@@ -723,7 +717,7 @@
       },
       "distinct_tool_sequences": 1,
       "tool_sequences": [
-        "extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide"
+        "extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide"
       ]
     },
     "trusted_bad_link": {
@@ -732,36 +726,38 @@
       "gate_overrides": 0,
       "rejected_proposals": 0,
       "gate_rejections": 0,
+      "average_steps": 4.3,
+      "stop_reasons": {
+        "success": 3
+      },
+      "helper_offered_by": {
+        "None": 1,
+        "model": 2
+      },
+      "distinct_tool_sequences": 2,
+      "tool_sequences": [
+        "extract_signals > check_link",
+        "extract_signals > check_link > check_sender > ask_human_helper"
+      ]
+    },
+    "model_catches_miss": {
+      "runs": 3,
+      "correct": 2,
+      "gate_overrides": 0,
+      "rejected_proposals": 0,
+      "gate_rejections": 2,
       "average_steps": 5.0,
       "stop_reasons": {
         "success": 3
       },
       "helper_offered_by": {
-        "None": 3
-      },
-      "distinct_tool_sequences": 1,
-      "tool_sequences": [
-        "extract_signals > check_link > check_sender > search_scam_guide"
-      ]
-    },
-    "model_catches_miss": {
-      "runs": 3,
-      "correct": 1,
-      "gate_overrides": 0,
-      "rejected_proposals": 0,
-      "gate_rejections": 1,
-      "average_steps": 4.7,
-      "stop_reasons": {
-        "success": 3
-      },
-      "helper_offered_by": {
-        "None": 2,
-        "model": 1
+        "None": 1,
+        "model": 2
       },
       "distinct_tool_sequences": 2,
       "tool_sequences": [
         "extract_signals > check_sender > search_scam_guide",
-        "extract_signals > check_sender > search_scam_guide > ask_human_helper"
+        "extract_signals > check_sender > ask_human_helper"
       ]
     },
     "guide_missing": {
@@ -769,19 +765,19 @@
       "correct": 3,
       "gate_overrides": 0,
       "rejected_proposals": 0,
-      "gate_rejections": 0,
-      "average_steps": 4.7,
+      "gate_rejections": 2,
+      "average_steps": 5.0,
       "stop_reasons": {
-        "success": 1,
-        "tool_failure": 2
+        "tool_failure": 1,
+        "success": 2
       },
       "helper_offered_by": {
         "model": 3
       },
       "distinct_tool_sequences": 2,
       "tool_sequences": [
-        "extract_signals > check_sender > ask_human_helper",
-        "extract_signals > check_sender > search_scam_guide(FAILED) > ask_human_helper"
+        "extract_signals > check_sender > search_scam_guide(FAILED) > ask_human_helper",
+        "extract_signals > check_sender > ask_human_helper"
       ]
     },
     "empty": {

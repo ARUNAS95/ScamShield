@@ -15,49 +15,32 @@ TOOL RESULT E2 : +1-555-0163 is NOT a saved contact (this alone is not a warning
 NEXT OPTIONS   : search_scam_guide, ask_human_helper, done
 
 === STEP 3 ===
-MODEL DECISION : ask_human_helper {"reason": "E1 shows asks you to call back. We recommend contacting a
-                 trusted family member to confirm if this is legitimate."}
+MODEL DECISION : ask_human_helper {"reason": "E1 shows asks you to call back. E2 shows the sender is not a
+                 saved contact. We recommend calling the number directly or checking with a trusted family
+                 member to confirm."}
 VALIDATION     : ok
 TOOL RESULT E3 : The person agreed. A practice alert for Priya (daughter) was written to the log. No real
                  message was sent.
 NEXT OPTIONS   : search_scam_guide, done
 
 === STEP 4 ===
-MODEL DECISION : done {"label": "likely_safe", "evidence": ["E1", "E2"], "explanation": "This message looks
-                 safe. It asks you to call back, but that's not a warning sign. The number isn't in your
-                 contacts, but that alone doesn't mean it's a scam. A trusted helper was told to check."}
-GATE           : REJECTED - evidence supports likely_safe -> likely_safe needs a saved contact, no strong
-                 signs, at most 1 weak sign, all links official; actual: sender +1-555-0163 is not a saved
-                 contact
-NEXT OPTIONS   : search_scam_guide, done
-
-=== STEP 5 ===
-MODEL DECISION : search_scam_guide {"query": "asks to call back"}
-VALIDATION     : ok
-TOOL RESULT    : TOOL FAILURE: search_scam_guide failed: FileNotFoundError: [Errno 2] No such file or
-                 directory: 'data/missing_scam_guide.json'. Continue with other evidence or ask a human.
-NEXT OPTIONS   : done
-
-=== STEP 6 ===
 MODEL DECISION : done {"label": "uncertain", "evidence": ["E1", "E2"], "explanation": "We are not sure about
-                 this message. It asks you to call back, which isn't a warning sign. The number isn't in your
-                 contacts, but that alone doesn't mean it's a scam. A trusted helper was told to check, but we
-                 need more info to be sure."}
+                 this message. It asks you to call back and comes from a number that is not in your contacts.
+                 We recommend confirming with a trusted family member."}
 GATE           : PASSED - evidence supports uncertain
 
 ====================== SCAMSHIELD RESULT ======================
 VERDICT     : NOT SURE - ASK SOMEONE YOU TRUST
-STOP REASON : tool_failure   (steps: 6, rejected proposals: 0, gate rejections: 1)
-TOOLS USED  : extract_signals -> check_sender -> ask_human_helper -> search_scam_guide(FAILED)
+STOP REASON : success   (steps: 4, rejected proposals: 0, gate rejections: 0)
+TOOLS USED  : extract_signals -> check_sender -> ask_human_helper
 EVIDENCE    :
   E1 extract_signals: strong: none; weak: none; 0 link(s); claims to be: no known organization
   E2 check_sender: +1-555-0163 is NOT a saved contact (this alone is not a warning sign).
   E3 ask_human_helper: The person agreed. A practice alert for Priya (daughter) was written to the log. No
       real message was sent.
 EXPLANATION (model):
-  We are not sure about this message. It asks you to call back, which isn't a warning sign. The number isn't
-  in your contacts, but that alone doesn't mean it's a scam. A trusted helper was told to check, but we need
-  more info to be sure.
+  We are not sure about this message. It asks you to call back and comes from a number that is not in your
+  contacts. We recommend confirming with a trusted family member.
 WHAT TO DO  : Do not use the number or link in the message. Call them back on a number you already have, and
               we have let Priya (daughter) know so they can help.
 HUMAN HELP  : offered by model, consent = True (simulated)
