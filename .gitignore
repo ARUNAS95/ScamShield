@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE (IntelliJ / VS Code)
+.idea/
+*.iml
+.vscode/
+
+# Run-time files (sample evidence we want to keep is committed with git add -f)
+evidence/*_checkpoint.json
+evidence/scratch/
+
+# Mac OS
+.DS_Store
