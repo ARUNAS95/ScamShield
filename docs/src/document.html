@@ -35,7 +35,7 @@ a particular message is suspicious, so the next message with a slightly differen
 <p><b>ScamShield</b> checks one text message and answers in short, kind, everyday words:</p>
 <div class="verdicts">
   <div style="background:#C62828"><b>Likely scam</b>at least one strong warning sign, or two weak ones</div>
-  <div style="background:#2E7D5B"><b>Likely safe</b>a saved contact, no strong signs, every link official</div>
+  <div style="background:#2E7D5B"><b>Likely safe</b>a saved contact, no strong signs, at most 1 weak sign, every link checked and official, no tool failure</div>
   <div style="background:#B45309"><b>Not sure, ask someone you trust</b>the evidence cannot settle it</div>
 </div>
 <p>Why this is useful:</p>
@@ -161,14 +161,19 @@ and the guide tip are always added by Python.</p>
 
 <h3>The verdict gate rules</h3>
 <ul>
-  <li><b>likely_scam</b> needs at least 1 strong warning sign (gift card, crypto, a request to pay with a money app,
-  a request for a code or password, a look-alike or known scam link, a number-only link, text trying to trick an AI)
-  or at least 2 weak ones (urgency, threat, money request, prize, new number, secrecy, short link).</li>
+  <li><b>likely_scam</b> needs at least 1 strong warning sign (a request to buy, send or read out a gift or store
+  card, crypto or a wire transfer, a request to pay with a money app, a request for a code, password, PIN or a photo
+  of a bank card, a look-alike, known scam, look-alike-letter or hidden-address link, a number-only link, text trying
+  to trick an AI) or at least 2 weak ones (urgency, threat, money request, prize, new number, secrecy, short link).
+  Only a request counts: a gift card given as a present or "I'll pay you back on Venmo" is not a warning sign.</li>
   <li><b>likely_safe</b> needs a saved contact, no strong signs, at most 1 weak sign, every link checked and official,
   and no tool failure.</li>
   <li><b>uncertain</b> is anything else. It is rejected when a strong warning sign was found ("not sure" would hide a
-  clear danger) and it requires that human help was offered first.</li>
+  clear danger), and help must be offered before uncertain.</li>
   <li>Cited evidence ids must exist, and the explanation must mention every strong warning sign.</li>
+  <li><b>The model's concern can only make the answer more careful.</b> Python can block a label the evidence does not
+  support, but if the gate gives up (or the run ends) while the evidence supports "safe" and the model said "scam" or
+  "not sure" at any point, the answer is "not sure" with human help offered, never "safe".</li>
 </ul>
 </section>
 
@@ -214,7 +219,11 @@ expected label.</p>
 <p><code>python3 tests.py</code>: <b>{{TESTS}}</b> tests passed at build time. They use a scripted model (no Ollama),
 including deliberately wrong answers: bad JSON, invented arguments, fabricated evidence ids, "safe" forced on a scam,
 "uncertain" on a strong sign, injection, consent yes/no, a missing guide, Ollama down, a single failed model call,
-failed post-checks, the step limit, no progress, readability, RAG ranking and fallback, and checkpoint resume.</p>
+failed post-checks, the step limit, no progress, readability, RAG ranking and fallback, checkpoint resume, a
+false-alarm regression list (ordinary texts that must stay safe) and a false-safe regression list (critic probes
+that must be scams). <code>python3 tests.py --break-gate</code> replaces the gate's <code>supported_label</code> with
+"always likely_safe": <b>{{BREAK_GATE}}</b> tests then fail (<code>evidence/eval/break_gate_tests.txt</code>), so
+the tests notice a broken gate.</p>
 
 <h3>Live agent evaluation</h3>
 <p>The evaluation set has {{EVAL_MESSAGES}} labeled fictional messages, separate from the demo cases. The held-out
@@ -225,12 +234,21 @@ look-alike letters, unusual web address endings, payment apps). One run per mess
 <ul>{{EVAL_MISSES}}</ul>
 <p><b>False "safe" answers</b>, the most harmful mistake for an older adult: {{FALSE_SAFE_SUMMARY}}.</p>
 
-<h3>Warning-sign rules alone on the held-out set (no model)</h3>
+<h3>Warning-sign rules alone on the held-out sets (no model)</h3>
 <p><code>python3 eval.py --rules --set holdout</code> runs only the rules and lookups. Before the round-1 rule changes
 {{RULES_BEFORE}} supported labels matched (false "safe": {{RULES_BEFORE_FALSE_SAFE}}); after them {{RULES_AFTER}}
-(false "safe": {{RULES_AFTER_FALSE_SAFE}}). Still wrong after the changes:</p>
+(false "safe": {{RULES_AFTER_FALSE_SAFE}}). The rules were adjusted after seeing these failures, so the later score
+is no longer a held-out score. Still wrong after the changes:</p>
 <ul>{{RULES_AFTER_WRONG}}</ul>
-<p>The held-out messages were not edited to make the rules pass. A message whose links are only "unknown" ends as
+<p><b>Held-out set 2</b> (<code>--set holdout2</code>) is the fresh check: 14 messages written and committed, with
+their rules-only score, before any round-3 rule change (brand gift cards with claim numbers, a Cyrillic look-alike
+link, a defanged link, a card-photo request, and harmless saved-contact texts with risky words). Before the changes
+{{HOLDOUT2_BEFORE}} matched (false "safe": {{HOLDOUT2_BEFORE_FALSE_SAFE}}); after them {{HOLDOUT2_AFTER}} (false
+"safe": {{HOLDOUT2_AFTER_FALSE_SAFE}}). The new rules came from the reviewer's probe list, and some probes share
+wording with this set, so the "after" score is optimistic; the "before" score is the honest held-out measurement.
+Still wrong:</p>
+<ul>{{HOLDOUT2_AFTER_WRONG}}</ul>
+<p>Neither held-out set was edited to make the rules pass. A message whose links are only "unknown" ends as
 "not sure", which is not unsafe, but weaker than a careful human.</p>
 
 <h3>Guide retrieval</h3>
@@ -257,18 +275,24 @@ pip3 install -r requirements.txt   # just: requests</pre>
 <pre>python3 tests.py</pre>
 <h3>4. Run the demo cases with the live model</h3>
 <pre>python3 scamshield_agent.py --list-cases
+python3 scamshield_agent.py --case ordinary --consent yes
 python3 scamshield_agent.py --case scam --consent yes
-python3 scamshield_agent.py --case injection --consent yes
+python3 scamshield_agent.py --case uncertain --consent yes
 python3 scamshield_agent.py --case guide_missing --consent yes
+python3 scamshield_agent.py --case injection --consent yes
 python3 scamshield_agent.py --case empty --consent yes
 python3 scamshield_agent.py --message "Your package is waiting, pay $2 at usps-help.co" --sender "+1-555-0123" --consent yes</pre>
 <p><code>--consent yes</code> answers the simulated family-alert question automatically (use <code>prompt</code> to
 be asked in the terminal). Other options: <code>--quiet</code>, <code>--search-mode keyword|rag_no_metadata|rag</code>,
-<code>--stop-after N</code> and <code>--resume &lt;checkpoint&gt;</code>. Every run prints each step and saves a
-trace to <code>evidence/&lt;case&gt;_trace.json</code>.</p>
+<code>--stop-after N</code> and <code>--resume &lt;checkpoint&gt;</code> (a finished run is not re-run). Every run
+prints each step, with a <code>NEXT OPTIONS</code> line showing the actions Python offers next, and saves a trace to
+<code>evidence/&lt;case&gt;_trace.json</code>. Optional environment variables: <code>OLLAMA_URL</code>,
+<code>SCAMSHIELD_MODEL</code>, <code>OLLAMA_EMBED_URL</code>, <code>SCAMSHIELD_EMBED_MODEL</code>.</p>
 <h3>5. Evaluation and repeated runs</h3>
 <pre>python3 eval.py --rules --set eval          # rules only, instant, no model
 python3 eval.py --rules --set holdout
+python3 eval.py --rules --set holdout2
+python3 tests.py --break-gate               # the break-the-gate experiment
 python3 eval.py --retrieval                 # needs nomic-embed-text
 python3 eval.py --model-queries
 python3 eval.py --agent --mode rag          # live model, evaluation set
@@ -279,21 +303,25 @@ python3 harness_runs.py --runs 3 --mode keyword</pre>
 <h3>6. Rebuild this document and the slides</h3>
 <pre>npm install --prefix docs    # once, installs pptxgenjs for the slide deck
 python3 docs/build_docs.py   # reads the evidence files, writes the PDF and the PPTX</pre>
+<p>Needs Chrome or Chromium (found through <code>CHROME_PATH</code>, the macOS location, or the PATH) and Node.js;
+the rebuild is tested on macOS.</p>
 </section>
 
 <section class="flow">
 <h2>8. Limitations and honest notes</h2>
 <ul>
   <li><b>The evaluation was written by the same person as the rules.</b> The warning-sign rules, the guide, the
-  evaluation messages and the held-out messages are all mine. The held-out set was written before the rule changes
-  to reduce this bias, but real scam texts are more varied than any small hand-written set.</li>
+  evaluation messages and the held-out messages are all mine. Each held-out set was written before the rule changes
+  it measures, to reduce this bias, but real scam texts are more varied than any small hand-written set.</li>
   <li><b>Small local model.</b> <code>qwen3:8b</code> sometimes proposes a verdict too early or says "safe" too
   quickly on unknown senders. The gate catches this, but it costs steps, and good final answers come from Python's
   checks, not from the model being reliable.</li>
   <li><b>The RAG gain is small.</b> Metadata RAG beat plain keyword search on only a few messages, and the guide and
   test messages share vocabulary. The retrieval comparison does not prove a large benefit.</li>
-  <li><b>Rules can be fooled.</b> Regex warning signs and a small website list miss new tricks; letters from other
-  alphabets are not undone; a claimed organization with an unknown website ends as "not sure", not "scam".</li>
+  <li><b>Rules can be fooled.</b> Regex warning signs and a small website list miss new tricks (held-out set 2 got
+  {{HOLDOUT2_BEFORE}} right before the round-3 changes); only a fixed list of look-alike letters from other alphabets
+  is mapped; a claimed organization with an unknown website ends as "not sure", not "scam"; "money request" fires on
+  any dollar amount, so a family thank-you with "$40" and "today" is a false alarm.</li>
   <li><b>Scope.</b> Fictional text messages only, English only, no images or voice notes; the family alert is
   simulated. No memory across messages.</li>
   <li><b>No LLM judge.</b> Explanations are checked by rules (verdict first, short sentences, no jargon), not by a
@@ -325,7 +353,9 @@ with parts of the code and documentation; I directed the work, reviewed the chan
 <p><b>New in ScamShield</b> (not in the course materials): the verdict gate that works out the supported label
 from recorded evidence with expected-vs-actual feedback; the never-trimmed evidence ledger; prompt-injection text as a
 strong warning sign; the readability check and the Python-written "what to do" line; metadata RAG with keyword
-fallback and its evaluation; checkpoint and resume.</p>
+fallback and its evaluation; checkpoint and resume (following the State management / Verification / Checkpointing
+bullets of the course Canvas post "additional notes on Nov. 4 lecture and references"); the rule that the model's
+concern can only make the answer more careful.</p>
 <h3>What I learned (from the development log)</h3>
 <ul>{{LEARNED}}</ul>
 </section>

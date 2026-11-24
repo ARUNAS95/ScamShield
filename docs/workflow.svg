@@ -155,10 +155,11 @@
   <text class="lab" x="1308" y="716" style="font-size:15px">2nd</text>
   <text class="lab" x="1308" y="734" style="font-size:15px">time</text>
 
-  <rect class="py" x="1030" y="775" width="340" height="90" rx="12"/>
+  <rect class="py" x="1030" y="775" width="340" height="112" rx="12"/>
   <text class="h" x="1200" y="805" text-anchor="middle">Python uses the label</text>
   <text class="t" x="1200" y="829" text-anchor="middle">the evidence supports</text>
   <text class="s" x="1200" y="851" text-anchor="middle">(stop reason gate_downgrade)</text>
+  <text class="s" x="1200" y="873" text-anchor="middle">never "safe" if the model was worried</text>
 
   <rect class="py" x="650" y="560" width="310" height="110" rx="12"/>
   <text class="h" x="805" y="590" text-anchor="middle">Readability check</text>
