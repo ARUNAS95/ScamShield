@@ -1,0 +1,19 @@
+RULES ONLY (no model), set = holdout2, 14 messages
+id   category   expected     supported          evidence
+F01  scam       likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+F02  scam       likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+F03  scam       likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+F04  scam       likely_scam  likely_safe  WRONG signs: none | links: none | saved contact: True
+F05  scam       likely_scam  likely_safe  WRONG signs: money_request(weak) | links: none | saved contact: True
+F06  scam       likely_scam  uncertain    WRONG signs: money_request(weak) | links: none | saved contact: False
+F07  scam       likely_scam  uncertain    WRONG signs: none | links: none | saved contact: False
+F08  legit      likely_safe  likely_scam  WRONG signs: payment_app(strong), money_request(weak) | links: none | saved contact: True
+F09  legit      likely_safe  likely_scam  WRONG signs: gift_card(strong) | links: none | saved contact: True
+F10  legit      likely_safe  likely_scam  WRONG signs: code_request(strong) | links: none | saved contact: True
+F11  legit      likely_safe  likely_scam  WRONG signs: urgency(weak), money_request(weak) | links: none | saved contact: True
+F12  legit      likely_safe  uncertain    WRONG signs: none | links: p.m.love=unknown | saved contact: True
+F13  uncertain  uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+F14  uncertain  uncertain    uncertain    OK    signs: none | links: none | saved contact: False
+
+RULES ONLY (holdout2): 2/14 supported labels match the expected label
+  false "safe": 5   false alarms (scam on a safe message): 4
