@@ -517,28 +517,28 @@ T(s, 'WHAT IT PROVES', { x: COL_PROVES, y: 1.78, w: W_PROVES, h: 0.32, fontSize:
 const layers = [
   { n: '1', name: 'Offline tests', big: isPending(D.tests_passed) ? PENDING : D.tests_passed + '/' + D.tests_total + ' pass',
     color: BLUE, h: 1.12,
-    is: [{ text: 'Automated checks that run without the AI. A fake model gives scripted answers, including deliberately ' +
-      'wrong ones (e.g. insisting a scam is safe).' }],
-    proves: [{ text: 'Python\'s checks catch bad model answers.' }] },
+    is: [{ text: 'Checks that run without the AI. A fake model sends answers I wrote in advance, some wrong on ' +
+      'purpose, like insisting a scam is safe.' }],
+    proves: [{ text: 'Python catches the model\'s bad answers.' }] },
   { n: '2', name: 'Break the gate on purpose',
     big: isPending(D.break_gate_failed) ? PENDING : D.break_gate_failed + ' of ' + D.break_gate_total + ' fail',
     color: BLUE, h: 1.0,
-    is: [{ text: 'We replaced the verdict gate with one that believes every message is safe, and ran the same tests again.' }],
-    proves: [{ text: 'The tests really notice a broken safety check. They are not empty tests.' }] },
+    is: [{ text: 'I swapped the safety gate for one that calls every message safe, then ran the same tests again.' }],
+    proves: [{ text: 'The tests notice when the safety check breaks, so they test something real.' }] },
   { n: '3', name: 'Live runs, real model', big: isPending(D.live_core_runs) ? PENDING : D.live_core_runs + ' runs',
     sub: isPending(D.live_core_false_safe) ? '' : D.live_core_false_safe + ' false "safe"', color: GREEN, h: 1.36,
     is: [
-      { text: 'The real agent (qwen3:8b) checks each message. ' },
+      { text: 'The real AI (qwen3:8b) checks each message. ' },
       { text: 'Test set 1: ' + val(evalSet.correct) + ' correct', options: { bold: true } },
       { text: ', ' + val(evalSet.false_safe).split(' of ')[0] + ' false "safe". ' },
       { text: 'Demo cases: ' + val(D.harness_total) + ' correct', options: { bold: true } },
       { text: ' (each run ' + val(D.harness_runs_per_case) + ' times).' },
     ],
-    proves: [{ text: 'The real agent works end to end. The ' + val(D.live_core_false_safe) + ' false "safe" answers ' +
-      'come from ' + failCaseWords + ', reported honestly.' }] },
+    proves: [{ text: 'The whole agent works end to end. The ' + val(D.live_core_false_safe) + ' false "safe" answers ' +
+      'all come from ' + failCaseWords + '.' }] },
   { n: '4', name: 'Large blind test', big: val(L.messages) + ' messages', color: GREEN, h: 1.0,
-    is: [{ text: 'Messages written by a separate AI agent that never saw our rules, frozen before testing.' }],
-    proves: [{ text: 'How ScamShield does on wording it was never tuned for. ' },
+    is: [{ text: 'Messages written by a separate AI that never saw our rules. Frozen before testing.' }],
+    proves: [{ text: 'How ScamShield copes with wording it was never tuned for. ' },
       { text: 'Results on the next slide.', options: { bold: true, color: BLUE } }] },
 ];
 let rowY = 2.14;
@@ -556,24 +556,23 @@ layers.forEach(function (r) {
     valign: 'middle' });
   rowY += r.h + 0.1;
 });
-T(s, 'Not counted as fair tests: test sets 2 and 3 (live agent ' + val(t2.correct) + ' and ' + val(t3.correct) +
-  ') were used to fix the rules. Their runs are inside the ' + val(D.live_core_runs) + ' live runs.',
+T(s, 'Test sets 2 and 3 don\'t count as fair tests: I used them to fix the rules (live agent ' +
+  val(t2.correct) + ' and ' + val(t3.correct) + '). Their runs are in the ' + val(D.live_core_runs) + ' live runs.',
 { x: LEFT, y: rowY + 0.02, w: CONTENT_W, h: 0.34, fontSize: 14, italic: true, color: GREEN, valign: 'middle' });
-s.addNotes('This slide shows the four ways I tested ScamShield. Every number is read from the saved evidence files ' +
-  'when the deck is built. ' +
-  'One, offline tests: ' + val(D.tests) + ' tests pass. They run without the AI. A fake, scripted model gives answers I ' +
-  'wrote in advance, many of them deliberately wrong: bad JSON, invented arguments, "safe" on a scam, injection, a ' +
-  'missing guide, Ollama down. Passing means Python\'s checks catch those bad answers. ' +
-  'Two, breaking the gate on purpose: I replaced the verdict gate with one that says every message is safe and ran the ' +
-  'same tests. ' + val(D.break_gate) + ' tests then fail. That is good: it shows the tests really notice when the ' +
-  'safety check is broken, so they are not empty tests. ' +
-  'Three, live runs with the real model, qwen3:8b. On test set 1 the agent got ' + val(evalSet.correct) + ' right with ' +
-  val(evalSet.false_safe) + ' false "safe" answers. Each demo case was run ' + val(D.harness_runs_per_case) +
-  ' times: ' + val(D.harness_total) + ' correct. Together with test sets 2 and 3 that is ' + val(D.live_core_runs) +
-  ' live runs and ' + val(D.live_core_false_safe) + ' false "safe" answers, both from ' + failCaseWords + ', where ' +
-  'neither the rules nor the model saw a problem. ' +
-  'Test sets 2 and 3 are small and I used them to fix the rules, so I do not count them as fair tests. ' +
-  'Four, the large blind test with ' + val(L.messages) + ' messages, on the next slide.');
+s.addNotes('I tested ScamShield in four ways, and every number here comes straight from the saved result files. ' +
+  'First, the offline tests: ' + val(D.tests) + ' pass. They run without the AI. A fake model sends answers I wrote ' +
+  'in advance, and many are wrong on purpose: broken JSON, made-up arguments, "safe" on a scam, an injection, a ' +
+  'missing guide, Ollama being down. Passing means Python catches all of those. ' +
+  'Second, I broke the gate on purpose. I swapped it for one that calls every message safe and ran the same tests, ' +
+  'and ' + val(D.break_gate) + ' of them failed. That is what I wanted to see: the tests notice when the safety check ' +
+  'breaks. ' +
+  'Third, live runs with the real model, qwen3:8b. On test set 1 it got ' + val(evalSet.correct) + ' right with ' +
+  val(evalSet.false_safe) + ' false "safe" answers, and I ran each demo case ' + val(D.harness_runs_per_case) +
+  ' times: ' + val(D.harness_total) + ' correct. Counting test sets 2 and 3, that is ' + val(D.live_core_runs) +
+  ' live runs with ' + val(D.live_core_false_safe) + ' false "safe" answers, all from ' + failCaseWords + ', where ' +
+  'neither the rules nor the model noticed anything wrong. ' +
+  'I do not count test sets 2 and 3 as fair tests, because I used them to fix the rules. ' +
+  'Fourth, the big blind test with ' + val(L.messages) + ' messages. That is the next slide.');
 
 // ================================================================ 10. Blind test
 s = content('Results', 'Blind test', 'Blind test: ' + val(L.messages) + ' messages it had never seen');
@@ -582,9 +581,10 @@ const LCW = 3.75;
 foldedBox(s, LEFT, 1.9, LCW, 2.45, BLUE, null, 0.4, 'what blind means');
 T(s, 'What "blind" means', { x: LEFT + 0.22, y: 2.02, w: LCW - 0.75, h: 0.4, fontSize: 18, bold: true, color: CREAM });
 T(s, [
-  { text: 'Written by a separate AI agent that could not see our detection rules.',
+  { text: 'A separate AI wrote them without ever seeing our rules.',
     options: { bullet: { indent: 16 }, breakLine: true } },
-  { text: 'Frozen before testing: never changed to improve the score.', options: { bullet: { indent: 16 } } },
+  { text: 'We froze the set before testing and never changed it to get a better score.',
+    options: { bullet: { indent: 16 } } },
 ], { x: LEFT + 0.22, y: 2.5, w: LCW - 0.4, h: 1.75, fontSize: 16, color: WHITE, paraSpaceAfter: 8 });
 const mix = [[counts.scam, 'scams', V_SCAM], [counts.safe, 'safe', V_SAFE], [counts.uncertain, 'not sure', V_UNSURE]];
 mix.forEach(function (m, i) {
@@ -639,7 +639,7 @@ function panel(x, kind, title, sub, result) {
     T(s, c[1], { x: cx, y: 4.18, w: 1.12, h: 0.5, fontSize: 14, color: fg });
   });
 }
-panel(RX, 'rules', 'Rules alone', 'no AI: Python\'s warning-sign rules only', LR);
+panel(RX, 'rules', 'Rules alone', 'Python\'s warning-sign rules, no AI', LR);
 panel(RX + PW + PGAP, 'agent', 'Full agent', 'AI (qwen3:8b) + Python checks', LA);
 
 // range bars: where the true accuracy very likely lies
@@ -682,25 +682,33 @@ const halves = [LR, LA].filter(function (r) { return r && r.ci; }).map(function 
   return (r.ci[1] - r.ci[0]) * 50;
 });
 const half = halves.length ? Math.round(Math.max.apply(null, halves)) : null;
-T(s, 'With ' + val(L.messages) + ' messages the true accuracy is very likely within ±' + (half === null ? '?' : half) +
-  ' points; with ' + val(evalSet.messages) + ' messages it could be anywhere from ' +
-  val(evalSet.range).replace(' to ', ' to ') + '.',
-{ x: RX, y: 6.62, w: 8.08, h: 0.55, fontSize: 16, italic: true, color: INK, valign: 'middle' });
-s.addNotes('This is the fairest test. The ' + val(L.messages) + ' messages were written by a separate AI agent that ' +
-  'could not see my detection rules, the code or the other test sets, and the set was frozen before testing, so I ' +
-  'never changed it to get a better score. It has ' + val(counts.scam) + ' scams, ' + val(counts.safe) + ' safe ' +
-  'messages and ' + val(counts.uncertain) + ' messages where the right answer is not sure. ' +
-  (LR ? 'Rules alone, with no AI at all, get ' + LR.score + ' right, which is ' + LR.percent + '. ' +
-    'They wrongly call ' + LR.false_safe + ' messages that are not safe "safe", and raise ' + LR.false_alarm +
-    ' false alarms on safe messages. ' : '') +
-  (LA ? 'The full agent, the model plus all of Python\'s checks, gets ' + LA.score + ', which is ' + LA.percent +
-    ', with ' + LA.false_safe + ' false "safe" answers and ' + LA.false_alarm + ' false alarms. ' :
-    'The full agent run on all ' + val(L.messages) + ' messages takes about two hours and was still running when this ' +
-    'deck was built. ') +
-  'The 95% range means: if we could test on endless similar messages, the true accuracy would very likely fall in ' +
-  'this range. With ' + val(L.messages) + ' messages it is narrow, about plus or minus ' + val(half) + ' points; with ' +
-  'the ' + val(evalSet.messages) + ' messages of test set 1 it is ' + val(evalSet.range) + ', so a perfect score ' +
-  'there says much less. The hardest message types are listed bottom left.');
+const CMP = L.compare;
+const takeaway = (CMP && LA) ?
+  'The agent called only ' + LA.false_safe.split(' of ')[0] + ' scams "safe" (rules alone: ' +
+  CMP.rules_false_safe + '). When it gets one wrong, it usually says "not sure" and sends you to a person.' :
+  'With ' + val(L.messages) + ' messages the true accuracy is very likely within ±' + (half === null ? '?' : half) +
+  ' points.';
+T(s, takeaway, { x: RX, y: 6.62, w: 8.08, h: 0.55, fontSize: 16, bold: true, color: BLUE, valign: 'middle' });
+s.addNotes('This is the fairest test we have. A separate AI wrote these ' + val(L.messages) + ' messages without ' +
+  'ever seeing my rules, my code or my other test sets, and I froze the set before testing, so I never changed it to ' +
+  'get a better score. There are ' + val(counts.scam) + ' scams, ' + val(counts.safe) + ' safe messages and ' +
+  val(counts.uncertain) + ' where the honest answer is "not sure". ' +
+  (LR ? 'With no AI at all, the rules get ' + LR.score + ' right, ' + LR.percent + '. But they call ' +
+    LR.false_safe.split(' of ')[0] + ' scams "safe", which is the mistake that hurts an older adult most. ' : '') +
+  (LA ? 'The full agent gets ' + LA.score + ', ' + LA.percent + ', so slightly lower, but it calls only ' +
+    LA.false_safe.split(' of ')[0] + ' scams "safe". ' : 'The full agent run takes about two hours and was still ' +
+    'running when this deck was built. ') +
+  (CMP ? 'Of the ' + CMP.rules_false_safe + ' messages the rules got dangerously wrong, the agent turned ' +
+    CMP.agent_avoided + ' into "not sure". That is the trade: of its ' + CMP.misses + ' mistakes, ' +
+    CMP.misses_unsure + ' are "not sure", which means "ask someone you trust" rather than a wrong answer. In ' +
+    CMP.gate_stricter + ' of them the model actually said the right thing, but the gate could not find a strong ' +
+    'warning sign in the evidence, so it played it safe. ' : '') +
+  'The two scams it still called safe both came from saved contacts: one asked Mom to read out a bank code, the other ' +
+  'was a fake bank courier coming to collect her card and PIN. I did not fix those after seeing them, because then ' +
+  'this would no longer be a blind test. ' +
+  'The 95% range is where the true accuracy very likely lies. With ' + val(L.messages) + ' messages it is about ' +
+  'plus or minus ' + val(half) + ' points. With the ' + val(evalSet.messages) + ' messages of test set 1 it is ' +
+  val(evalSet.range) + ', so a perfect score there says much less. The hardest message types are bottom left.');
 
 // ================================================================ 10. What I learned
 pres.addSection({ title: 'Wrap-up' });
