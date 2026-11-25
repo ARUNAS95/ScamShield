@@ -19,6 +19,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+import gate
 import rag
 import scamshield_agent as agent
 
@@ -1273,6 +1274,8 @@ def always_safe(context):
 if __name__ == '__main__':
     break_gate = '--break-gate' in sys.argv
     if break_gate:
+        # the gate lives in gate.py; the agent module holds its own reference too
+        gate.supported_label = always_safe
         agent.supported_label = always_safe
         print('BREAK-GATE EXPERIMENT: supported_label() now always returns likely_safe.\n')
     tests = [

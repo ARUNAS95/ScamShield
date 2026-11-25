@@ -32,7 +32,8 @@ HERE = Path(__file__).resolve().parent
 OUT_DIR = HERE / 'evidence' / 'harness'
 DEFAULT_CASES = ['scam', 'ordinary', 'ordinary_urgent', 'uncertain', 'injection', 'trusted_bad_link',
                  'model_catches_miss', 'guide_missing', 'empty']
-SOURCE_FILES = ['scamshield_agent.py', 'rag.py', 'harness_runs.py', 'eval.py', 'data/scam_guide.json',
+SOURCE_FILES = ['scamshield_agent.py', 'settings.py', 'signals.py', 'tools.py', 'gate.py', 'rag.py',
+                'harness_runs.py', 'eval.py', 'data/scam_guide.json',
                 'data/messages.json', 'data/organizations.json', 'data/domains.json',
                 'data/trusted_contacts.json']
 

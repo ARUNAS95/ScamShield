@@ -80,6 +80,10 @@ fail when they should, and they did.
   - Claims in the documents that went beyond the evidence were corrected.
 - **Cut the extras.** The rubric says a small, reliable agent can get full credit, so I removed
   checkpointing, embedding search and a duplicate safety check. The results stayed the same.
+- **Made the code easier to navigate.** The agent was one 2,061-line file, so I split it into five files
+  with one job each: the agent loop, the tools, the verdict gate, the warning-sign rules and the settings.
+  I checked that nothing changed: all 90 tests pass, the break-the-gate check still fails exactly 21
+  tests, and the rules-only results on all four test sets are identical, line for line.
 - **Blind test with 614 messages.** The full agent got 84% right and called only 2 scams "safe"; the
   rules alone got 86% but called 13 scams "safe". I did not change any rule after seeing the results.
 
