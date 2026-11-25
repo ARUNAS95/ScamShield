@@ -138,9 +138,10 @@ What this means:
   person to someone they trust.
 - **The 2 scams it called safe** came from saved contacts (a "read me the code from the bank text"
   request and a fake bank courier). I did not change the rules after seeing them, so the test stays blind.
-- **Code version:** the blind run used the code before it was split into five files (it was one
-  2,061-line file). The split only moved code: the tests, the break-the-gate count and the rules-only
-  results on all four test sets are identical before and after.
+- **Code version:** all saved live runs in `evidence/` (the blind test, test sets 1 to 3 and the demo
+  runs) used the code before it was split into five files (it was one 2,061-line file). The split only
+  moved code: the tests, the break-the-gate count and the rules-only results on all four test sets are
+  identical before and after, and the demo cases give the same answers.
 
 **Demo cases run 3 times** (`evidence/harness/results.json`): 25 of 27 runs gave the expected answer.
 The 2 misses were `model_catches_miss` called "safe": neither the rules nor the model noticed the
