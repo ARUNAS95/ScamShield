@@ -440,6 +440,27 @@ def large_test_numbers(rules_text, agent_data):
         if name in agent_categories:
             item['agent'] = slash(agent_categories[name]['correct'], agent_categories[name]['total'])
         out['weakest'].append(item)
+    # How the full agent compares with the rules, message by message: which of the rules' false "safe"
+    # answers the agent avoided, how its misses ended, and how often the gate was stricter than the model.
+    out['compare'] = None
+    agent_rows = {row['id']: row for row in (agent_data or {}).get('rows', [])}
+    if rules_text and agent_rows:
+        rules_false_safe = []
+        for line in rules_text.splitlines():
+            parts = line.split()
+            if (len(parts) > 4 and parts[4] in ('OK', 'WRONG') and parts[0][:1] == 'X'
+                    and parts[2] != 'likely_safe' and parts[3] == 'likely_safe'):
+                rules_false_safe.append(parts[0])
+        wrong = [row for row in agent_rows.values() if not row['correct']]
+        out['compare'] = {
+            'rules_false_safe': len(rules_false_safe),
+            'agent_avoided': sum(1 for i in rules_false_safe
+                                 if i in agent_rows and agent_rows[i]['final_label'] != 'likely_safe'),
+            'misses': len(wrong),
+            'misses_unsure': sum(1 for row in wrong if row['final_label'] == 'uncertain'),
+            'gate_stricter': sum(1 for row in wrong if row['model_label'] == row['expected']
+                                 and row['final_label'] == 'uncertain'),
+        }
     return out
 
 
@@ -1040,6 +1061,14 @@ def main():
                                   % (la['score'], la['percent'], la['range'], la['false_safe'], la['false_alarm']))
          if la else e('live run in progress (one run per message, about 2 hours); this document is rebuilt when '
                       'evidence/eval/large_agent_results.json is written'))
+    cmp_ = large.get('compare')
+    fill(values, 'LARGE_COMPARE', e(
+        'Of the %d messages the rules alone wrongly called "safe", the agent said "safe" to only %d; the rest became '
+        '"not sure". It costs some accuracy: of the agent\'s %d mistakes, %d ended "not sure", which sends the person '
+        'to a human instead of giving a dangerous answer. In %d of them the model itself had the right label, but '
+        'the gate found no strong warning sign in the evidence and lowered the answer to "not sure"'
+        % (cmp_['rules_false_safe'], cmp_['rules_false_safe'] - cmp_['agent_avoided'], cmp_['misses'],
+           cmp_['misses_unsure'], cmp_['gate_stricter'])) if cmp_ else PENDING)
     counts = large['counts']
     fill(values, 'LARGE_COUNTS', e('%d scams, %d safe, %d not sure' % (counts['scam'], counts['safe'],
                                                                          counts['uncertain'])))
