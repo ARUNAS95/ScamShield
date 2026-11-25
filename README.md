@@ -153,7 +153,7 @@ eval.py               evaluation on the test sets
 harness_runs.py       repeated runs of the demo cases
 data/                 fictional messages, contacts, websites, scam guide and test sets
 evidence/             saved runs, traces and results
-CONTRIBUTION.md       my plan, what I did, where I used an AI coding assistant, what I learned
+CONTRIBUTION.md       how I used an AI coding assistant and checked its work, my plan, what I learned
 ```
 
 The project document (PDF) and the slides are submitted separately.
