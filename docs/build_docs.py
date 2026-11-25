@@ -902,11 +902,11 @@ def problem_cases(runs, harness_file):
 
 
 # ------------------------------------------------------------------------
-# DEVLOG findings (for "what I learned")
+# Findings in CONTRIBUTION.md (for "what I learned")
 # ------------------------------------------------------------------------
 
-def devlog_findings():
-    text = read_text('DEVLOG.md') or ''
+def contribution_findings():
+    text = read_text('CONTRIBUTION.md') or ''
     findings = {}
     for line in text.splitlines():
         found = re.match(r'### Finding (\d+): (.+)', line)
@@ -916,8 +916,8 @@ def devlog_findings():
     return findings
 
 
-# The lesson for each DEVLOG finding, matched by words in the finding's title
-# (so a renumbered DEVLOG still works).
+# The lesson for each finding, matched by words in the finding's title
+# (so renumbered findings still work).
 LESSONS = [
     ('invents arguments', 'Never trust the shape of a model reply: keep only the argument keys a tool declares.'),
     ('notes were counted', 'Tell the model plainly what is NOT a warning sign, or it will count it as one.'),
@@ -1140,7 +1140,7 @@ def main():
             retry_tests.append('"' + name + '"')
     fill(values, 'RETRY_TESTS', e(', '.join(retry_tests) if retry_tests else PENDING))
 
-    findings = devlog_findings()
+    findings = contribution_findings()
     learned = ''
     learned_deck = []
     for words, lesson in LESSONS:

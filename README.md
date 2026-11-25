@@ -383,7 +383,7 @@ What this shows, in plain words:
 found nothing, the guide search returned nothing relevant, and the model proposed "safe" without raising a
 concern, so the gate had nothing to block (`evidence/harness/run_model_catches_miss_*_trace.json`). Across
 all earlier rounds this case ended "not sure" in 9 of 9 runs with embedding search and in 4 of 9 runs with
-keyword search only (see `evidence/harness/rag/results.json` and `keyword/results.json` on the earlier `main` commit fe084ba, and the DEVLOG rounds), so removing the embeddings probably made this one case weaker; it was kept simple on
+keyword search only (see `evidence/harness/rag/results.json` and `keyword/results.json` on the earlier `main` commit fe084ba, and CONTRIBUTION.md), so removing the embeddings probably made this one case weaker; it was kept simple on
 purpose and the case was not tuned. Overall: **2 false "safe" answers in 78 live runs**, both on this case.
 
 Known wrong answers on the labeled sets from the rules (they do not depend on the model):
@@ -413,7 +413,7 @@ Known wrong answers on the labeled sets from the rules (they do not depend on th
 - **Limits of the evaluation:** the same person wrote the rules, the guide and test sets 1 to 3; only the
   large set was written blind (by an AI agent, so it may not match real scam texts).
 
-Development findings (what broke and what changed) are in [DEVLOG.md](DEVLOG.md).
+My plan, what I did each day, what broke and what I learned are in [CONTRIBUTION.md](CONTRIBUTION.md).
 
 ## Why plain Python and not LangGraph
 
@@ -448,8 +448,8 @@ harness_runs.py       repeated live runs of the demo cases
 data/                 fictional messages, contacts, organizations, websites, guide, and the test sets
                       (eval_set.json, eval_holdout.json, eval_holdout2.json, eval_large.json)
 evidence/             saved traces, console logs and results (eval/, harness/)
-DEVLOG.md             development findings
-docs/                 project document, slide deck, diagram, demo script, study guide (and their build scripts)
+CONTRIBUTION.md       my plan, daily work, findings and what I learned
+docs/                 project document, slide deck, diagram (and their build scripts)
 ```
 
 ## Deliverables
@@ -458,8 +458,7 @@ docs/                 project document, slide deck, diagram, demo script, study 
 |---|---|
 | [docs/ScamShield_Project_Document.pdf](docs/ScamShield_Project_Document.pdf) | Project document: problem, workflow with diagram, an annotated real trace, problem cases, results, how to run, limitations, individual work |
 | [docs/ScamShield_Presentation.pptx](docs/ScamShield_Presentation.pptx) | Slide deck for the class presentation, with speaker notes |
-| [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | 5-minute live demo script with commands, what to point at, and fallbacks |
-| [docs/EXPLAIN.md](docs/EXPLAIN.md) | Study guide: the loop, key functions with line numbers, gate rules, likely questions |
+| [CONTRIBUTION.md](CONTRIBUTION.md) | My plan, what I did each day, what broke and how I fixed it, and what I learned |
 | [docs/workflow.svg](docs/workflow.svg) / [docs/workflow.png](docs/workflow.png) | The workflow diagram |
 
 The PDF and the deck are generated: every result number in them is read from the files in `evidence/`
