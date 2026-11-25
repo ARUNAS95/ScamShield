@@ -132,6 +132,14 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
     work done after it. Some older commit messages call the round-2 fixes "round-3"; older files call
     test sets 2 and 3 "holdout" and "holdout2".)
 
+    **What did the blind test show?** One live run per message (`evidence/eval/large_agent_results.json`):
+    the full agent got 513/614 = 84% right (95% range 80% to 86%), with 2 false "safe" answers. The rules
+    alone got 526/614 = 86% but called 13 scams "safe". So the agent is slightly less accurate but much
+    safer: it turned 11 of those 13 into "not sure". 90 of its 101 mistakes are "not sure", which sends the
+    person to a human. In 43 of them the model had the right label, but the gate found no strong warning
+    sign and lowered the answer. The 2 false "safe" (X0159, X0580) came from saved contacts: a "read me the
+    code" request and a fake bank courier. They were not fixed afterwards, so the test stays blind.
+
 11. **What does the guide search add, and is it RAG?**
     The guide tip in the answer and evidence for unclear messages. It is keyword retrieval with metadata
     rules (org filter, red-flag boost, other-organization penalty), not embeddings. Earlier versions also

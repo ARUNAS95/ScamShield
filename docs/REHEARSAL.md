@@ -32,9 +32,12 @@ NEXT OPTIONS and GATE lines and say in one sentence what happened and why.
    embeddings and search modes: no rubric points, harder to explain.)
 10. What did the evaluation show? (Test sets 2 and 3: 6/12 and 2/14 rules-only before fixes, then used to
     fix rules, so no longer held out; the 614-message large blind test set, written by a separate AI agent
-    that never saw the rules, with its 95% confidence range; the live numbers are in the README.)
+    that never saw the rules: full agent 513/614 = 84% (80% to 86%) with 2 false "safe", rules alone 86%
+    with 13 false "safe". Slightly less accurate, much safer; most misses are "not sure".)
+13. What does the AI add beyond the rules? (On the blind test it cut scams called "safe" from 13 to 2,
+    and in 43 misses it had the right answer but the gate wanted stronger evidence.)
 11. Why are all commits on Nov 24, and how did you use AI? (Your own answers to EXPLAIN Q12 and Q13.)
 12. What would you build next?
 
-- [ ] Could answer at least 10 of 12 without notes
+- [ ] Could answer at least 11 of 13 without notes
 - [ ] Re-read the ones you missed, then try again
