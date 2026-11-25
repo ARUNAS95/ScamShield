@@ -23,6 +23,3 @@ evidence/family_alerts.log
 .claude/
 critic_report/
 
-# Document build (python3 docs/build_docs.py): npm packages and intermediate files
-docs/node_modules/
-docs/build/

@@ -1,8 +1,0 @@
-{
-  "name": "scamshield-docs",
-  "private": true,
-  "description": "Builds the ScamShield slide deck (python3 docs/build_docs.py calls docs/build_pptx.js)",
-  "dependencies": {
-    "pptxgenjs": "3.12.0"
-  }
-}
