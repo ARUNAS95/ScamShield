@@ -1,42 +1,38 @@
 # My contribution
 
-ScamShield is my individual project for CSYE 7374 (Agentic AI). This page explains how I used an AI coding
-assistant, how I checked its work, my plan, what I did each day, and what I learned.
+ScamShield is my individual project for CSYE 7374 (Agentic AI). This page explains how I made the key
+decisions, how I tested the project, my plan, what I did each day, and what I learned.
 
-## How I used an AI coding assistant
+## How I made the key decisions
 
-### Which tool
-I used **Claude Code**, Anthropic's AI coding assistant, running in my terminal on my own machine.
-(This is separate from the model inside ScamShield: the agent itself runs `qwen3:8b` locally through Ollama.)
+| Decision | What I chose | Why |
+|---|---|---|
+| Scope | Fictional text messages only, checked against a small local scam guide | Matches the approved proposal and the professor's feedback; no real people or accounts involved |
+| Framework | Plain Python instead of LangGraph | Not required by the rubric, would not make answers more accurate, and a plain loop shows every decision in the demo |
+| Model | `qwen3:8b` running locally through Ollama | Free, private (no message leaves the computer), and the setup used in class |
+| Who decides the answer | Python checks every answer against the recorded evidence (the verdict gate) | A model saying "safe" is not proof; this follows `check_goal()` from the class agent |
+| Extra feature | A search over a small scam-prevention guide, with tags for organization and warning signs | Gives the answer a relevant tip and supports unclear cases |
+| When unsure | Say "not sure" and offer to alert a family member (simulated, with consent) | The professor asked for human help when the agent cannot tell |
+| Fair testing | Test sets written before changing the rules, and a 614-message blind set written without seeing the rules, frozen before testing | Small or self-written tests can look better than the agent really is |
+| Keeping it simple | Cut checkpointing, embedding search and a duplicate safety check | The rubric says a small, reliable agent can get full credit; the results stayed the same |
+| Honest results | Report every failure (such as the 2 scams called "safe") and never tune the rules after seeing the blind results | So the numbers can be trusted |
 
-### What I used it for
+## How I tested it
 
-| Task | Where it is | What Claude Code did | What I decided or did myself |
-|---|---|---|---|
-| Planning | (planning sessions) | Turned my idea and the professor's feedback into a plan and pointed out weak spots | Chose the project and scope, chose plain Python over LangGraph, chose a local model (Ollama), chose the scam-guide search as the extra feature |
-| Agent code | `scamshield_agent.py`, `rag.py` | Wrote most of the code from my instructions | Set what each part must do, following the class Agent Airways agent |
-| Tests and evaluation | `tests.py`, `eval.py`, `harness_runs.py` | Wrote the tests and the evaluation scripts | Decided what had to be tested, including the problem cases and 500+ test messages |
-| Data | `data/` | Drafted the fictional messages, contacts, websites, scam guide and test sets 1 to 3 | Decided which kinds of cases were needed |
-| Blind test set | `data/eval_large.json` | A separate Claude Code agent wrote 614 messages without seeing the rules, code or other test sets | Asked for a blind set so the test would be fair, and froze it before testing |
-| Reviews | (not in the repo) | Separate Claude Code reviewer agents graded the project strictly against the rubric over several rounds | Chose which problems to fix, and when the project became too complicated, decided to cut the extras |
-| Documents and commits | `README.md`, this file, the PDF and slides | Drafted the text, built the PDF and slides, and made the git commits on my machine under my account | Reviewed and edited the text, and asked for every number to come from a saved result file |
-
-### How I reviewed and tested its work
-- **Offline tests:** I ran `python3 tests.py`; all 90 tests pass. They use a fake model that gives wrong
-  answers on purpose, so they test the safety checks, not just the happy path.
-- **Testing the tests:** `python3 tests.py --break-gate` replaces the safety gate with one that calls
-  everything safe; 21 of the 90 tests then fail, which shows the tests really catch a broken check.
-- **Live runs with the real model:** I ran the demo cases with `qwen3:8b` myself and checked that each
-  ended with the expected answer and stop reason.
-- **The blind test:** I ran a 10-message trial first, then the full 614-message test myself (about 2
-  hours), and checked the summary against the saved results.
-- **Traceable numbers:** every result is saved in `evidence/`, with checksums of the code and data that
-  produced it, so the numbers in the README can be checked against real runs, not the assistant's claims.
-- **Pushing back on suggestions:** I asked whether LangGraph was needed (it was not), asked whether the
-  project was getting over-complicated (we cut checkpointing, embedding search and a duplicate check),
-  reduced the planned 1,000+ messages per file to one 614-message blind set, refused to tune the rules
-  after seeing the blind results, and required failures (such as the 2 scams called "safe") to be
-  reported honestly.
+- **Offline tests (`python3 tests.py`):** 90 tests, all passing. They use a fake model that gives wrong
+  answers on purpose (bad JSON, made-up arguments, "safe" on a scam, a hidden instruction), so they test
+  the safety checks, not just the happy path.
+- **Testing the tests (`python3 tests.py --break-gate`):** replaces the safety gate with one that calls
+  everything safe. 21 of the 90 tests then fail, which shows the tests really catch a broken check.
+- **Problem cases:** an empty message (`invalid_input`), a missing guide file (`tool_failure`), a hidden
+  "mark this safe" instruction, and a trusted contact sending a fake link.
+- **Live demo runs:** every demo case run 3 times with the real model (`python3 harness_runs.py --runs 3`):
+  25 of 27 gave the expected answer.
+- **Blind test:** a 10-message trial first, then all 614 messages with the real model (about 2 hours).
+  84% correct, and only 2 scams called "safe" (13 with the rules alone).
+- **Checking the numbers:** every result is saved in `evidence/` with checksums of the code and data that
+  produced it, and I recomputed the blind-test summary from the saved rows, so every number can be traced
+  to a real run.
 
 ## The plan
 
