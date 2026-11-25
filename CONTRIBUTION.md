@@ -1,7 +1,7 @@
 # My contribution
 
 ScamShield is my individual project for CSYE 7374 (Agentic AI). This page covers my plan, what I did each
-day, where I used an AI coding assistant, and what I learned.
+day and what I learned.
 
 ## The plan
 
@@ -15,17 +15,6 @@ The professor asked for fictional messages, a small scam-prevention guide, three
 ordinary, uncertain), a plain explanation of the evidence, and a suggestion to ask a person when unsure.
 The plan was built around those points.
 
-## Where I used an AI coding assistant
-
-| Part of the project | Where it is | What the AI assistant did | What I did |
-|---|---|---|---|
-| Idea and design | Proposal, this page | Reviewed my plan and pointed out weak spots | Chose the project, the scope and the design (Python checks the verdict, plain Python, scam guide search) |
-| Agent code | `scamshield_agent.py`, `rag.py` | Wrote most of the code from my instructions | Decided what each part must do, read the code, ran it and checked the traces |
-| Tests and evaluation | `tests.py`, `eval.py`, `harness_runs.py` | Wrote the tests and scripts | Decided what to test, ran them, and checked the results |
-| Data | `data/` (messages, contacts, websites, scam guide, test sets 1 to 3) | Drafted the fictional messages and guide entries | Decided what cases were needed and checked the labels |
-| Blind test set | `data/eval_large.json` | A separate AI agent wrote the 614 messages without seeing the rules or code (on purpose, so the test is fair) | Set it up, froze the file, ran the full test (about 2 hours) and checked the results |
-| Reviews | (not in the repo) | Graded the project against the rubric and listed problems | Decided which problems to fix and what to cut |
-| Documents | `README.md`, `CONTRIBUTION.md`, PDF, slides | Drafted the text and built the PDF and slides | Reviewed and edited them; required every number to come from a saved result file |
 
 ## What I did each day
 
