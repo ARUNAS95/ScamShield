@@ -720,11 +720,11 @@ for (let i = 0; i < learned.length; i++) {
   foldedBox(s, x, y, 5.96, 2.3, WHITE, SAGE, 0.4, 'lesson');
   T(s, String(i + 1), { x: x + 0.2, y: y + 0.18, w: 0.6, h: 0.7, fontSize: 36, bold: true, color: BLUE });
   T(s, learned[i].lesson, { x: x + 0.9, y: y + 0.25, w: 4.6, h: 1.35, fontSize: 19, bold: true, color: INK });
-  T(s, 'DEVLOG finding ' + learned[i].number + ': ' + learned[i].title, { x: x + 0.9, y: y + 1.65, w: 4.85,
+  T(s, 'Finding ' + learned[i].number + ': ' + learned[i].title, { x: x + 0.9, y: y + 1.65, w: 4.85,
     h: 0.5, fontSize: 15, italic: true, color: GREEN });
 }
 if (!learned.length) {
-  T(s, 'Lessons pending (DEVLOG findings not found)', { x: LEFT, y: 2.2, w: 8, h: 0.6, fontSize: 20, color: RUST });
+  T(s, 'Lessons pending (findings not found)', { x: LEFT, y: 2.2, w: 8, h: 0.6, fontSize: 20, color: RUST });
 }
 s.addNotes('These come from the findings in my development log. The model invented tool arguments, so Python keeps ' +
   'only the keys a tool declares. The model counted notes like "not a saved contact" as warning signs until the ' +
