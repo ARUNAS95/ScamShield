@@ -156,7 +156,7 @@ Stop rules: 10 steps, 3 rejected proposals in a row (`no_progress`), 2 retries o
     account, at my request, which is also why several have the same timestamp."
 
 13. **Which AI tools did you use?**
-    *Answer:* "I used Claude Code. I chose the project, the scope and the
+    *Answer:* "I used an AI coding assistant. I chose the project, the scope and the
     design (the plain-Python loop from class, the verdict gate, a metadata search over the scam guide) and made
     the key calls during the work: no LangGraph, a held-out test written before rule changes, honest
     reporting of failures, and a 614-message test written by a separate agent that never saw the rules.

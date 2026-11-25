@@ -156,7 +156,7 @@ up from 46). Live evaluation numbers in the README are to be regenerated after t
 ### Demo output and hygiene
 - The `extract_signals` line names the warning signs, the guide search line lists the guide ids and
   titles, and long console lines are wrapped instead of cut off.
-- `tests.py` uses its `run_test` helper; `.claude/` and `critic_report/` are ignored by git.
+- `tests.py` uses its `run_test` helper; `critic_report/` is ignored by git.
 - README: the `ALLOWED_NEXT` "graph" claims were replaced by the conditional routing description; the
   tool sequence counts are labeled as RAG-mode numbers; trace fields are credited to the bare-bones
   class notebook and PR #31; checkpointing is described as this project's own addition.
@@ -488,7 +488,7 @@ possible extensions in the README and would need a new blind set to measure hone
   messages an accuracy of 80% could really be anywhere from about 67% to 89%, which is why I wanted 500+
   messages. I also learned that hand-written rules generalize poorly: each fresh held-out set exposed many
   misses before it was used for fixes (6/12 and 2/14), and embedding search mattered only on one hard case, which I traded away to keep the agent small.
-- **How I used AI tools while building it, and how I checked their work:** I used Claude Code. It wrote
+- **How I used AI tools while building it, and how I checked their work:** I used an AI coding assistant. It wrote
   most of the code, tests and documentation from my instructions, and I set up a loop where a work agent
   fixed issues and separate critic agents graded the project against the rubric. I checked the results by
   running the tests and the live evaluations myself, required that every number in the documents come
