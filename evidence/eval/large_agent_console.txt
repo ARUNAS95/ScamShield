@@ -1,0 +1,669 @@
+X0001 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0002 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0003 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0004 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0005 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0006 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0007 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0008 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0009 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0010 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0011 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0012 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0013 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0014 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0015 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0016 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0017 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0018 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0019 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0020 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0021 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0022 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0023 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0024 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0025 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0026 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0027 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0028 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0029 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0030 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0031 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0032 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0033 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
+X0034 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0035 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0036 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0037 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0038 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0039 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0040 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0041 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide > ask_human_helper
+X0042 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0043 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0044 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0045 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > lookup_official_contact > check_sender > search_scam_guide
+X0046 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0047 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0048 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0049 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0050 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide > ask_human_helper
+X0051 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0052 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0053 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0054 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0055 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0056 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0057 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0058 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0059 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0060 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0061 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0062 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0063 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0064 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0065 likely_scam  -> uncertain    WRONG success         steps=7  gate_rej=1 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0066 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0067 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0068 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0069 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0070 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0071 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0072 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0073 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0074 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0075 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0076 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0077 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0078 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0079 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0080 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0081 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0082 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0083 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0084 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0085 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+X0086 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+X0087 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0088 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0089 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0090 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0091 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0092 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0093 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0094 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0095 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0096 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0097 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0098 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0099 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0100 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0101 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0102 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0103 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0104 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0105 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0106 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0107 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0108 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0109 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0110 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0111 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0112 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0113 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0114 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0115 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0116 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0117 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0118 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0119 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0120 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0121 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0122 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0123 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0124 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0125 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0126 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0127 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0128 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0129 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0130 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0131 likely_scam  -> uncertain    WRONG success         steps=5  gate_rej=1 tools=extract_signals > check_sender > ask_human_helper
+X0132 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0133 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0134 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0135 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0136 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0137 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0138 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0139 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0140 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0141 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0142 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0143 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0144 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0145 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0146 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0147 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0148 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > lookup_official_contact > check_sender > ask_human_helper
+X0149 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0150 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0151 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0152 likely_scam  -> uncertain    WRONG gate_downgrade  steps=5  gate_rej=2 tools=extract_signals > check_sender > ask_human_helper
+X0153 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0154 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0155 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0156 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0157 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0158 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0159 likely_scam  -> likely_safe  WRONG success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0160 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0161 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0162 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0163 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0164 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0165 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0166 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0167 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+X0168 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0169 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0170 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0171 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0172 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0173 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0174 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0175 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0176 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0177 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0178 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0179 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact
+X0180 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0181 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0182 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0183 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0184 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0185 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0186 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0187 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0188 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0189 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0190 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0191 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0192 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0193 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0194 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0195 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0196 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0197 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0198 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0199 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0200 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0201 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0202 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0203 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0204 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0205 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0206 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0207 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0208 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0209 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0210 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0211 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0212 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0213 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0214 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0215 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0216 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0217 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+X0218 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0219 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0220 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0221 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0222 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0223 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0224 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0225 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0226 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0227 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0228 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0229 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0230 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0231 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0232 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+X0233 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0234 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0235 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0236 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0237 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide
+X0238 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0239 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0240 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > search_scam_guide
+X0241 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0242 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0243 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0244 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0245 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0246 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0247 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0248 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0249 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0250 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0251 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0252 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0253 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0254 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0255 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0256 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0257 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0258 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0259 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0260 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0261 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0262 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0263 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0264 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0265 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0266 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0267 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0268 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0269 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0270 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0271 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0272 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0273 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0274 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0275 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0276 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0277 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0278 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0279 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0280 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0281 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0282 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0283 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0284 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0285 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0286 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0287 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0288 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0289 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0290 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0291 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0292 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0293 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0294 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0295 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0296 likely_safe  -> likely_scam  WRONG success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0297 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0298 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0299 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0300 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0301 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0302 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0303 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0304 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0305 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0306 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0307 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0308 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0309 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0310 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0311 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0312 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0313 likely_safe  -> uncertain    WRONG success         steps=5  gate_rej=1 tools=extract_signals > check_sender > ask_human_helper
+X0314 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0315 likely_safe  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0316 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0317 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0318 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0319 likely_safe  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0320 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0321 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0322 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0323 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0324 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0325 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0326 likely_safe  -> uncertain    WRONG success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0327 likely_safe  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0328 likely_safe  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0329 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0330 likely_safe  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0331 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0332 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0333 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0334 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0335 likely_safe  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0336 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0337 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0338 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0339 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0340 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0341 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0342 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0343 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0344 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0345 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0346 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0347 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0348 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0349 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0350 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0351 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0352 likely_safe  -> likely_safe  OK    success         steps=5  gate_rej=1 tools=extract_signals > check_sender > lookup_official_contact
+X0353 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0354 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0355 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0356 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0357 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0358 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0359 likely_safe  -> likely_scam  WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0360 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0361 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0362 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0363 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0364 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0365 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0366 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0367 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0368 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0369 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
+X0370 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0371 likely_safe  -> likely_scam  WRONG success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
+X0372 likely_safe  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0373 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0374 likely_safe  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0375 likely_safe  -> likely_scam  WRONG success         steps=6  gate_rej=1 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0376 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0377 likely_safe  -> likely_safe  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0378 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0379 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0380 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0381 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0382 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0383 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0384 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0385 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0386 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0387 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0388 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0389 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0390 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0391 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
+X0392 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
+X0393 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
+X0394 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0395 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender
+X0396 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0397 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0398 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0399 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0400 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0401 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0402 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0403 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0404 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0405 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0406 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0407 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0408 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0409 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0410 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0411 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0412 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0413 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0414 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0415 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0416 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0417 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0418 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > ask_human_helper
+X0419 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0420 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0421 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0422 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0423 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0424 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0425 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0426 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0427 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0428 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0429 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0430 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0431 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0432 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0433 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0434 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0435 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0436 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0437 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0438 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0439 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0440 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0441 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0442 uncertain    -> uncertain    OK    success         steps=5  gate_rej=1 tools=extract_signals > check_sender > ask_human_helper
+X0443 uncertain    -> uncertain    OK    success         steps=7  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0444 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0445 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0446 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0447 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0448 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0449 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0450 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0451 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0452 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0453 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0454 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0455 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0456 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0457 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0458 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0459 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0460 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0461 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0462 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0463 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0464 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0465 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0466 uncertain    -> uncertain    OK    success         steps=7  gate_rej=1 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0467 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0468 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0469 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0470 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0471 uncertain    -> uncertain    OK    success         steps=7  gate_rej=1 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0472 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0473 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0474 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0475 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0476 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0477 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0478 likely_safe  -> uncertain    WRONG success         steps=7  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0479 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0480 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide > ask_human_helper
+X0481 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > ask_human_helper
+X0482 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > lookup_official_contact > ask_human_helper
+X0483 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0484 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > lookup_official_contact > ask_human_helper
+X0485 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0486 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > lookup_official_contact > check_sender > ask_human_helper
+X0487 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0488 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0489 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0490 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0491 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0492 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0493 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0494 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0495 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0496 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0497 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0498 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0499 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0500 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0501 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0502 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0503 uncertain    -> likely_scam  WRONG success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0504 uncertain    -> likely_scam  WRONG success         steps=2  gate_rej=0 tools=extract_signals
+X0505 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0506 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0507 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0508 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0509 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0510 uncertain    -> uncertain    OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0511 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0512 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0513 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0514 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0515 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0516 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0517 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0518 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0519 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0520 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0521 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0522 likely_scam  -> likely_scam  OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0523 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0524 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0525 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0526 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0527 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0528 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0529 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+X0530 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > ask_human_helper
+X0531 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=1 tools=extract_signals > lookup_official_contact
+X0532 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0533 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact
+X0534 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0535 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0536 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0537 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0538 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0539 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0540 likely_scam  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0541 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0542 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0543 likely_safe  -> likely_scam  WRONG success         steps=5  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide
+X0544 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0545 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0546 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0547 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0548 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0549 likely_safe  -> likely_safe  OK    success         steps=6  gate_rej=1 tools=extract_signals > check_link > check_sender > lookup_official_contact
+X0550 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0551 likely_safe  -> likely_scam  WRONG gate_downgrade  steps=5  gate_rej=2 tools=extract_signals > lookup_official_contact > check_sender
+X0552 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0553 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0554 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0555 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0556 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0557 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0558 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0559 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0560 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0561 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0562 uncertain    -> uncertain    OK    gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > lookup_official_contact > ask_human_helper
+X0563 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0564 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0565 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > ask_human_helper
+X0566 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0567 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide > ask_human_helper
+X0568 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0569 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0570 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_link
+X0571 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0572 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > lookup_official_contact
+X0573 likely_scam  -> uncertain    WRONG gate_downgrade  steps=7  gate_rej=2 tools=extract_signals > check_link > check_sender > search_scam_guide > ask_human_helper
+X0574 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender
+X0575 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0576 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > search_scam_guide > check_sender > ask_human_helper
+X0577 likely_scam  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0578 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0579 likely_scam  -> likely_scam  OK    success         steps=3  gate_rej=0 tools=extract_signals > search_scam_guide
+X0580 likely_scam  -> likely_safe  WRONG success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0581 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0582 likely_scam  -> likely_scam  OK    success         steps=2  gate_rej=0 tools=extract_signals
+X0583 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > lookup_official_contact > check_sender > search_scam_guide
+X0584 likely_scam  -> likely_scam  OK    success         steps=6  gate_rej=0 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0585 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0586 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0587 likely_scam  -> likely_scam  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0588 likely_scam  -> likely_scam  OK    success         steps=5  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact > search_scam_guide
+X0589 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0590 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0591 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0592 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0593 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0594 likely_safe  -> uncertain    WRONG success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0595 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0596 likely_safe  -> uncertain    WRONG gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_link > check_sender > lookup_official_contact
+X0597 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0598 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0599 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > lookup_official_contact
+X0600 likely_safe  -> likely_safe  OK    success         steps=6  gate_rej=1 tools=extract_signals > check_link > check_sender > lookup_official_contact
+X0601 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_link > check_sender
+X0602 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0603 likely_safe  -> likely_safe  OK    success         steps=4  gate_rej=0 tools=extract_signals > check_sender > search_scam_guide
+X0604 likely_safe  -> likely_safe  OK    success         steps=3  gate_rej=0 tools=extract_signals > check_sender
+X0605 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0606 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0607 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0608 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0609 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0610 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0611 uncertain    -> likely_scam  WRONG success         steps=7  gate_rej=1 tools=extract_signals > check_link > check_sender > lookup_official_contact > search_scam_guide
+X0612 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0613 uncertain    -> uncertain    OK    gate_downgrade  steps=6  gate_rej=2 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+X0614 uncertain    -> uncertain    OK    success         steps=6  gate_rej=1 tools=extract_signals > check_sender > search_scam_guide > ask_human_helper
+
+AGENT: 513/614 correct = 84%
+  95% confidence range for accuracy: 80.4% to 86.3%
+  false "safe" answers : 2 of 417 messages that are not safe
+  false alarms (scam)  : 6 of 197 safe messages
+  uncertain answers    : 215
+  model last label right: 83%   gate overrides: 100   gate rejections: 325
+  average steps        : 4.58   distinct tool sequences: 26
+  guide searched in 339 messages; correct guide entry used: 0/0
+  human help offered by: {"None": 371, "model": 242, "python": 1}
+  scam_impersonation_medicare 7/10
+  scam_impersonation_ssa 9/10
+  scam_impersonation_irs 10/10
+  scam_impersonation_usps 8/10
+  scam_impersonation_bank 8/11
+  scam_impersonation_pharmacy 6/7
+  scam_impersonation_amazon 8/10
+  scam_delivery_fee 3/6
+  scam_account_locked 4/6
+  scam_prize    8/9
+  scam_tech_support 2/9
+  scam_romance  7/8
+  scam_crypto   7/9
+  scam_job      6/7
+  uncertain_job_offer 1/1
+  scam_grandparent 7/9
+  uncertain_new_number_opener 1/1
+  scam_hacked_contact 33/45
+  scam_prompt_injection 11/15
+  scam_obfuscation 8/18
+  scam_link_tricks 15/16
+  scam_qr       3/6
+  scam_reply_cancel 5/8
+  scam_voicemail 7/9
+  scam_weak_combo 8/11
+  scam_short    4/7
+  scam_misc     16/23
+  safe_family   77/79
+  safe_money_mention 14/21
+  safe_gift_present 7/9
+  safe_wifi     8/8
+  safe_pharmacy 24/26
+  safe_bank_alert 20/25
+  safe_official_link 14/14
+  safe_abbrev_time 12/12
+  uncertain_appointment 14/14
+  uncertain_community 18/18
+  uncertain_neighbor 10/10
+  uncertain_wrong_number 14/14
+  uncertain_delivery 12/12
+  uncertain_unknown_link 8/8
+  uncertain_contact_ambiguous 8/9
+  uncertain_org_unknown_sender 11/12
+  uncertain_other 30/32
+Saved: evidence/eval/large_agent_results.json
