@@ -18,7 +18,7 @@ needs from what only measures or presents it.
   step), the verdict gate with the "safe" rule, human help with consent, the problem cases
   (`guide_missing`, `empty`, `injection`, ...), and the offline tests in `tests.py`.
 - **Extras (evidence and presentation):** repeated live runs (`harness_runs.py`), the labeled test sets
-  with `eval.py`, and the tooling that builds the PDF and the slide deck (`docs/build_docs.py`).
+  with `eval.py`.
 
 ## Why this is useful
 
@@ -449,28 +449,12 @@ data/                 fictional messages, contacts, organizations, websites, gui
                       (eval_set.json, eval_holdout.json, eval_holdout2.json, eval_large.json)
 evidence/             saved traces, console logs and results (eval/, harness/)
 CONTRIBUTION.md       my plan, daily work, findings and what I learned
-docs/                 project document, slide deck, diagram (and their build scripts)
 ```
 
 ## Deliverables
 
-| File | What it is |
-|---|---|
-| [docs/ScamShield_Project_Document.pdf](docs/ScamShield_Project_Document.pdf) | Project document: problem, workflow with diagram, an annotated real trace, problem cases, results, how to run, limitations, individual work |
-| [docs/ScamShield_Presentation.pptx](docs/ScamShield_Presentation.pptx) | Slide deck for the class presentation, with speaker notes |
-| [CONTRIBUTION.md](CONTRIBUTION.md) | My plan, what I did each day, what broke and how I fixed it, and what I learned |
-| [docs/workflow.svg](docs/workflow.svg) / [docs/workflow.png](docs/workflow.png) | The workflow diagram |
-
-The PDF and the deck are generated: every result number in them is read from the files in `evidence/`
-at build time and the test count comes from running `tests.py` (missing results are shown as "pending").
-To rebuild them (needs Google Chrome or Chromium and Node.js; the language model is not called; the
-rebuild is tested on macOS). Chrome is found through the `CHROME_PATH` environment variable, then the
-usual macOS location, then `google-chrome`/`chromium` on the PATH:
-
-```bash
-npm install --prefix docs     # once: installs pptxgenjs for the slide deck
-python3 docs/build_docs.py    # writes docs/ScamShield_Project_Document.pdf and docs/ScamShield_Presentation.pptx
-```
+The project document (PDF) and the slide deck are submitted separately. My plan, what I did each day and
+what I learned are in [CONTRIBUTION.md](CONTRIBUTION.md).
 
 ## Known limitations
 
