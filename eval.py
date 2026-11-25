@@ -49,7 +49,8 @@ EVAL_FILES = {
     'large': HERE / 'data' / 'eval_large.json',   # 614 messages written blind by an AI agent, frozen
 }
 OUT_DIR = HERE / 'evidence' / 'eval'
-SOURCE_FILES = ['scamshield_agent.py', 'rag.py', 'eval.py', 'data/scam_guide.json', 'data/organizations.json',
+SOURCE_FILES = ['scamshield_agent.py', 'settings.py', 'signals.py', 'tools.py', 'gate.py', 'rag.py',
+                'eval.py', 'data/scam_guide.json', 'data/organizations.json',
                 'data/domains.json', 'data/trusted_contacts.json', 'data/eval_set.json',
                 'data/eval_holdout.json', 'data/eval_holdout2.json', 'data/eval_large.json']
 
