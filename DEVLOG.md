@@ -420,6 +420,26 @@ added). `python3 tests.py --break-gate`: 21 of 90 fail with the broken gate
 11/12, test set 3 13/14, large blind test set 526/614). Python code went from 4,555 to 4,134 lines. The
 live results (eval and harness) are regenerated after this change.
 
+## Nov 24, 2026: Live run on the 614-message blind test set
+
+I ran the full agent once on every message of the large blind test set (about 2 hours,
+`evidence/eval/large_agent_results.json`, `large_agent_console.txt`, one trace per message in
+`large_agent/`). I checked the summary by recomputing it from the 614 rows; the data file still has its
+frozen checksum and the code checksums match the committed files.
+
+- Full agent: 513/614 = 83.6% (95% range 80.4% to 86.3%), 2 false "safe" of 417, 6 false alarms of 197.
+- Rules alone (same messages): 526/614 = 85.7%, 13 false "safe". The agent said "safe" to only 2 of
+  those 13; the other 11 became "not sure".
+- 90 of the agent's 101 mistakes ended "not sure". In 43 the model had the right label, but the gate
+  found no strong warning sign and lowered the answer. Family texts that mention money also ended "not
+  sure", because a worried model can never end "safe".
+- The 2 false "safe" answers came from saved contacts (X0159 "read me the code from the bank text",
+  X0580 a fake bank courier collecting the card and PIN). Two false alarms come from rules that miss a
+  "not" ("No payment needed", "we will never ask for your PIN").
+
+I did not change any rule after seeing these results, so the set stays blind. Fixes are listed under
+possible extensions in the README and would need a new blind set to measure honestly.
+
 ## What came from the course and what is new
 
 | From the course (Agent Airways, bare-bones notebook, PR #31, Harness assignment, robust browser agent note, Nov 4 notes) | New in ScamShield |
